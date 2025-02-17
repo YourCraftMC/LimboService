@@ -23,7 +23,6 @@ import com.loohp.limbo.entity.DataWatcher;
 import com.loohp.limbo.entity.Entity;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.player.Player;
-import com.loohp.limbo.utils.GameMode;
 import com.loohp.limbo.world.World;
 
 import java.lang.reflect.Constructor;

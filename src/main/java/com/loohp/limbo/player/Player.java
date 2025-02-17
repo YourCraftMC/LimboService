@@ -37,26 +37,9 @@ import com.loohp.limbo.inventory.InventoryView;
 import com.loohp.limbo.inventory.TitledInventory;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.network.ClientConnection;
-import com.loohp.limbo.network.protocol.packets.ClientboundClearTitlesPacket;
-import com.loohp.limbo.network.protocol.packets.ClientboundSetActionBarTextPacket;
-import com.loohp.limbo.network.protocol.packets.ClientboundSetSubtitleTextPacket;
-import com.loohp.limbo.network.protocol.packets.ClientboundSetTitleTextPacket;
-import com.loohp.limbo.network.protocol.packets.ClientboundSetTitlesAnimationPacket;
-import com.loohp.limbo.network.protocol.packets.ClientboundSystemChatPacket;
-import com.loohp.limbo.network.protocol.packets.PacketOut;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutCloseWindow;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutGameStateChange;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutHeldItemChange;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutNamedSoundEffect;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutOpenWindow;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutPlayerListHeaderFooter;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutPositionAndLook;
-import com.loohp.limbo.network.protocol.packets.ClientboundResourcePackPushPacket;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutRespawn;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutStopSound;
+import com.loohp.limbo.network.protocol.packets.*;
 import com.loohp.limbo.sounds.SoundEffect;
 import com.loohp.limbo.utils.BungeecordAdventureConversionUtils;
-import com.loohp.limbo.utils.GameMode;
 import com.loohp.limbo.utils.MessageSignature;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
@@ -73,6 +56,7 @@ import net.kyori.adventure.title.Title.Times;
 import net.kyori.adventure.title.TitlePart;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -109,7 +93,7 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
 	//@WatchableField(MetadataIndex = 20, WatchableObjectType = WatchableObjectType.NBT) 
 	//protected Entity rightShoulder = null;
 	
-	public Player(ClientConnection clientConnection, String username, UUID uuid, int entityId, Location location, PlayerInteractManager playerInteractManager) throws IllegalArgumentException, IllegalAccessException {
+	public Player(ClientConnection clientConnection, String username, UUID uuid, int entityId, Location location, PlayerInteractManager playerInteractManager) {
 		super(EntityType.PLAYER, entityId, uuid, location.getWorld(), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 		this.clientConnection = clientConnection;
 		this.username = username;
@@ -120,8 +104,12 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
 		this.playerInteractManager = playerInteractManager;
 		this.playerInteractManager.setPlayer(this);
 		this.watcher = new DataWatcher(this);
-		this.watcher.update();
-	}
+        try {
+            this.watcher.update();
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 	protected int nextContainerId() {
 		return containerIdCounter.updateAndGet(i -> ++i > Byte.MAX_VALUE ? 1 : i);

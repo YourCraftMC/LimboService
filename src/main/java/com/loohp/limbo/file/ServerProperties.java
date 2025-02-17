@@ -23,7 +23,6 @@ import com.google.common.collect.Lists;
 import com.loohp.limbo.Console;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.location.Location;
-import com.loohp.limbo.utils.GameMode;
 import com.loohp.limbo.world.World;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -87,7 +86,7 @@ public class ServerProperties {
 	private Component tabHeader;
 	private Component tabFooter;
 
-	private Optional<BufferedImage> favicon;
+	private Optional<byte[]> favicon;
 
 	public ServerProperties(File file) throws IOException {
 		this.file = file;
@@ -178,7 +177,7 @@ public class ServerProperties {
 			try {
 				BufferedImage image = ImageIO.read(png);
 				if (image.getHeight() == 64 && image.getWidth() == 64) {
-					favicon = Optional.of(image);
+					favicon = Optional.of(Files.readAllBytes(png.toPath()));
 				} else {
 					Limbo.getInstance().getConsole().sendMessage("Unable to load server-icon.png! The image is not 64 x 64 in size!");
 				}
@@ -270,7 +269,7 @@ public class ServerProperties {
 		return forwardingSecrets;
 	}
 
-	public Optional<BufferedImage> getFavicon() {
+	public Optional<byte[]> getFavicon() {
 		return favicon;
 	}
 

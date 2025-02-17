@@ -33,9 +33,9 @@ public class StatusPingEvent extends Event {
 	private Component motd;
 	private int maxPlayers;
 	private int playersOnline;
-	private BufferedImage favicon;
+	private byte[] favicon;
 
-	public StatusPingEvent(ClientConnection connection, String version, int protocol, Component motd, int maxPlayers, int playersOnline, BufferedImage favicon) {
+	public StatusPingEvent(ClientConnection connection, String version, int protocol, Component motd, int maxPlayers, int playersOnline, byte[] favicon) {
 		this.connection = connection;
 		this.version = version;
 		this.protocol = protocol;
@@ -89,11 +89,11 @@ public class StatusPingEvent extends Event {
 		this.playersOnline = playersOnline;
 	}
 
-	public BufferedImage getFavicon() {
+	public byte[] getFavicon() {
 		return favicon;
 	}
 
-	public void setFavicon(BufferedImage favicon) {
+	public void setFavicon(byte[] favicon) {
 		this.favicon = favicon;
 	}
 

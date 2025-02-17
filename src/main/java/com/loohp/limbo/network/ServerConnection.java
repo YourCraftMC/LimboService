@@ -20,54 +20,97 @@
 package com.loohp.limbo.network;
 
 import com.loohp.limbo.Limbo;
+import com.loohp.limbo.events.status.StatusPingEvent;
+import com.loohp.limbo.file.ServerProperties;
+import org.geysermc.mcprotocollib.network.Session;
+import org.geysermc.mcprotocollib.network.event.server.ServerAdapter;
+import org.geysermc.mcprotocollib.network.event.server.ServerBoundEvent;
+import org.geysermc.mcprotocollib.network.event.server.SessionAddedEvent;
+import org.geysermc.mcprotocollib.network.server.NetworkServer;
+import org.geysermc.mcprotocollib.protocol.MinecraftConstants;
+import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
+import org.geysermc.mcprotocollib.protocol.data.status.PlayerInfo;
+import org.geysermc.mcprotocollib.protocol.data.status.ServerStatusInfo;
+import org.geysermc.mcprotocollib.protocol.data.status.VersionInfo;
+import org.geysermc.mcprotocollib.protocol.data.status.handler.ServerInfoBuilder;
 
-import java.io.IOException;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-public class ServerConnection extends Thread {
+public class ServerConnection {
 
-	private final String ip;
-	private final int port;
-	private final boolean silent;
-	private ServerSocket serverSocket;
-	private List<ClientConnection> clients;
+    private final String ip;
+    private final int port;
+    private final boolean silent;
+    private ServerSocket serverSocket;
+    private Map<Session, ClientConnection> clients;
 
-	public ServerConnection(String ip, int port, boolean silent) {
-		this.clients = new ArrayList<>();
-		this.ip = ip;
-		this.port = port;
-		this.silent = silent;
-		start();
-	}
-	
-	@Override
-	public void run() {
-		try {
-			serverSocket = new ServerSocket(port, 50, InetAddress.getByName(ip));
-			if (!silent) {
-				Limbo.getInstance().getConsole().sendMessage("Limbo server listening on /" + serverSocket.getInetAddress().getHostName() + ":" + serverSocket.getLocalPort());
-			}
-	        while (true) {
-	            Socket connection = serverSocket.accept();
-	            ClientConnection sc = new ClientConnection(connection);
-	            clients.add(sc);
-	            sc.start();
-	        }
-	    } catch(IOException e) {
-	        e.printStackTrace();
-	    }
-	}
+    private NetworkServer server;
 
-	public ServerSocket getServerSocket() {
-		return serverSocket;
-	}
+    public ServerConnection(String ip, int port, boolean silent) {
+        this.clients = new HashMap<>();
+        this.ip = ip;
+        this.port = port;
+        this.silent = silent;
+        start();
+    }
 
-	public List<ClientConnection> getClients() {
-		return clients;
-	}
+    void start() {
+        server = new NetworkServer(new InetSocketAddress(this.ip, this.port), MinecraftProtocol::new);
+        clients();
+        motd();
+        server.bind();
+    }
 
+    private void clients() {
+        server.addListener(new ServerAdapter() {
+            @Override
+            public void serverBound(ServerBoundEvent event) {
+                if (!silent) {
+                    Limbo.getInstance().getConsole().sendMessage("Limbo server listening on /" + serverSocket.getInetAddress().getHostName() + ":" + serverSocket.getLocalPort());
+                }
+            }
+
+            @Override
+            public void sessionAdded(SessionAddedEvent event) {
+                ClientConnection sc = new ClientConnection(event.getSession());
+                clients.put(event.getSession(), sc);
+
+                InetSocketAddress inetAddress = ((InetSocketAddress) event.getSession().getRemoteAddress());
+                ServerProperties properties = Limbo.getInstance().getServerProperties();
+                String str = (properties.isLogPlayerIPAddresses() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + inetAddress.getPort();
+                Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Legacy Status has pinged");
+            }
+        });
+    }
+
+    private void motd() {
+        server.setGlobalFlag(MinecraftConstants.SERVER_INFO_BUILDER_KEY, new ServerInfoBuilder() {
+            @Override
+            public ServerStatusInfo buildInfo(Session session) {
+                ServerProperties p = Limbo.getInstance().getServerProperties();
+                StatusPingEvent event = Limbo.getInstance().getEventsManager().callEvent(new StatusPingEvent(getClient(session), p.getVersionString(), p.getProtocol(), p.getMotd(), p.getMaxPlayers(), Limbo.getInstance().getPlayers().size(), p.getFavicon().orElse(null)));
+                return new ServerStatusInfo(event.getMotd(),
+                        new PlayerInfo(event.getMaxPlayers(), event.getPlayersOnline(), new ArrayList<>()),
+                        new VersionInfo(event.getVersion(), event.getProtocol()),
+                        event.getFavicon(), false
+                );
+            }
+        });
+    }
+
+    public ServerSocket getServerSocket() {
+        return serverSocket;
+    }
+
+    public Map<Session, ClientConnection> getClients() {
+        return clients;
+    }
+
+    public ClientConnection getClient(Session session) {
+        return clients.get(session);
+    }
 }

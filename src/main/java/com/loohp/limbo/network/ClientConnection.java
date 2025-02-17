@@ -20,15 +20,12 @@
 package com.loohp.limbo.network;
 
 import com.loohp.limbo.Limbo;
-import com.loohp.limbo.entity.Entity;
 import com.loohp.limbo.entity.EntityEquipment;
-import com.loohp.limbo.events.connection.ConnectionEstablishedEvent;
 import com.loohp.limbo.events.inventory.AnvilRenameInputEvent;
 import com.loohp.limbo.events.inventory.InventoryCloseEvent;
 import com.loohp.limbo.events.inventory.InventoryCreativeEvent;
 import com.loohp.limbo.events.player.PlayerInteractEvent;
 import com.loohp.limbo.events.player.PlayerJoinEvent;
-import com.loohp.limbo.events.player.PlayerLoginEvent;
 import com.loohp.limbo.events.player.PlayerMoveEvent;
 import com.loohp.limbo.events.player.PlayerQuitEvent;
 import com.loohp.limbo.events.player.PlayerResourcePackStatusEvent;
@@ -36,11 +33,9 @@ import com.loohp.limbo.events.player.PlayerSelectedSlotChangeEvent;
 import com.loohp.limbo.events.player.PlayerSpawnEvent;
 import com.loohp.limbo.events.player.PlayerSwapHandItemsEvent;
 import com.loohp.limbo.events.player.PluginMessageEvent;
-import com.loohp.limbo.events.status.StatusPingEvent;
 import com.loohp.limbo.file.ServerProperties;
 import com.loohp.limbo.inventory.AnvilInventory;
 import com.loohp.limbo.inventory.Inventory;
-import com.loohp.limbo.inventory.InventoryType;
 import com.loohp.limbo.inventory.ItemStack;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.network.protocol.packets.ClientboundFinishConfigurationPacket;
@@ -98,17 +93,12 @@ import com.loohp.limbo.network.protocol.packets.ServerboundChatCommandPacket;
 import com.loohp.limbo.network.protocol.packets.ServerboundFinishConfigurationPacket;
 import com.loohp.limbo.network.protocol.packets.ServerboundLoginAcknowledgedPacket;
 import com.loohp.limbo.player.Player;
-import com.loohp.limbo.player.PlayerInteractManager;
 import com.loohp.limbo.player.PlayerInventory;
-import com.loohp.limbo.registry.PacketRegistry;
-import com.loohp.limbo.registry.RegistryCustom;
 import com.loohp.limbo.utils.BungeecordAdventureConversionUtils;
 import com.loohp.limbo.utils.CheckedBiConsumer;
 import com.loohp.limbo.utils.CustomStringUtils;
 import com.loohp.limbo.utils.DataTypeIO;
 import com.loohp.limbo.utils.DeclareCommands;
-import com.loohp.limbo.utils.ForwardingUtils;
-import com.loohp.limbo.utils.GameMode;
 import com.loohp.limbo.utils.InventoryClickUtils;
 import com.loohp.limbo.utils.MojangAPIUtils;
 import com.loohp.limbo.utils.MojangAPIUtils.SkinResponse;
@@ -119,27 +109,20 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.geysermc.mcprotocollib.network.Session;
+import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
+import org.geysermc.mcprotocollib.network.packet.Packet;
+import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.reflect.Constructor;
-import java.net.InetAddress;
-import java.net.Socket;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -148,41 +131,33 @@ import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-public class ClientConnection extends Thread {
+public class ClientConnection extends SessionAdapter {
 
     private static final Key DEFAULT_HANDLER_NAMESPACE = Key.key("default");
     private static final String BRAND_ANNOUNCE_CHANNEL = Key.key("brand").toString();
 
     private final Random random = new Random();
-    private final Socket clientSocket;
-    protected Channel channel;
+    private final Session session;
     private boolean running;
-    private volatile ClientState state;
 
     private Player player;
     private TimerTask keepAliveTask;
     private AtomicLong lastPacketTimestamp;
     private AtomicLong lastKeepAlivePayLoad;
-    private InetAddress inetAddress;
+    private SocketAddress inetAddress;
     private boolean ready;
 
-    public ClientConnection(Socket clientSocket) {
-        this.clientSocket = clientSocket;
-        this.inetAddress = clientSocket.getInetAddress();
+    public ClientConnection(Session session) {
+        this.session = session;
+        this.inetAddress = session.getLocalAddress();
         this.lastPacketTimestamp = new AtomicLong(-1);
         this.lastKeepAlivePayLoad = new AtomicLong(-1);
-        this.channel = null;
         this.running = false;
         this.ready = false;
-    }
-
-    public InetAddress getInetAddress() {
-        return inetAddress;
     }
 
     public long getLastKeepAlivePayLoad() {
@@ -209,16 +184,9 @@ public class ClientConnection extends Thread {
         return player;
     }
 
-    public ClientState getClientState() {
-        return state;
-    }
 
-    public Socket getSocket() {
-        return clientSocket;
-    }
-
-    public Channel getChannel() {
-        return channel;
+    public Session getSession() {
+        return session;
     }
 
     public boolean isRunning() {
@@ -230,14 +198,12 @@ public class ClientConnection extends Thread {
     }
 
     public void sendPluginMessage(String channel, byte[] data) throws IOException {
-        PacketPlayOutPluginMessaging packet = new PacketPlayOutPluginMessaging(channel, data);
-        sendPacket(packet);
+        sendPacket(new ClientboundCustomPayloadPacket(Key.key(channel), data));
     }
 
-    public synchronized void sendPacket(PacketOut packet) throws IOException {
-        if (channel.writePacket(packet)) {
-            setLastPacketTimestamp(System.currentTimeMillis());
-        }
+    public synchronized void sendPacket(Packet packet) throws IOException {
+        session.send(packet);
+        setLastPacketTimestamp(System.currentTimeMillis());
     }
 
     public void disconnect(BaseComponent[] reason) {
@@ -245,15 +211,7 @@ public class ClientConnection extends Thread {
     }
 
     public void disconnect(Component reason) {
-        try {
-            PacketPlayOutDisconnect packet = new PacketPlayOutDisconnect(reason);
-            sendPacket(packet);
-        } catch (IOException ignored) {
-        }
-        try {
-            clientSocket.close();
-        } catch (IOException ignored) {
-        }
+        session.disconnect(reason);
     }
 
     private void disconnectDuringLogin(BaseComponent[] reason) {
@@ -263,303 +221,20 @@ public class ClientConnection extends Thread {
     private void disconnectDuringLogin(Component reason) {
         ServerProperties properties = Limbo.getInstance().getServerProperties();
         if (!properties.isReducedDebugInfo()) {
-            String str = (properties.isLogPlayerIPAddresses() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + clientSocket.getPort();
+            String str = (properties.isLogPlayerIPAddresses() ? ((InetSocketAddress) inetAddress).getHostName() : "<ip address withheld>") + ":" + ((InetSocketAddress) session.getLocalAddress()).getPort();
             Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Player disconnected with the reason " + PlainTextComponentSerializer.plainText().serialize(reason));
         }
-        try {
-            PacketLoginOutDisconnect packet = new PacketLoginOutDisconnect(reason);
-            sendPacket(packet);
-        } catch (IOException ignored) {
-        }
-        try {
-            clientSocket.close();
-        } catch (IOException ignored) {
-        }
-    }
-
-    private void setChannel(DataInputStream input, DataOutputStream output) {
-        this.channel = new Channel(this, input, output);
-
-        this.channel.addHandlerBefore(DEFAULT_HANDLER_NAMESPACE, new ChannelPacketHandler() {
-            @Override
-            public ChannelPacketRead read(ChannelPacketRead read) {
-                if (read.hasReadPacket()) {
-                    return super.read(read);
-                }
-                try {
-                    DataInput input = read.getDataInput();
-                    int size = read.getSize();
-                    int packetId = read.getPacketId();
-                    Class<? extends PacketIn> packetType = PacketRegistry.getPacketClass(packetId, PacketRegistry.NetworkPhase.fromClientState(state), PacketRegistry.PacketBound.SERVERBOUND);
-                    if (packetType == null) {
-                        input.skipBytes(size - DataTypeIO.getVarIntLength(packetId));
-                        return null;
-                    }
-                    Constructor<?>[] constructors = packetType.getConstructors();
-                    Constructor<?> constructor = Arrays.stream(constructors).filter(each -> each.getParameterCount() > 0 && each.getParameterTypes()[0].equals(DataInputStream.class)).findFirst().orElse(null);
-                    if (constructor == null) {
-                        throw new NoSuchMethodException(packetType + " has no valid constructors!");
-                    } else if (constructor.getParameterCount() == 1) {
-                        read.setPacket((PacketIn) constructor.newInstance(input));
-                    } else if (constructor.getParameterCount() == 3) {
-                        read.setPacket((PacketIn) constructor.newInstance(input, size, packetId));
-                    } else {
-                        throw new NoSuchMethodException(packetType + " has no valid constructors!");
-                    }
-                    return super.read(read);
-                } catch (Exception e) {
-                    throw new RuntimeException("Unable to read packet", e);
-                }
-            }
-        });
+        session.disconnect(reason);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public void run() {
         running = true;
-        state = ClientState.HANDSHAKE;
         try {
-            clientSocket.setKeepAlive(true);
-            setChannel(new DataInputStream(clientSocket.getInputStream()), new DataOutputStream(clientSocket.getOutputStream()));
-
-            Limbo.getInstance().getEventsManager().callEvent(new ConnectionEstablishedEvent(this));
-
-            int handShakeSize = DataTypeIO.readVarInt(channel.input);
-
-            //legacy ping
-            if (handShakeSize == 0xFE) {
-                ServerProperties properties = Limbo.getInstance().getServerProperties();
-
-                state = ClientState.LEGACY;
-                channel.output.writeByte(255);
-                String str = (properties.isLogPlayerIPAddresses() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + clientSocket.getPort();
-                Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Legacy Status has pinged");
-                ServerProperties p = Limbo.getInstance().getServerProperties();
-                StatusPingEvent event = Limbo.getInstance().getEventsManager().callEvent(new StatusPingEvent(this, p.getVersionString(), p.getProtocol(), p.getMotd(), p.getMaxPlayers(), Limbo.getInstance().getPlayers().size(), p.getFavicon().orElse(null)));
-                String response = Limbo.getInstance().buildLegacyPingResponse(event.getVersion(), event.getMotd(), event.getMaxPlayers(), event.getPlayersOnline());
-                byte[] bytes = response.getBytes(StandardCharsets.UTF_16BE);
-                channel.output.writeShort(response.length());
-                channel.output.write(bytes);
-
-                channel.close();
-                clientSocket.close();
-                state = ClientState.DISCONNECTED;
-            }
-
-            PacketHandshakingIn handshake = (PacketHandshakingIn) channel.readPacket(handShakeSize);
-
-            boolean isBungeecord = Limbo.getInstance().getServerProperties().isBungeecord();
-            boolean isBungeeGuard = Limbo.getInstance().getServerProperties().isBungeeGuard();
-            boolean isVelocityModern = Limbo.getInstance().getServerProperties().isVelocityModern();
-            String bungeeForwarding = handshake.getServerAddress();
-            UUID bungeeUUID = null;
-            SkinResponse forwardedSkin = null;
-
-            try {
-                switch (handshake.getHandshakeType()) {
-                case STATUS:
-                    state = ClientState.STATUS;
-                    while (clientSocket.isConnected()) {
-                        PacketIn packetIn = channel.readPacket();
-                        if (packetIn instanceof PacketStatusInRequest) {
-                            ServerProperties properties = Limbo.getInstance().getServerProperties();
-
-                            String str = (properties.isLogPlayerIPAddresses() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + clientSocket.getPort();
-                            if (Limbo.getInstance().getServerProperties().handshakeVerboseEnabled()) {
-                                Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Handshake Status has pinged");
-                            }
-                            ServerProperties p = Limbo.getInstance().getServerProperties();
-                            StatusPingEvent event = Limbo.getInstance().getEventsManager().callEvent(new StatusPingEvent(this, p.getVersionString(), p.getProtocol(), p.getMotd(), p.getMaxPlayers(), Limbo.getInstance().getPlayers().size(), p.getFavicon().orElse(null)));
-                            PacketStatusOutResponse response = new PacketStatusOutResponse(Limbo.getInstance().buildServerListResponseJson(event.getVersion(), event.getProtocol(), event.getMotd(), event.getMaxPlayers(), event.getPlayersOnline(), event.getFavicon()));
-                            sendPacket(response);
-                        } else if (packetIn instanceof PacketStatusInPing) {
-                            PacketStatusInPing ping = (PacketStatusInPing) packetIn;
-                            PacketStatusOutPong pong = new PacketStatusOutPong(ping.getPayload());
-                            sendPacket(pong);
-                            break;
-                        }
-                    }
-                    break;
-                case LOGIN:
-                case TRANSFER:
-                    state = ClientState.LOGIN;
-                    ServerProperties properties = Limbo.getInstance().getServerProperties();
-
-                    if (isBungeecord || isBungeeGuard) {
-                        try {
-                            String[] data = bungeeForwarding.split("\\x00");
-                            String host = "";
-                            String floodgate = "";
-                            String clientIp = "";
-                            String bungee = "";
-                            String skinData = "";
-                            int state = 0;
-                            for (int i = 0; i < data.length; i++) {
-                                if (!properties.isReducedDebugInfo()) {
-                                    Limbo.getInstance().getConsole().sendMessage(i + ": " + data[i]);
-                                }
-
-                                switch (state) {
-                                default:
-                                    Limbo.getInstance().getConsole().sendMessage(i + ": ignore data: State: " + state);
-                                    break;
-                                case 0:
-                                    host = data[i];
-                                    state = 1;
-                                    break;
-                                case 1:
-                                    if (data[i].startsWith("^Floodgate^")) {
-                                        floodgate = data[i];
-                                        state = 2;
-                                        break;
-                                    }
-                                    /* fallthrough */
-                                case 2:
-                                    clientIp = data[i];
-                                    state = 3;
-                                    break;
-                                case 3:
-                                    bungee = data[i];
-                                    state = 4;
-                                    break;
-                                case 4:
-                                    skinData = data[i];
-                                    state = 6;
-                                    break;
-                                }
-                            }
-                            if (state != 6) {
-                                throw new IllegalStateException("Illegal bungee state: " + state);
-                            }
-
-                            if (!properties.isReducedDebugInfo()) {
-                                Limbo.getInstance().getConsole().sendMessage("Host: " + host);
-                                Limbo.getInstance().getConsole().sendMessage("Floodgate: " + floodgate);
-                                Limbo.getInstance().getConsole().sendMessage("clientIp: " + clientIp);
-                                Limbo.getInstance().getConsole().sendMessage("bungee: " + bungee);
-                                Limbo.getInstance().getConsole().sendMessage("skinData: " + skinData);
-                            }
-
-                            bungeeUUID = UUID.fromString(bungee.replaceFirst("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)", "$1-$2-$3-$4-$5"));
-                            inetAddress = InetAddress.getByName(clientIp);
-
-                            boolean bungeeGuardFound = false;
-
-                            if (!skinData.equals("")) {
-                                JSONArray skinJson = (JSONArray) new JSONParser().parse(skinData);
-
-                                for (Object obj : skinJson) {
-                                    JSONObject property = (JSONObject) obj;
-                                    if (property.get("name").toString().equals("textures")) {
-                                        String skin = property.get("value").toString();
-                                        String signature = property.get("signature").toString();
-                                        forwardedSkin = new SkinResponse(skin, signature);
-                                    } else if (isBungeeGuard && property.get("name").toString().equals("bungeeguard-token")) {
-                                        String token = property.get("value").toString();
-                                        bungeeGuardFound = Limbo.getInstance().getServerProperties().getForwardingSecrets().contains(token);
-                                    }
-                                }
-                            }
-
-                            if (isBungeeGuard && !bungeeGuardFound) {
-                                disconnectDuringLogin(TextComponent.fromLegacyText("Invalid information forwarding"));
-                                break;
-                            }
-                        } catch (Exception e) {
-                            if (!properties.isReducedDebugInfo()) {
-                                StringWriter sw = new StringWriter();
-                                PrintWriter pw = new PrintWriter(sw);
-                                e.printStackTrace(pw);
-                                Limbo.getInstance().getConsole().sendMessage(sw.toString());
-                            }
-                            Limbo.getInstance().getConsole().sendMessage("If you wish to use bungeecord's IP forwarding, please enable that in your bungeecord config.yml as well!");
-                            disconnectDuringLogin(new BaseComponent[] {new TextComponent(ChatColor.RED + "Please connect from the proxy!")});
-                        }
-                    }
-                    int messageId = this.random.nextInt();
-                    while (clientSocket.isConnected()) {
-                        PacketIn packetIn = channel.readPacket();
-
-                        if (packetIn instanceof PacketLoginInLoginStart) {
-                            PacketLoginInLoginStart start = (PacketLoginInLoginStart) packetIn;
-                            String username = start.getUsername();
-
-                            if (Limbo.getInstance().getServerProperties().isVelocityModern()) {
-                                PacketLoginOutPluginMessaging loginPluginRequest = new PacketLoginOutPluginMessaging(messageId, ForwardingUtils.VELOCITY_FORWARDING_CHANNEL);
-                                sendPacket(loginPluginRequest);
-                                continue;
-                            }
-
-                            UUID uuid = isBungeecord || isBungeeGuard ? bungeeUUID : start.getUniqueId();
-                            if (uuid == null) {
-                                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(StandardCharsets.UTF_8));
-                            }
-
-                            if (!properties.enforceWhitelist() && properties.uuidWhitelisted(uuid)) {
-                                disconnectDuringLogin(TextComponent.fromLegacyText("You are not whitelisted on the server"));
-                                break;
-                            }
-
-                            PacketLoginOutLoginSuccess success = new PacketLoginOutLoginSuccess(uuid, username);
-                            sendPacket(success);
-
-                            player = new Player(this, username, uuid, Limbo.getInstance().getNextEntityId(), Limbo.getInstance().getServerProperties().getWorldSpawn(), new PlayerInteractManager());
-                            player.setSkinLayers((byte) (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40));
-                        } else if (packetIn instanceof PacketLoginInPluginMessaging) {
-                            PacketLoginInPluginMessaging response = (PacketLoginInPluginMessaging) packetIn;
-                            if (response.getMessageId() != messageId) {
-                                disconnectDuringLogin(TextComponent.fromLegacyText("Internal error, messageId did not match"));
-                                break;
-                            }
-                            if (!response.getData().isPresent()) {
-                                disconnectDuringLogin(TextComponent.fromLegacyText("Unknown login plugin response packet!"));
-                                break;
-                            }
-                            byte[] responseData = response.getData().get();
-                            if (!ForwardingUtils.validateVelocityModernResponse(responseData)) {
-                                disconnectDuringLogin(TextComponent.fromLegacyText("Invalid playerinfo forwarding!"));
-                                break;
-                            }
-                            ForwardingUtils.VelocityModernForwardingData data = ForwardingUtils.getVelocityDataFrom(responseData);
-                            inetAddress = InetAddress.getByName(data.getIpAddress());
-                            forwardedSkin = data.getSkinResponse();
-
-                            PacketLoginOutLoginSuccess success = new PacketLoginOutLoginSuccess(data.getUuid(), data.getUsername());
-                            sendPacket(success);
-
-                            player = new Player(this, data.getUsername(), data.getUuid(), Limbo.getInstance().getNextEntityId(), Limbo.getInstance().getServerProperties().getWorldSpawn(), new PlayerInteractManager());
-                            player.setSkinLayers((byte) (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40));
-                        } else if (packetIn instanceof ServerboundLoginAcknowledgedPacket) {
-                            state = ClientState.CONFIGURATION;
-                            break;
-                        }
-                    }
-
-                    PlayerLoginEvent event = Limbo.getInstance().getEventsManager().callEvent(new PlayerLoginEvent(this, false, Component.empty()));
-                    if (event.isCancelled()) {
-                        disconnectDuringLogin(event.getCancelReason());
-                    }
-
-                    break;
-                }
-            } catch (Exception ignored) {
-                channel.close();
-                clientSocket.close();
-                state = ClientState.DISCONNECTED;
-            }
-
             if (state == ClientState.CONFIGURATION) {
 
                 TimeUnit.MILLISECONDS.sleep(500);
-
-                for (RegistryCustom registryCustom : RegistryCustom.getRegistries()) {
-                    ClientboundRegistryDataPacket registryDataPacket = new ClientboundRegistryDataPacket(registryCustom);
-                    sendPacket(registryDataPacket);
-                }
-
-                ClientboundFinishConfigurationPacket clientboundFinishConfigurationPacket = new ClientboundFinishConfigurationPacket();
-                sendPacket(clientboundFinishConfigurationPacket);
 
                 ServerboundFinishConfigurationPacket serverboundFinishConfigurationPacket = (ServerboundFinishConfigurationPacket) channel.readPacket();
 
@@ -598,7 +273,7 @@ public class ClientConnection extends Thread {
                 PacketPlayOutPlayerAbilities abilities = new PacketPlayOutPlayerAbilities(0.05F, 0.1F, flags.toArray(new PlayerAbilityFlags[flags.size()]));
                 sendPacket(abilities);
 
-                String str = (properties.isLogPlayerIPAddresses() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + clientSocket.getPort() + "|" + player.getName() + "(" + player.getUniqueId() + ")";
+                String str = (properties.isLogPlayerIPAddresses() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + session.getPort() + "|" + player.getName() + "(" + player.getUniqueId() + ")";
                 Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Player had connected to the Limbo server!");
 
                 PacketPlayOutGameStateChange gameEvent = new PacketPlayOutGameStateChange(PacketPlayOutGameStateChange.GameStateChangeEvent.LEVEL_CHUNKS_LOAD_START, 0);
@@ -666,7 +341,7 @@ public class ClientConnection extends Thread {
                 };
                 new Timer().schedule(keepAliveTask, 5000, 10000);
 
-                while (clientSocket.isConnected()) {
+                while (session.isConnected()) {
                     try {
                         CheckedBiConsumer<PlayerMoveEvent, Location, IOException> processMoveEvent = (event, originalTo) -> {
                             if (event.isCancelled()) {
@@ -862,7 +537,7 @@ public class ClientConnection extends Thread {
 
                 Limbo.getInstance().getEventsManager().callEvent(new PlayerQuitEvent(player));
 
-                str = (properties.isLogPlayerIPAddresses() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + clientSocket.getPort() + "|" + player.getName();
+                str = (properties.isLogPlayerIPAddresses() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + session.getPort() + "|" + player.getName();
                 Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Player had disconnected!");
             }
         } catch (Exception ignored) {
@@ -870,7 +545,7 @@ public class ClientConnection extends Thread {
 
         try {
             channel.close();
-            clientSocket.close();
+            session.close();
         } catch (Exception ignored) {
         }
         state = ClientState.DISCONNECTED;

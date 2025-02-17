@@ -24,8 +24,8 @@ import com.loohp.limbo.entity.DataWatcher.WatchableField;
 import com.loohp.limbo.entity.DataWatcher.WatchableObjectType;
 import com.loohp.limbo.inventory.EquipmentSlot;
 import com.loohp.limbo.location.Location;
-import com.loohp.limbo.world.BlockPosition;
 import com.loohp.limbo.world.World;
+import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.UUID;
 
@@ -48,7 +48,7 @@ public abstract class LivingEntity extends Entity {
 	@WatchableField(MetadataIndex = 13, WatchableObjectType = WatchableObjectType.VARINT) 
 	protected int absorption = 0;
 	@WatchableField(MetadataIndex = 14, WatchableObjectType = WatchableObjectType.POSITION, IsOptional = true) 
-	protected BlockPosition sleepingLocation = null;
+	protected Vector3i sleepingLocation = null;
 
 	public LivingEntity(EntityType type, int entityId, UUID uuid, World world, double x, double y, double z, float yaw, float pitch) {
 		super(type, entityId, uuid, world, x, y, z, yaw, pitch);
@@ -140,11 +140,11 @@ public abstract class LivingEntity extends Entity {
 		this.absorption = absorption;
 	}
 
-	public BlockPosition getSleepingLocation() {
+	public Vector3i getSleepingLocation() {
 		return sleepingLocation;
 	}
 
-	public void setSleepingLocation(BlockPosition sleepingLocation) {
+	public void setSleepingLocation(Vector3i sleepingLocation) {
 		this.sleepingLocation = sleepingLocation;
 	}
 

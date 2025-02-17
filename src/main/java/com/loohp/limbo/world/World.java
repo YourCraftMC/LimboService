@@ -33,6 +33,7 @@ import com.loohp.limbo.utils.SchematicConversionUtils;
 import net.querz.mca.Chunk;
 import net.querz.nbt.tag.CompoundTag;
 import net.querz.nbt.tag.ListTag;
+import org.cloudburstmc.math.vector.Vector3i;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -126,7 +127,7 @@ public class World {
 		chunk.setBlockStateAt(x, y, z, block, false);
 	}
 
-	public BlockState getBlock(BlockPosition blockPosition) {
+	public BlockState getBlock(Vector3i blockPosition) {
 		return getBlock(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ());
 	}
 	
@@ -145,7 +146,7 @@ public class World {
 		return new BlockState(tag);
 	}
 
-	public void setBlock(BlockPosition blockPosition, BlockState state) {
+	public void setBlock(Vector3i blockPosition, BlockState state) {
 		setBlock(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ(), state);
 	}
 	

@@ -35,7 +35,6 @@ import com.loohp.limbo.inventory.InventoryType;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.metrics.Metrics;
 import com.loohp.limbo.network.ServerConnection;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutBoss;
 import com.loohp.limbo.permissions.PermissionsManager;
 import com.loohp.limbo.player.Player;
 import com.loohp.limbo.plugins.LimboPlugin;
@@ -55,6 +54,8 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.querz.nbt.io.NBTUtil;
 import net.querz.nbt.tag.CompoundTag;
+import org.geysermc.mcprotocollib.protocol.data.game.BossBarAction;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundBossEventPacket;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -350,14 +351,10 @@ public final class Limbo {
 		KeyedBossBar keyedBossBar = bossBars.remove(Key);
 		keyedBossBar.getProperties().removeListener(keyedBossBar.getUnsafe().a());
 		keyedBossBar.getUnsafe().b();
-		PacketPlayOutBoss packetPlayOutBoss = new PacketPlayOutBoss(keyedBossBar, PacketPlayOutBoss.BossBarAction.REMOVE);
+		ClientboundBossEventPacket bossEventPacket = new ClientboundBossEventPacket(keyedBossBar.getUuid()).withAction(BossBarAction.REMOVE);
 		for (Player player : keyedBossBar.getPlayers()) {
-			try {
-				player.clientConnection.sendPacket(packetPlayOutBoss);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+            player.clientConnection.sendPacket(bossEventPacket);
+        }
 	}
 
 	public Map<Key, KeyedBossBar> getBossBars() {

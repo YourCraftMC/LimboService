@@ -25,9 +25,8 @@ import com.loohp.limbo.entity.DataWatcher;
 import com.loohp.limbo.entity.DataWatcher.WatchableObject;
 import com.loohp.limbo.entity.Entity;
 import com.loohp.limbo.location.Location;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutEntityDestroy;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutEntityMetadata;
 import com.loohp.limbo.player.Player;
+import com.loohp.limbo.utils.EntityUtil;
 import com.loohp.limbo.utils.SchematicConversionUtils;
 import net.querz.mca.Chunk;
 import net.querz.nbt.tag.CompoundTag;
@@ -283,14 +282,10 @@ public class World {
 		for (DataWatcher watcher : entities.values()) {
 			if (watcher.getEntity().getWorld().equals(this)) {
 				Map<Field, WatchableObject> updated = watcher.update();
-				ClientboundSetEntityDataPacket packet = new PacketPlayOutEntityMetadata(watcher.getEntity(), false, updated.keySet().toArray(new Field[0]));
+				ClientboundSetEntityDataPacket packet = EntityUtil.metadata(watcher.getEntity(), false, updated.keySet().toArray(new Field[0]));
 				for (Player player : getPlayers()) {
-					try {
-						player.clientConnection.sendPacket(packet);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
+                    player.clientConnection.sendPacket(packet);
+                }
 			} else {
 				ClientboundRemoveEntitiesPacket packet = new ClientboundRemoveEntitiesPacket(new int[]{watcher.getEntity().getEntityId()});
 				for (Player player : getPlayers()) {

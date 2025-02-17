@@ -23,8 +23,8 @@ import com.loohp.limbo.Limbo;
 import com.loohp.limbo.entity.DataWatcher.WatchableField;
 import com.loohp.limbo.entity.DataWatcher.WatchableObjectType;
 import com.loohp.limbo.location.Location;
-import com.loohp.limbo.utils.Rotation3f;
 import com.loohp.limbo.world.World;
+import org.cloudburstmc.math.vector.Vector3f;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
 import java.util.UUID;
@@ -40,17 +40,17 @@ public class ArmorStand extends LivingEntity {
 	@WatchableField(MetadataIndex = 15, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x10) 
 	protected boolean marker = false;
 	@WatchableField(MetadataIndex = 16, WatchableObjectType = WatchableObjectType.ROTATION) 
-	protected Rotation3f headRotation = new Rotation3f(0.0, 0.0, 0.0);
+	protected Vector3f headRotation = Vector3f.from(0.0, 0.0, 0.0);
 	@WatchableField(MetadataIndex = 17, WatchableObjectType = WatchableObjectType.ROTATION) 
-	protected Rotation3f bodyRotation = new Rotation3f(0.0, 0.0, 0.0);
+	protected Vector3f bodyRotation = Vector3f.from(0.0, 0.0, 0.0);
 	@WatchableField(MetadataIndex = 18, WatchableObjectType = WatchableObjectType.ROTATION) 
-	protected Rotation3f leftArmRotation = new Rotation3f(-10.0, 0.0, -10.0);
+	protected Vector3f leftArmRotation = Vector3f.from(-10.0, 0.0, -10.0);
 	@WatchableField(MetadataIndex = 19, WatchableObjectType = WatchableObjectType.ROTATION) 
-	protected Rotation3f rightArmRotation = new Rotation3f(-15.0, 0.0, 10.0);
+	protected Vector3f rightArmRotation = Vector3f.from(-15.0, 0.0, 10.0);
 	@WatchableField(MetadataIndex = 20, WatchableObjectType = WatchableObjectType.ROTATION) 
-	protected Rotation3f leftLegRotation = new Rotation3f(-1.0, 0.0, -1.0);
+	protected Vector3f leftLegRotation = Vector3f.from(-1.0, 0.0, -1.0);
 	@WatchableField(MetadataIndex = 21, WatchableObjectType = WatchableObjectType.ROTATION) 
-	protected Rotation3f rightLegRotation = new Rotation3f(1.0, 0.0, 1.0);
+	protected Vector3f rightLegRotation = Vector3f.from(1.0, 0.0, 1.0);
 	
 	public ArmorStand(int entityId, UUID uuid, World world, double x, double y, double z, float yaw, float pitch) {
 		super(EntityType.ARMOR_STAND, entityId, uuid, world, x, y, z, yaw, pitch);
@@ -104,51 +104,51 @@ public class ArmorStand extends LivingEntity {
 		this.marker = marker;
 	}
 
-	public Rotation3f getHeadRotation() {
+	public Vector3f getHeadRotation() {
 		return headRotation;
 	}
 
-	public void setHeadRotation(Rotation3f headRotation) {
+	public void setHeadRotation(Vector3f headRotation) {
 		this.headRotation = headRotation;
 	}
 
-	public Rotation3f getBodyRotation() {
+	public Vector3f getBodyRotation() {
 		return bodyRotation;
 	}
 
-	public void setBodyRotation(Rotation3f bodyRotation) {
+	public void setBodyRotation(Vector3f bodyRotation) {
 		this.bodyRotation = bodyRotation;
 	}
 
-	public Rotation3f getLeftArmRotation() {
+	public Vector3f getLeftArmRotation() {
 		return leftArmRotation;
 	}
 
-	public void setLeftArmRotation(Rotation3f leftArmRotation) {
+	public void setLeftArmRotation(Vector3f leftArmRotation) {
 		this.leftArmRotation = leftArmRotation;
 	}
 
-	public Rotation3f getRightArmRotation() {
+	public Vector3f getRightArmRotation() {
 		return rightArmRotation;
 	}
 
-	public void setRightArmRotation(Rotation3f rightArmRotation) {
+	public void setRightArmRotation(Vector3f rightArmRotation) {
 		this.rightArmRotation = rightArmRotation;
 	}
 
-	public Rotation3f getLeftLegRotation() {
+	public Vector3f getLeftLegRotation() {
 		return leftLegRotation;
 	}
 
-	public void setLeftLegRotation(Rotation3f leftLegRotation) {
+	public void setLeftLegRotation(Vector3f leftLegRotation) {
 		this.leftLegRotation = leftLegRotation;
 	}
 
-	public Rotation3f getRightLegRotation() {
+	public Vector3f getRightLegRotation() {
 		return rightLegRotation;
 	}
 
-	public void setRightLegRotation(Rotation3f rightLegRotation) {
+	public void setRightLegRotation(Vector3f rightLegRotation) {
 		this.rightLegRotation = rightLegRotation;
 	}
 }

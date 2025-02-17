@@ -94,12 +94,7 @@ import com.loohp.limbo.network.protocol.packets.ServerboundFinishConfigurationPa
 import com.loohp.limbo.network.protocol.packets.ServerboundLoginAcknowledgedPacket;
 import com.loohp.limbo.player.Player;
 import com.loohp.limbo.player.PlayerInventory;
-import com.loohp.limbo.utils.BungeecordAdventureConversionUtils;
-import com.loohp.limbo.utils.CheckedBiConsumer;
-import com.loohp.limbo.utils.CustomStringUtils;
-import com.loohp.limbo.utils.DeclareCommands;
-import com.loohp.limbo.utils.InventoryClickUtils;
-import com.loohp.limbo.utils.MojangAPIUtils;
+import com.loohp.limbo.utils.*;
 import com.loohp.limbo.utils.MojangAPIUtils.SkinResponse;
 import com.loohp.limbo.world.BlockState;
 import com.loohp.limbo.world.World;
@@ -113,6 +108,7 @@ import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -294,7 +290,7 @@ public class ClientConnection extends SessionAdapter {
                 sendPacket(positionLook);
 
                 player.getDataWatcher().update();
-                PacketPlayOutEntityMetadata show = new PacketPlayOutEntityMetadata(player, false, Player.class.getDeclaredField("skinLayers"));
+                ClientboundSetEntityDataPacket show = EntityUtil.metadata(player, false, Player.class.getDeclaredField("skinLayers"));
                 sendPacket(show);
 
                 Limbo.getInstance().getEventsManager().callEvent(new PlayerJoinEvent(player));

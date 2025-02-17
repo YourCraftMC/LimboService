@@ -24,6 +24,7 @@ import com.loohp.limbo.entity.Entity;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.network.protocol.packets.*;
 import com.loohp.limbo.utils.ChunkUtil;
+import com.loohp.limbo.utils.EntityUtil;
 import com.loohp.limbo.world.ChunkPosition;
 import com.loohp.limbo.world.World;
 import net.querz.mca.Chunk;
@@ -32,6 +33,7 @@ import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundRemoveEntitiesPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundChunkBatchFinishedPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundChunkBatchStartPacket;
@@ -81,7 +83,7 @@ public class PlayerInteractManager {
 				ClientboundAddEntityPacket packet = new ClientboundAddEntityPacket(entity.getEntityId(), entity.getUniqueId(), entity.getType(), entity.getX(), entity.getY(), entity.getZ(), entity.getYaw(), entity.getPitch(), entity.getYaw());
 				player.clientConnection.sendPacket(packet);
 
-				PacketPlayOutEntityMetadata meta = new PacketPlayOutEntityMetadata(entity);
+				ClientboundSetEntityDataPacket meta = EntityUtil.metadata(entity, true);
 				player.clientConnection.sendPacket(meta);
 			}
 		}

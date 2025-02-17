@@ -97,7 +97,6 @@ import com.loohp.limbo.player.PlayerInventory;
 import com.loohp.limbo.utils.BungeecordAdventureConversionUtils;
 import com.loohp.limbo.utils.CheckedBiConsumer;
 import com.loohp.limbo.utils.CustomStringUtils;
-import com.loohp.limbo.utils.DataTypeIO;
 import com.loohp.limbo.utils.DeclareCommands;
 import com.loohp.limbo.utils.InventoryClickUtils;
 import com.loohp.limbo.utils.MojangAPIUtils;

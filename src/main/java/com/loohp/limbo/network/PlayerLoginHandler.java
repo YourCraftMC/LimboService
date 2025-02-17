@@ -16,6 +16,7 @@ import net.kyori.adventure.text.Component;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.auth.GameProfile;
+import org.geysermc.mcprotocollib.network.Flag;
 import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.protocol.MinecraftConstants;
 import org.geysermc.mcprotocollib.protocol.ServerLoginHandler;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 
 public class PlayerLoginHandler implements ServerLoginHandler {
+    public static final Flag<Player> PLAYER_FLAG = new Flag<>("limbo:player", Player.class);
     private ClientConnection clientConnection;
 
     public PlayerLoginHandler(ClientConnection clientConnection) {
@@ -142,5 +144,10 @@ public class PlayerLoginHandler implements ServerLoginHandler {
             ClientboundGameEventPacket state = new ClientboundGameEventPacket(GameEvent.CHANGE_GAMEMODE, properties.getDefaultGamemode());
             player.clientConnection.sendPacket(state);
         }
+
+        // PLAYER LIST HEADER AND FOOTER CODE CONRIBUTED BY GAMERDUCK123
+        player.sendPlayerListHeaderAndFooter(properties.getTabHeader(), properties.getTabFooter());
+
+        session.setFlag(PLAYER_FLAG, player);
     }
 }

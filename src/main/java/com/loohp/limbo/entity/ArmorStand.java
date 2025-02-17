@@ -25,6 +25,7 @@ import com.loohp.limbo.entity.DataWatcher.WatchableObjectType;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.utils.Rotation3f;
 import com.loohp.limbo.world.World;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
 import java.util.UUID;
 

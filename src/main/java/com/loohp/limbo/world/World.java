@@ -24,7 +24,6 @@ import com.loohp.limbo.entity.ArmorStand;
 import com.loohp.limbo.entity.DataWatcher;
 import com.loohp.limbo.entity.DataWatcher.WatchableObject;
 import com.loohp.limbo.entity.Entity;
-import com.loohp.limbo.entity.EntityType;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.network.protocol.packets.PacketPlayOutEntityDestroy;
 import com.loohp.limbo.network.protocol.packets.PacketPlayOutEntityMetadata;
@@ -34,10 +33,11 @@ import net.querz.mca.Chunk;
 import net.querz.nbt.tag.CompoundTag;
 import net.querz.nbt.tag.ListTag;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundRemoveEntitiesPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -269,14 +269,10 @@ public class World {
 	
 	protected void removeEntity(Entity entity) {
 		entities.remove(entity);
-		PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(entity.getEntityId());
+		ClientboundRemoveEntitiesPacket packet = new ClientboundRemoveEntitiesPacket(new int[]{entity.getEntityId()});
 		for (Player player : getPlayers()) {
-			try {
-				player.clientConnection.sendPacket(packet);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+            player.clientConnection.sendPacket(packet);
+        }
 	}
 	
 	protected DataWatcher getDataWatcher(Entity entity) {
@@ -287,7 +283,7 @@ public class World {
 		for (DataWatcher watcher : entities.values()) {
 			if (watcher.getEntity().getWorld().equals(this)) {
 				Map<Field, WatchableObject> updated = watcher.update();
-				PacketPlayOutEntityMetadata packet = new PacketPlayOutEntityMetadata(watcher.getEntity(), false, updated.keySet().toArray(new Field[0]));
+				ClientboundSetEntityDataPacket packet = new PacketPlayOutEntityMetadata(watcher.getEntity(), false, updated.keySet().toArray(new Field[0]));
 				for (Player player : getPlayers()) {
 					try {
 						player.clientConnection.sendPacket(packet);
@@ -296,14 +292,10 @@ public class World {
 					}
 				}
 			} else {
-				PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(watcher.getEntity().getEntityId());
+				ClientboundRemoveEntitiesPacket packet = new ClientboundRemoveEntitiesPacket(new int[]{watcher.getEntity().getEntityId()});
 				for (Player player : getPlayers()) {
-					try {
-						player.clientConnection.sendPacket(packet);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
+                    player.clientConnection.sendPacket(packet);
+                }
 				entities.remove(watcher.getEntity());
 			}
 		}

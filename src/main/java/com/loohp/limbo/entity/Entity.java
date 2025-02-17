@@ -29,44 +29,45 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.chat.BaseComponent;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
 import java.util.UUID;
 
 public abstract class Entity implements Sound.Emitter {
-	
-	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x01) 
+
+	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x01)
 	protected boolean onFire = false;
-	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x02) 
+	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x02)
 	protected boolean crouching = false;
-	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x04) 
+	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x04)
 	protected boolean unused = false;
-	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x08) 
+	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x08)
 	protected boolean sprinting = false;
-	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x10) 
+	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x10)
 	protected boolean swimming = false;
-	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x20) 
+	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x20)
 	protected boolean invisible = false;
-	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x40) 
+	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x40)
 	protected boolean glowing = false;
-	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x80) 
+	@WatchableField(MetadataIndex = 0, WatchableObjectType = WatchableObjectType.BYTE, IsBitmask = true, Bitmask = 0x80)
 	protected boolean elytraFlying = false;
-	@WatchableField(MetadataIndex = 1, WatchableObjectType = WatchableObjectType.VARINT) 
+	@WatchableField(MetadataIndex = 1, WatchableObjectType = WatchableObjectType.VARINT)
 	protected int air = 300;
-	@WatchableField(MetadataIndex = 2, WatchableObjectType = WatchableObjectType.CHAT, IsOptional = true) 
+	@WatchableField(MetadataIndex = 2, WatchableObjectType = WatchableObjectType.CHAT, IsOptional = true)
 	protected Component customName = null;
-	@WatchableField(MetadataIndex = 3, WatchableObjectType = WatchableObjectType.BOOLEAN) 
+	@WatchableField(MetadataIndex = 3, WatchableObjectType = WatchableObjectType.BOOLEAN)
 	protected boolean customNameVisible = false;
-	@WatchableField(MetadataIndex = 4, WatchableObjectType = WatchableObjectType.BOOLEAN) 
+	@WatchableField(MetadataIndex = 4, WatchableObjectType = WatchableObjectType.BOOLEAN)
 	protected boolean silent = false;
-	@WatchableField(MetadataIndex = 5, WatchableObjectType = WatchableObjectType.BOOLEAN) 
+	@WatchableField(MetadataIndex = 5, WatchableObjectType = WatchableObjectType.BOOLEAN)
 	protected boolean noGravity = false;
-	@WatchableField(MetadataIndex = 6, WatchableObjectType = WatchableObjectType.POSE) 
+	@WatchableField(MetadataIndex = 6, WatchableObjectType = WatchableObjectType.POSE)
 	protected Pose pose = Pose.STANDING;
 	@WatchableField(MetadataIndex = 7, WatchableObjectType = WatchableObjectType.VARINT)
 	protected int frozenTicks = 0;
-	
+
 	protected final EntityType type;
-	
+
 	protected int entityId;
 	protected UUID uuid;
 	protected World world;
@@ -75,7 +76,7 @@ public abstract class Entity implements Sound.Emitter {
 	protected double z;
 	protected float yaw;
 	protected float pitch;
-	
+
 	public Entity(EntityType type, int entityId, UUID uuid, World world, double x, double y, double z, float yaw, float pitch) {
 		this.type = type;
 		this.entityId = entityId;
@@ -87,31 +88,31 @@ public abstract class Entity implements Sound.Emitter {
 		this.yaw = yaw;
 		this.pitch = pitch;
 	}
-	
+
 	public Entity(EntityType type, UUID uuid, World world, double x, double y, double z, float yaw, float pitch) {
 		this(type, Limbo.getInstance().getNextEntityId(), uuid, world, x, y, z, yaw, pitch);
 	}
-	
-	public Entity(EntityType type, World world, double x, double y, double z, float yaw, float pitch) { 
+
+	public Entity(EntityType type, World world, double x, double y, double z, float yaw, float pitch) {
 		this(type, Limbo.getInstance().getNextEntityId(), UUID.randomUUID(), world, x, y, z, yaw, pitch);
 	}
-	
-	public Entity(EntityType type, UUID uuid, Location location) { 
+
+	public Entity(EntityType type, UUID uuid, Location location) {
 		this(type, Limbo.getInstance().getNextEntityId(), uuid, location.getWorld(), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 	}
-	
-	public Entity(EntityType type, Location location) { 
+
+	public Entity(EntityType type, Location location) {
 		this(type, Limbo.getInstance().getNextEntityId(), UUID.randomUUID(), location.getWorld(), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 	}
-	
+
 	public EntityType getType() {
 		return type;
 	}
-	
+
 	public Location getLocation() {
 		return new Location(world, x, y, z, yaw, pitch);
 	}
-	
+
 	public void teleport(Location location) {
 		this.world = location.getWorld();
 		this.x = location.getX();
@@ -120,24 +121,24 @@ public abstract class Entity implements Sound.Emitter {
 		this.yaw = location.getYaw();
 		this.pitch = location.getPitch();
 	}
-	
+
 	public Component getCustomName() {
 		return customName;
 	}
-	
+
 	public void setCustomName(String name) {
 		this.customName = name == null ? null : LegacyComponentSerializer.legacySection().deserialize(name);
 	}
-	
+
 	public void setCustomName(Component component) {
 		this.customName = component;
 	}
-	
+
 	@Deprecated
 	public void setCustomName(BaseComponent component) {
 		setCustomName(component == null ? null : BungeecordAdventureConversionUtils.toComponent(component));
 	}
-	
+
 	@Deprecated
 	public void setCustomName(BaseComponent[] components) {
 		setCustomName(components == null ? null : BungeecordAdventureConversionUtils.toComponent(components));
@@ -294,16 +295,16 @@ public abstract class Entity implements Sound.Emitter {
 	public UUID getUniqueId() {
 		return uuid;
 	}
-	
+
 	public boolean isValid() {
 		return world.getEntities().contains(this);
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	public void remove() {
 		Limbo.getInstance().getUnsafe().a(world, this);
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	public DataWatcher getDataWatcher() {
 		return Limbo.getInstance().getUnsafe().b(world, this);

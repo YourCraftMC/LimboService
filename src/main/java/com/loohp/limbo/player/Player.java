@@ -25,7 +25,6 @@ import com.loohp.limbo.entity.DataWatcher;
 import com.loohp.limbo.entity.DataWatcher.WatchableField;
 import com.loohp.limbo.entity.DataWatcher.WatchableObjectType;
 import com.loohp.limbo.entity.EntityEquipment;
-import com.loohp.limbo.entity.EntityType;
 import com.loohp.limbo.entity.LivingEntity;
 import com.loohp.limbo.events.inventory.InventoryCloseEvent;
 import com.loohp.limbo.events.inventory.InventoryOpenEvent;

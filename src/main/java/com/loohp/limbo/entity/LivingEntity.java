@@ -26,6 +26,7 @@ import com.loohp.limbo.inventory.EquipmentSlot;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.world.World;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
 import java.util.UUID;
 

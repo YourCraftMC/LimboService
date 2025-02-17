@@ -23,11 +23,20 @@ import com.loohp.limbo.Limbo;
 import com.loohp.limbo.entity.Entity;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.network.protocol.packets.*;
+import com.loohp.limbo.utils.ChunkUtil;
 import com.loohp.limbo.world.ChunkPosition;
 import com.loohp.limbo.world.World;
 import net.querz.mca.Chunk;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundRemoveEntitiesPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundChunkBatchFinishedPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundChunkBatchStartPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundForgetLevelChunkPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundLevelChunkWithLightPacket;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -69,7 +78,7 @@ public class PlayerInteractManager {
 		Set<Entity> entitiesInRange = player.getWorld().getEntities().stream().filter(each -> each.getLocation().distanceSquared(location) < viewDistanceBlocks * viewDistanceBlocks).collect(Collectors.toSet());
 		for (Entity entity : entitiesInRange) {
 			if (!entities.contains(entity)) {
-				PacketPlayOutSpawnEntity packet = new PacketPlayOutSpawnEntity(entity.getEntityId(), entity.getUniqueId(), entity.getType(), entity.getX(), entity.getY(), entity.getZ(), entity.getYaw(), entity.getPitch(), entity.getPitch(), 0, (short) 0, (short) 0, (short) 0);
+				ClientboundAddEntityPacket packet = new ClientboundAddEntityPacket(entity.getEntityId(), entity.getUniqueId(), entity.getType(), entity.getX(), entity.getY(), entity.getZ(), entity.getYaw(), entity.getPitch(), entity.getYaw());
 				player.clientConnection.sendPacket(packet);
 
 				PacketPlayOutEntityMetadata meta = new PacketPlayOutEntityMetadata(entity);
@@ -83,7 +92,7 @@ public class PlayerInteractManager {
 			}
 		}
 		for (int id : ids) {
-			PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(id);
+			ClientboundRemoveEntitiesPacket packet = new ClientboundRemoveEntitiesPacket(new int[]{id});
 			player.clientConnection.sendPacket(packet);
 		}
 
@@ -109,7 +118,7 @@ public class PlayerInteractManager {
 		for (Entry<ChunkPosition, Chunk> entry : currentViewing.entrySet()) {
 			ChunkPosition chunkPos = entry.getKey();
 			if (!chunksInRange.containsKey(chunkPos)) {
-				PacketPlayOutUnloadChunk packet = new PacketPlayOutUnloadChunk(chunkPos.getChunkX(), chunkPos.getChunkZ());
+				ClientboundForgetLevelChunkPacket packet = new ClientboundForgetLevelChunkPacket(chunkPos.getChunkX(), chunkPos.getChunkZ());
 				player.clientConnection.sendPacket(packet);
 			}
 		}
@@ -122,7 +131,7 @@ public class PlayerInteractManager {
 			if (!currentViewing.containsKey(chunkPos)) {
 				Chunk chunk = chunkPos.getWorld().getChunkAt(chunkPos.getChunkX(), chunkPos.getChunkZ());
 				if (chunk == null) {
-					ClientboundLevelChunkWithLightPacket chunkdata = new ClientboundLevelChunkWithLightPacket(chunkPos.getChunkX(), chunkPos.getChunkZ(), entry.getValue(), world.getEnvironment(), Collections.emptyList(), Collections.emptyList());
+					ClientboundLevelChunkWithLightPacket chunkdata = ChunkUtil.create(chunkPos.getChunkX(), chunkPos.getChunkZ(), entry.getValue(), world.getEnvironment(), Collections.emptyList(), Collections.emptyList());
 					player.clientConnection.sendPacket(chunkdata);
                 } else {
 					List<Byte[]> blockChunk = world.getLightEngineBlock().getBlockLightBitMask(chunkPos.getChunkX(), chunkPos.getChunkZ());
@@ -136,7 +145,7 @@ public class PlayerInteractManager {
 					if (skyChunk == null) {
 						skyChunk = new ArrayList<>();
 					}
-					ClientboundLevelChunkWithLightPacket chunkdata = new ClientboundLevelChunkWithLightPacket(chunkPos.getChunkX(), chunkPos.getChunkZ(), chunk, world.getEnvironment(), skyChunk, blockChunk);
+					ClientboundLevelChunkWithLightPacket chunkdata = ChunkUtil.create(chunkPos.getChunkX(), chunkPos.getChunkZ(), chunk, world.getEnvironment(), skyChunk, blockChunk);
 					player.clientConnection.sendPacket(chunkdata);
                 }
                 counter++;

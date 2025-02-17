@@ -53,6 +53,8 @@ public class PlayerLoginHandler implements ServerLoginHandler {
         Player player = new Player(clientConnection, profile.getName(), profile.getId(), Limbo.getInstance().getNextEntityId(), Limbo.getInstance().getServerProperties().getWorldSpawn(), new PlayerInteractManager());
         player.setSkinLayers((byte) (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40));
 
+        Limbo.getInstance().getUnsafe().a(player);
+
         ServerProperties properties = Limbo.getInstance().getServerProperties();
         Location worldSpawn = properties.getWorldSpawn();
 

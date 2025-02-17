@@ -25,7 +25,7 @@
 	<artifactId>Limbo</artifactId>
 	<name>Limbo</name>
 	<version>0.7.12-ALPHA</version>
-	
+
 	<description>Standalone Limbo Minecraft Server.</description>
 	<url>https://github.com/LOOHP/Limbo</url>
 	<packaging>jar</packaging>
@@ -37,7 +37,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
-	
+
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
 		<resources>
@@ -223,9 +223,22 @@
 			<name>Maven Central</name>
 			<url>https://repo.maven.apache.org/maven2/</url>
 		</repository>
+		<repository>
+			<id>opencollab</id>
+			<url>https://repo.opencollab.dev/maven-snapshots</url>
+		</repository>
+		<repository>
+			<id>opencollab-releases</id>
+			<url>https://repo.opencollab.dev/maven-releases</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.6</version>
+        </dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
@@ -310,6 +323,14 @@
 			<version>2.11</version>
 			<scope>compile</scope>
 		</dependency>
+
+
+		<dependency>
+			<groupId>org.geysermc.mcprotocollib</groupId>
+			<artifactId>protocol</artifactId>
+			<version>1.21.4-SNAPSHOT</version>
+		</dependency>
+
 	</dependencies>
 
 </project>

@@ -137,8 +137,7 @@ import java.util.stream.Collectors;
 
 public class ClientConnection extends SessionAdapter {
 
-    private static final Key DEFAULT_HANDLER_NAMESPACE = Key.key("default");
-    private static final String BRAND_ANNOUNCE_CHANNEL = Key.key("brand").toString();
+    public static final String BRAND_ANNOUNCE_CHANNEL = Key.key("brand").toString();
 
     private final Random random = new Random();
     private final Session session;
@@ -153,11 +152,15 @@ public class ClientConnection extends SessionAdapter {
 
     public ClientConnection(Session session) {
         this.session = session;
-        this.inetAddress = session.getLocalAddress();
+        this.inetAddress = session.getRemoteAddress();
         this.lastPacketTimestamp = new AtomicLong(-1);
         this.lastKeepAlivePayLoad = new AtomicLong(-1);
         this.running = false;
         this.ready = false;
+    }
+
+    public SocketAddress getInetAddress() {
+        return inetAddress;
     }
 
     public long getLastKeepAlivePayLoad() {
@@ -197,11 +200,11 @@ public class ClientConnection extends SessionAdapter {
         return ready;
     }
 
-    public void sendPluginMessage(String channel, byte[] data) throws IOException {
+    public void sendPluginMessage(String channel, byte[] data) {
         sendPacket(new ClientboundCustomPayloadPacket(Key.key(channel), data));
     }
 
-    public synchronized void sendPacket(Packet packet) throws IOException {
+    public synchronized void sendPacket(Packet packet) {
         session.send(packet);
         setLastPacketTimestamp(System.currentTimeMillis());
     }

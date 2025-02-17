@@ -22,27 +22,15 @@ package com.loohp.limbo.player;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.entity.Entity;
 import com.loohp.limbo.location.Location;
-import com.loohp.limbo.network.ClientConnection;
-import com.loohp.limbo.network.protocol.packets.ClientboundChunkBatchFinishedPacket;
-import com.loohp.limbo.network.protocol.packets.ClientboundChunkBatchStartPacket;
-import com.loohp.limbo.network.protocol.packets.ClientboundLevelChunkWithLightPacket;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutEntityDestroy;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutEntityMetadata;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutSpawnEntity;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutUnloadChunk;
+import com.loohp.limbo.network.protocol.packets.*;
 import com.loohp.limbo.world.ChunkPosition;
 import com.loohp.limbo.world.World;
 import net.querz.mca.Chunk;
+import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
+import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class PlayerInteractManager {
@@ -70,8 +58,8 @@ public class PlayerInteractManager {
 		return player;
 	}
 
-	public void update() throws IOException {
-		if (player.clientConnection.getClientState() != ClientConnection.ClientState.PLAY) {
+	public void update() {
+		if (((MinecraftProtocol) player.clientConnection.getSession().getPacketProtocol()).getOutboundState() != ProtocolState.GAME) {
 			return;
 		}
 

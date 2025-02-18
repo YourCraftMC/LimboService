@@ -8,6 +8,7 @@ import com.loohp.limbo.events.inventory.AnvilRenameInputEvent;
 import com.loohp.limbo.events.inventory.InventoryCloseEvent;
 import com.loohp.limbo.events.inventory.InventoryCreativeEvent;
 import com.loohp.limbo.events.player.*;
+import com.loohp.limbo.file.ServerProperties;
 import com.loohp.limbo.inventory.AnvilInventory;
 import com.loohp.limbo.inventory.EquipmentSlot;
 import com.loohp.limbo.inventory.Inventory;
@@ -19,10 +20,13 @@ import com.loohp.limbo.player.PlayerInventory;
 import com.loohp.limbo.registry.BuiltInRegistries;
 import com.loohp.limbo.registry.RegistryCustom;
 import com.loohp.limbo.utils.CustomStringUtils;
+import com.loohp.limbo.utils.ForwardingUtils;
 import com.loohp.limbo.utils.InventoryClickUtils;
+import com.loohp.limbo.utils.MojangAPIUtils;
 import com.loohp.limbo.world.BlockState;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.querz.nbt.tag.CompoundTag;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -41,6 +45,7 @@ import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.Serverbound
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundResourcePackPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundFinishConfigurationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
+import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundCommandSuggestionsPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHeldSlotPacket;
@@ -50,15 +55,25 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.Serverbound
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundCommandSuggestionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.inventory.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
+import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
+import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundCustomQueryAnswerPacket;
+import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundHelloPacket;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 
-public class ClientSessionAdapter extends SessionAdapter {
+public class ClientSessionPacketHandler extends SessionAdapter {
     BiConsumer<PlayerMoveEvent, Location> processMoveEvent = (event, originalTo) -> {
         if (event.isCancelled()) {
             Location returnTo = event.getFrom();

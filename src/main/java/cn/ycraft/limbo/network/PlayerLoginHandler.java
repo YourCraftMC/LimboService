@@ -1,5 +1,6 @@
 package cn.ycraft.limbo.network;
 
+import cn.ycraft.limbo.network.server.ForwardData;
 import cn.ycraft.limbo.util.EntityUtil;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.events.player.PlayerJoinEvent;
@@ -44,7 +45,23 @@ public class PlayerLoginHandler implements ServerLoginHandler {
     @Override
     public void loggedIn(Session session) {
         ClientConnection clientConnection = session.getFlag(NetworkConstants.CLIENT_CONNECTION_FLAG);
+        ClientSessionPacketHandler packetHandler = session.getFlag(NetworkConstants.CLIENT_SESSION_PACKET_HANDLER_FLAG);
+        ForwardData forwardedSkin = session.getFlag(NetworkConstants.FORWARD_FLAG);
         GameProfile profile = session.getFlag(MinecraftConstants.PROFILE_KEY);
+
+        if (forwardedSkin.uuid != null) {
+            profile = new GameProfile(forwardedSkin.uuid, forwardedSkin.username != null ? forwardedSkin.username : profile.getName());
+        }
+        if (forwardedSkin.velocityDataFrom != null) {
+            profile = new GameProfile(forwardedSkin.velocityDataFrom.uuid, forwardedSkin.velocityDataFrom.username != null ? forwardedSkin.velocityDataFrom.username : profile.getName());
+        }
+        if (forwardedSkin.properties != null) {
+            profile.setProperties(forwardedSkin.properties);
+        }
+        if (forwardedSkin.velocityDataFrom != null) {
+            profile.setProperties(forwardedSkin.velocityDataFrom.properties);
+        }
+
         Player player = new Player(clientConnection, profile.getName(), profile.getId(), Limbo.getInstance().getNextEntityId(), Limbo.getInstance().getServerProperties().getWorldSpawn(), new PlayerInteractManager());
         player.setSkinLayers((byte) (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40));
 
@@ -53,6 +70,7 @@ public class PlayerLoginHandler implements ServerLoginHandler {
             session.disconnect(event.getCancelReason());
             return;
         }
+
 
         Limbo.getInstance().getUnsafe().a(player);
 

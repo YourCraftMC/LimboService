@@ -14,14 +14,11 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
 
-import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
 import java.util.*;
 
 public class EntityUtil {
     public static ClientboundSetEntityDataPacket metadata(Entity entity, boolean allFields, Field... fields) {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
         ByteBuf output = Unpooled.buffer();
         MinecraftTypes.writeVarInt(output, entity.getEntityId());
         Collection<DataWatcher.WatchableObject> watches;

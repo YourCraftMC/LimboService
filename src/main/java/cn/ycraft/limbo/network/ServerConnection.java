@@ -19,6 +19,8 @@
 
 package cn.ycraft.limbo.network;
 
+import cn.ycraft.limbo.network.protocol.LimboProtocol;
+import cn.ycraft.limbo.network.server.ForwardData;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.events.player.PlayerQuitEvent;
 import com.loohp.limbo.events.status.StatusPingEvent;
@@ -60,7 +62,7 @@ public class ServerConnection {
     }
 
     void start() {
-        server = new NetworkServer(new InetSocketAddress(this.ip, this.port), MinecraftProtocol::new);
+        server = new NetworkServer(new InetSocketAddress(this.ip, this.port), LimboProtocol::new);
         server.setGlobalFlag(MinecraftConstants.ENCRYPT_CONNECTION, false);
         server.setGlobalFlag(MinecraftConstants.SERVER_LOGIN_HANDLER_KEY, new PlayerLoginHandler());
         clients();
@@ -79,11 +81,14 @@ public class ServerConnection {
 
             @Override
             public void sessionAdded(SessionAddedEvent event) {
-                event.getSession().addListener(new ClientSessionAdapter());
+                ClientSessionPacketHandler packetHandler = new ClientSessionPacketHandler();
                 ClientConnection sc = new ClientConnection(event.getSession());
-                clients.put(event.getSession(), sc);
                 event.getSession().setFlag(NetworkConstants.CLIENT_CONNECTION_FLAG, sc);
+                event.getSession().setFlag(NetworkConstants.CLIENT_SESSION_PACKET_HANDLER_FLAG, packetHandler);
+                event.getSession().setFlag(NetworkConstants.FORWARD_FLAG, new ForwardData());
+                event.getSession().addListener(packetHandler);
                 event.getSession().addListener(sc);
+                clients.put(event.getSession(), sc);
 
                 InetSocketAddress inetAddress = ((InetSocketAddress) event.getSession().getRemoteAddress());
                 ServerProperties properties = Limbo.getInstance().getServerProperties();

@@ -19,6 +19,7 @@
 
 package com.loohp.limbo.world;
 
+import com.loohp.limbo.registry.RegistryCustom;
 import net.kyori.adventure.key.Key;
 
 import java.util.HashSet;
@@ -26,9 +27,9 @@ import java.util.Set;
 
 public class Environment {
 
-	public static final Environment NORMAL = new Environment(Key.key("minecraft:overworld"), true);
-	public static final Environment NETHER = new Environment(Key.key("minecraft:the_nether"), false);
-	public static final Environment END = new Environment(Key.key("minecraft:the_end"), false);
+	public static final Environment NORMAL = new Environment(Key.key("minecraft:overworld"), true, 0);
+	public static final Environment NETHER = new Environment(Key.key("minecraft:the_nether"), false, 3);
+	public static final Environment END = new Environment(Key.key("minecraft:the_end"), false,2);
 	
 	public static final Set<Environment> REGISTERED_ENVIRONMENTS = new HashSet<>();
 
@@ -44,15 +45,15 @@ public class Environment {
 	}
 	
 	@Deprecated
-	public static Environment createCustom(Key key) {
-		return createCustom(key, true);
+	public static Environment createCustom(Key key, int id) {
+		return createCustom(key, true, id);
 	}
 	
-	public static Environment createCustom(Key key, boolean hasSkyLight) {
+	public static Environment createCustom(Key key, boolean hasSkyLight, int id) {
 		if (REGISTERED_ENVIRONMENTS.stream().anyMatch(each -> each.getKey().equals(key))) {
 			throw new IllegalArgumentException("An Environment is already created with this Key");
 		}
-		return new Environment(key, hasSkyLight);
+		return new Environment(key, hasSkyLight, id);
 	}
 	
 	public static Environment getCustom(Key key) {
@@ -63,10 +64,12 @@ public class Environment {
 	
 	private Key key;
 	private boolean hasSkyLight;
+	private int id;
 	
-	private Environment(Key key, boolean hasSkyLight) {
+	private Environment(Key key, boolean hasSkyLight, int id) {
 		this.key = key;
 		this.hasSkyLight = hasSkyLight;
+		this.id = id;
 	}
 	
 	public Key getKey() {
@@ -109,5 +112,9 @@ public class Environment {
 			return false;
 		}
 		return true;
+	}
+
+	public int getId() {
+		return id;
 	}
 }

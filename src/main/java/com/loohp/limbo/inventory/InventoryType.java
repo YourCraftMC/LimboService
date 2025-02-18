@@ -20,6 +20,7 @@
 package com.loohp.limbo.inventory;
 
 import net.kyori.adventure.key.Key;
+import org.geysermc.mcprotocollib.protocol.data.game.inventory.ContainerType;
 
 public enum InventoryType {
 
@@ -174,51 +175,52 @@ public enum InventoryType {
         return isCreatable;
     }
 
-    public Key getRawType(int slots) {
+    public ContainerType getRawType(int slots) {
         switch (this) {
             case CHEST:
-                return Key.key("minecraft:generic_9x" + (slots / 9));
+                return ContainerType.valueOf("GENERIC_9X" + (slots / 9));
             case DISPENSER:
             case DROPPER:
-                return Key.key("minecraft:generic_3x3");
+                return ContainerType.GENERIC_3X3;
             case FURNACE:
-                return Key.key("minecraft:furnace");
+                return ContainerType.FURNACE;
             case WORKBENCH:
-                return Key.key("minecraft:crafting");
+                return ContainerType.CRAFTER_3x3;
             case ENCHANTING:
-                return Key.key("minecraft:enchantment");
+                return ContainerType.ENCHANTMENT;
             case BREWING:
-                return Key.key("minecraft:brewing_stand");
+                return ContainerType.BREWING_STAND;
             case MERCHANT:
-                return Key.key("minecraft:merchant");
+                return ContainerType.MERCHANT;
             case ENDER_CHEST:
             case BARREL:
-                return Key.key("minecraft:generic_9x3");
+                return ContainerType.GENERIC_9X3;
             case ANVIL:
-                return Key.key("minecraft:anvil");
+                return ContainerType.ANVIL;
             case SMITHING:
-                return Key.key("minecraft:smithing");
+                return ContainerType.SMITHING;
             case BEACON:
-                return Key.key("minecraft:beacon");
+                return ContainerType.BEACON;
             case HOPPER:
-                return Key.key("minecraft:hopper");
+                return ContainerType.HOPPER;
             case SHULKER_BOX:
-                return Key.key("minecraft:shulker_box");
+                return ContainerType.SHULKER_BOX;
             case BLAST_FURNACE:
-                return Key.key("minecraft:blast_furnace");
+                return ContainerType.BLAST_FURNACE;
             case LECTERN:
-                return Key.key("minecraft:lectern");
+                return ContainerType.LECTERN;
             case SMOKER:
-                return Key.key("minecraft:smoker");
+                return ContainerType.SMOKER;
             case LOOM:
-                return Key.key("minecraft:loom");
+                return ContainerType.LOOM;
             case CARTOGRAPHY:
-                return Key.key("minecraft:cartography_table");
+                return ContainerType.CARTOGRAPHY;
             case GRINDSTONE:
-                return Key.key("minecraft:grindstone");
+                return ContainerType.GRINDSTONE;
             case STONECUTTER:
-                return Key.key("minecraft:stonecutter");
+                return ContainerType.STONECUTTER;
             case CRAFTING:
+                return ContainerType.CRAFTING;
             case PLAYER:
             case CREATIVE:
             case COMPOSTER:

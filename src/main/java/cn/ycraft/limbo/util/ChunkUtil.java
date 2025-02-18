@@ -25,10 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class ChunkUtil {
     public static ClientboundLevelChunkWithLightPacket create(int chunkX, int chunkZ, Chunk chunk, Environment environment, List<Byte[]> skylightArrays, List<Byte[]> blocklightArrays) {
@@ -48,7 +45,7 @@ public class ChunkUtil {
         }
 
 
-        ByteBuf dataOut = readChunkData(chunk, environment);
+        ByteBuf dataOut = createSectionData(chunk, environment);
 
         byte[] chunkData = new byte[dataOut.readableBytes()];
         dataOut.readBytes(chunkData);
@@ -94,7 +91,7 @@ public class ChunkUtil {
         return new ClientboundLevelChunkWithLightPacket(chunkX, chunkZ, chunkData, heightMaps, blockEntities, lightData);
     }
 
-    public static @NotNull ByteBuf readChunkData(Chunk chunk, Environment environment) {
+    public static @NotNull ByteBuf createSectionData(Chunk chunk, Environment environment) {
         ByteBuf dataOut = Unpooled.buffer();
         for (int i = 0; i < 16; i++) {
             Section section = chunk.getSection(i);
@@ -114,10 +111,10 @@ public class ChunkUtil {
 
                 int newBits = 32 - Integer.numberOfLeadingZeros(section.getPalette().size() - 1);
                 newBits = Math.max(newBits, 4);
-                if (newBits <= 8) {
+                if (newBits <= 8) { // indirect
                     dataOut.writeByte(newBits);
 
-                    MinecraftTypes.writeVarInt(dataOut, section.getPalette().size());
+                    MinecraftTypes.writeVarInt(dataOut, section.getPalette().size()); // Palette Length
                     for (CompoundTag tag : section.getPalette()) {
                         MinecraftTypes.writeVarInt(dataOut, GeneratedBlockDataMappings.getGlobalPaletteIDFromState(tag));
                     }

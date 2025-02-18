@@ -464,6 +464,8 @@ public final class Limbo {
 		for (Player player : getPlayers()) {
 			player.disconnect("Server closed");
 		}
+
+		server.shutdown();
 		while (!getPlayers().isEmpty()) {
 			try {
 				TimeUnit.MILLISECONDS.sleep(500);

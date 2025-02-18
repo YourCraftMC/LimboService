@@ -27,7 +27,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.querz.nbt.tag.CompoundTag;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.nbt.NbtMap;
-import org.geysermc.mcprotocollib.network.Flag;
 import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.network.event.session.DisconnectingEvent;
 import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
@@ -80,7 +79,6 @@ public class ClientSessionAdapter extends SessionAdapter {
 
     private static final List<ClientboundRegistryDataPacket> REGISTRIES_DATA = new ArrayList<>();
     private static final ClientboundFinishConfigurationPacket FINISH_CONFIGURATION = new ClientboundFinishConfigurationPacket();
-    private static final Flag<Boolean> REGISTRY_FINISH = new Flag<>("limbo:registry_finish", Boolean.class);
 
     static {
         try {
@@ -119,7 +117,7 @@ public class ClientSessionAdapter extends SessionAdapter {
 
     @Override
     public void packetReceived(Session session, Packet packet) {
-        Player player = session.getFlag(PlayerLoginHandler.PLAYER_FLAG);
+        Player player = session.getFlag(NetworkConstants.PLAYER_FLAG);
         if (player == null) {
             return;
         }
@@ -143,7 +141,10 @@ public class ClientSessionAdapter extends SessionAdapter {
     @Override
     public void disconnecting(DisconnectingEvent event) {
         Session session = event.getSession();
-        Player player = session.getFlag(PlayerLoginHandler.PLAYER_FLAG);
+        Player player = session.getFlag(NetworkConstants.PLAYER_FLAG);
+        if (player == null) {
+            return;
+        }
         InetSocketAddress inetAddress = (InetSocketAddress) session.getRemoteAddress();
 
         Limbo.getInstance().getEventsManager().callEvent(new PlayerQuitEvent(player));
@@ -186,7 +187,8 @@ public class ClientSessionAdapter extends SessionAdapter {
                     inventory.setItem(player.getSelectedSlot(), itemStack);
                 } else if (player.getGamemode() == GameMode.SURVIVAL) {
                     for (int i = 0; i < 9; i++) {
-                        if (inventory.getItem(i).isSimilar(itemStack)) {
+                        ItemStack item = inventory.getItem(i);
+                        if (item != null && item.isSimilar(itemStack)) {
                             player.setSelectedSlot((byte) i);
                             break;
                         }

@@ -20,12 +20,15 @@
 package cn.ycraft.limbo.network;
 
 import com.loohp.limbo.Limbo;
+import com.loohp.limbo.events.player.PlayerQuitEvent;
 import com.loohp.limbo.events.status.StatusPingEvent;
 import com.loohp.limbo.file.ServerProperties;
+import com.loohp.limbo.player.Player;
 import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.network.event.server.ServerAdapter;
 import org.geysermc.mcprotocollib.network.event.server.ServerBoundEvent;
 import org.geysermc.mcprotocollib.network.event.server.SessionAddedEvent;
+import org.geysermc.mcprotocollib.network.event.server.SessionRemovedEvent;
 import org.geysermc.mcprotocollib.network.server.NetworkServer;
 import org.geysermc.mcprotocollib.protocol.MinecraftConstants;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
@@ -59,6 +62,7 @@ public class ServerConnection {
     void start() {
         server = new NetworkServer(new InetSocketAddress(this.ip, this.port), MinecraftProtocol::new);
         server.setGlobalFlag(MinecraftConstants.ENCRYPT_CONNECTION, false);
+        server.setGlobalFlag(MinecraftConstants.SERVER_LOGIN_HANDLER_KEY, new PlayerLoginHandler());
         clients();
         motd();
         server.bind();
@@ -78,12 +82,31 @@ public class ServerConnection {
                 event.getSession().addListener(new ClientSessionAdapter());
                 ClientConnection sc = new ClientConnection(event.getSession());
                 clients.put(event.getSession(), sc);
+                event.getSession().setFlag(NetworkConstants.CLIENT_CONNECTION_FLAG, sc);
                 event.getSession().addListener(sc);
 
                 InetSocketAddress inetAddress = ((InetSocketAddress) event.getSession().getRemoteAddress());
                 ServerProperties properties = Limbo.getInstance().getServerProperties();
                 String str = (properties.isLogPlayerIPAddresses() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + inetAddress.getPort();
                 Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Legacy Status has pinged");
+            }
+
+            @Override
+            public void sessionRemoved(SessionRemovedEvent event) {
+                super.sessionRemoved(event);
+                Session session = event.getSession();
+                Player player = session.getFlag(NetworkConstants.PLAYER_FLAG);
+                if (player == null) {
+                    return;
+                }
+                InetSocketAddress inetAddress = (InetSocketAddress) session.getRemoteAddress();
+
+                Limbo.getInstance().getEventsManager().callEvent(new PlayerQuitEvent(player));
+
+                String str = (Limbo.getInstance().getServerProperties().isLogPlayerIPAddresses() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + inetAddress.getPort() + "|" + player.getName();
+                Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Player had disconnected!");
+                Limbo.getInstance().getUnsafe().b(player);
+                Limbo.getInstance().getServerConnection().getClients().remove(session);
             }
         });
     }
@@ -109,5 +132,9 @@ public class ServerConnection {
 
     public ClientConnection getClient(Session session) {
         return clients.get(session);
+    }
+
+    public void shutdown() {
+        server.close(false);
     }
 }

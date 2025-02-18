@@ -1,7 +1,9 @@
 package cn.ycraft.limbo.network;
 
+import cn.ycraft.limbo.util.EntityUtil;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.events.player.PlayerJoinEvent;
+import com.loohp.limbo.events.player.PlayerLoginEvent;
 import com.loohp.limbo.events.player.PlayerSpawnEvent;
 import com.loohp.limbo.file.ServerProperties;
 import com.loohp.limbo.location.Location;
@@ -16,7 +18,6 @@ import net.kyori.adventure.text.Component;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.auth.GameProfile;
-import org.geysermc.mcprotocollib.network.Flag;
 import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.protocol.MinecraftConstants;
 import org.geysermc.mcprotocollib.protocol.ServerLoginHandler;
@@ -29,6 +30,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.level.notify.GameEvent;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundCommandsPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundPlayerInfoUpdatePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
@@ -39,19 +41,18 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 
 public class PlayerLoginHandler implements ServerLoginHandler {
-    public static final Flag<Player> PLAYER_FLAG = new Flag<>("limbo:player", Player.class);
-    private ClientConnection clientConnection;
-
-    public PlayerLoginHandler(ClientConnection clientConnection) {
-        this.clientConnection = clientConnection;
-    }
-
     @Override
     public void loggedIn(Session session) {
-
+        ClientConnection clientConnection = session.getFlag(NetworkConstants.CLIENT_CONNECTION_FLAG);
         GameProfile profile = session.getFlag(MinecraftConstants.PROFILE_KEY);
         Player player = new Player(clientConnection, profile.getName(), profile.getId(), Limbo.getInstance().getNextEntityId(), Limbo.getInstance().getServerProperties().getWorldSpawn(), new PlayerInteractManager());
         player.setSkinLayers((byte) (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40));
+
+        PlayerLoginEvent event = Limbo.getInstance().getEventsManager().callEvent(new PlayerLoginEvent(clientConnection, false, Component.empty()));
+        if (event.isCancelled()) {
+            session.disconnect(event.getCancelReason());
+            return;
+        }
 
         Limbo.getInstance().getUnsafe().a(player);
 
@@ -65,23 +66,23 @@ public class PlayerLoginHandler implements ServerLoginHandler {
                 0,
                 false,
                 new Key[]{Key.key("minecraft:" + world.getName())},
-                20,
-                16,
-                16,
-                false,
-                false,
+                properties.getMaxPlayers(),
+                8,
+                8,
+                !properties.isReducedDebugInfo(),
+                true,
                 false,
                 new PlayerSpawnInfo(
-                        0,//todo
+                        world.getEnvironment().getId(),
                         Key.key("minecraft:" + world.getName()),
-                        100,
+                        0,
                         properties.getDefaultGamemode(),
                         properties.getDefaultGamemode(),
-                        !properties.isReducedDebugInfo(),
                         false,
+                        true,
                         null,
-                        100,
-                        5
+                        0,
+                        0
                 ),
                 false
         ));
@@ -94,7 +95,7 @@ public class PlayerLoginHandler implements ServerLoginHandler {
         buffer.readBytes(bytes);
         clientConnection.sendPluginMessage(ClientConnection.BRAND_ANNOUNCE_CHANNEL, bytes);
 
-        ClientboundPlayerInfoUpdatePacket infoUpdatePacket = new ClientboundPlayerInfoUpdatePacket(EnumSet.of(PlayerListEntryAction.ADD_PLAYER), new PlayerListEntry[]{new PlayerListEntry(
+        ClientboundPlayerInfoUpdatePacket infoUpdatePacket = new ClientboundPlayerInfoUpdatePacket(EnumSet.of(PlayerListEntryAction.ADD_PLAYER, PlayerListEntryAction.UPDATE_GAME_MODE, PlayerListEntryAction.UPDATE_LISTED, PlayerListEntryAction.UPDATE_LATENCY, PlayerListEntryAction.UPDATE_DISPLAY_NAME), new PlayerListEntry[]{new PlayerListEntry(
                 profile.getId(),
                 profile,
                 true,
@@ -129,7 +130,7 @@ public class PlayerLoginHandler implements ServerLoginHandler {
         player.clientConnection.sendPacket(spawnPositionPacket);
 
         Vector3d spawn = Vector3d.from(worldSpawn.getX(), worldSpawn.getY(), worldSpawn.getZ());
-        ClientboundPlayerPositionPacket positionPacket = new ClientboundPlayerPositionPacket(player.getEntityId(), spawn, Vector3d.ZERO, player.getYaw(), player.getPitch(), new ArrayList<>());
+        ClientboundPlayerPositionPacket positionPacket = new ClientboundPlayerPositionPacket(1, spawn, Vector3d.ZERO, player.getYaw(), player.getPitch(), new ArrayList<>());
         Limbo.getInstance().getUnsafe().a(player, new Location(world, worldSpawn.getX(), worldSpawn.getY(), worldSpawn.getZ(), worldSpawn.getYaw(), worldSpawn.getPitch()));
         player.clientConnection.sendPacket(positionPacket);
 
@@ -139,17 +140,36 @@ public class PlayerLoginHandler implements ServerLoginHandler {
             e.printStackTrace();
         }
 
-        //todo metadata
+        try {
+            ClientboundSetEntityDataPacket metadata = EntityUtil.metadata(player, false, Player.class.getDeclaredField("skinLayers"));
+            player.clientConnection.sendPacket(metadata);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+
         Limbo.getInstance().getEventsManager().callEvent(new PlayerJoinEvent(player));
 
-        if (properties.isAllowFlight()) {
-            ClientboundGameEventPacket state = new ClientboundGameEventPacket(GameEvent.CHANGE_GAMEMODE, properties.getDefaultGamemode());
-            player.clientConnection.sendPacket(state);
+//        if (properties.isAllowFlight()) {
+//            ClientboundGameEventPacket state = new ClientboundGameEventPacket(GameEvent.CHANGE_GAMEMODE, properties.getDefaultGamemode());
+//            player.clientConnection.sendPacket(state);
+//        }
+
+        // RESOURCEPACK CODE CONRIBUTED BY GAMERDUCK123
+        if (!properties.getResourcePackLink().equalsIgnoreCase("")) {
+            if (!properties.getResourcePackSHA1().equalsIgnoreCase("")) {
+                //SEND RESOURCEPACK
+                player.setResourcePack(properties.getResourcePackLink(), properties.getResourcePackSHA1(), properties.getResourcePackRequired(), properties.getResourcePackPrompt());
+            } else {
+                //NO SHA
+                Limbo.getInstance().getConsole().sendMessage("ResourcePacks require SHA1s");
+            }
+        } else {
+            //RESOURCEPACK NOT ENABLED
         }
 
         // PLAYER LIST HEADER AND FOOTER CODE CONRIBUTED BY GAMERDUCK123
         player.sendPlayerListHeaderAndFooter(properties.getTabHeader(), properties.getTabFooter());
 
-        session.setFlag(PLAYER_FLAG, player);
+        session.setFlag(NetworkConstants.PLAYER_FLAG, player);
     }
 }

@@ -42,7 +42,7 @@ public class DeclareCommands {
         }
 
         List<CommandNode> nodes = new ArrayList<>();
-        nodes.add(new CommandNode(CommandType.ROOT, false, new int[0], OptionalInt.empty(), "", CommandParser.STRING, StringProperties.GREEDY_PHRASE, Key.key("ask_server")));
+        nodes.add(new CommandNode(CommandType.ROOT, true, new int[0], OptionalInt.empty(), "", CommandParser.STRING, StringProperties.GREEDY_PHRASE, Key.key("ask_server")));
         for (String command : commands) {
             nodes.add(new CommandNode(CommandType.LITERAL, true, new int[0], OptionalInt.empty(), command, CommandParser.STRING, StringProperties.GREEDY_PHRASE, Key.key("ask_server")));
         }

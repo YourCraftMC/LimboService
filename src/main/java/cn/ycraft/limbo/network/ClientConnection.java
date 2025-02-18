@@ -60,7 +60,7 @@ public class ClientConnection extends SessionAdapter {
     }
 
     public Player getPlayer() {
-        return session.getFlag(PlayerLoginHandler.PLAYER_FLAG);
+        return session.getFlag(NetworkConstants.PLAYER_FLAG);
     }
 
 
@@ -98,6 +98,6 @@ public class ClientConnection extends SessionAdapter {
     }
 
     public boolean isReady() {
-        return session.hasFlag(PlayerLoginHandler.PLAYER_FLAG);
+        return session.hasFlag(NetworkConstants.PLAYER_FLAG);
     }
 }

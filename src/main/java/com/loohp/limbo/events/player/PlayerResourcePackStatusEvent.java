@@ -19,19 +19,19 @@
 
 package com.loohp.limbo.events.player;
 
-import com.loohp.limbo.network.protocol.packets.ServerboundResourcePackPacket.Action;
 import com.loohp.limbo.player.Player;
+import org.geysermc.mcprotocollib.protocol.data.game.ResourcePackStatus;
 
 public class PlayerResourcePackStatusEvent extends PlayerEvent {
 
-	private Action status;
-	
-	public PlayerResourcePackStatusEvent(Player player, Action status) {
-		super(player);
-		this.status = status;
-	}
-	
-	public Action getStatus() {
-		return status;
-	}
+    private ResourcePackStatus status;
+
+    public PlayerResourcePackStatusEvent(Player player, ResourcePackStatus status) {
+        super(player);
+        this.status = status;
+    }
+
+    public ResourcePackStatus getStatus() {
+        return status;
+    }
 }

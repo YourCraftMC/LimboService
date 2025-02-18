@@ -34,7 +34,7 @@ import com.loohp.limbo.inventory.InventoryHolder;
 import com.loohp.limbo.inventory.InventoryType;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.metrics.Metrics;
-import com.loohp.limbo.network.ServerConnection;
+import cn.ycraft.limbo.network.ServerConnection;
 import com.loohp.limbo.permissions.PermissionsManager;
 import com.loohp.limbo.player.Player;
 import com.loohp.limbo.plugins.LimboPlugin;

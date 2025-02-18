@@ -1,4 +1,4 @@
-package com.loohp.limbo.utils;
+package cn.ycraft.limbo.util;
 
 import net.kyori.adventure.bossbar.BossBar;
 import org.geysermc.mcprotocollib.protocol.data.game.BossBarColor;

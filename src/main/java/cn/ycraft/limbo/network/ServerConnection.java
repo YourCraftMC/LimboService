@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.loohp.limbo.network;
+package cn.ycraft.limbo.network;
 
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.events.status.StatusPingEvent;
@@ -35,7 +35,6 @@ import org.geysermc.mcprotocollib.protocol.data.status.VersionInfo;
 import org.geysermc.mcprotocollib.protocol.data.status.handler.ServerInfoBuilder;
 
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +44,6 @@ public class ServerConnection {
     private final String ip;
     private final int port;
     private final boolean silent;
-    private ServerSocket serverSocket;
     private Map<Session, ClientConnection> clients;
 
     private NetworkServer server;
@@ -60,6 +58,7 @@ public class ServerConnection {
 
     void start() {
         server = new NetworkServer(new InetSocketAddress(this.ip, this.port), MinecraftProtocol::new);
+        server.setGlobalFlag(MinecraftConstants.ENCRYPT_CONNECTION, false);
         clients();
         motd();
         server.bind();
@@ -70,7 +69,7 @@ public class ServerConnection {
             @Override
             public void serverBound(ServerBoundEvent event) {
                 if (!silent) {
-                    Limbo.getInstance().getConsole().sendMessage("Limbo server listening on /" + serverSocket.getInetAddress().getHostName() + ":" + serverSocket.getLocalPort());
+                    Limbo.getInstance().getConsole().sendMessage("Limbo server listening on /" + ((InetSocketAddress) event.getServer().getBindAddress()).getHostName() + ":" + ((InetSocketAddress) event.getServer().getBindAddress()).getPort());
                 }
             }
 
@@ -100,10 +99,6 @@ public class ServerConnection {
                 );
             }
         });
-    }
-
-    public ServerSocket getServerSocket() {
-        return serverSocket;
     }
 
     public Map<Session, ClientConnection> getClients() {

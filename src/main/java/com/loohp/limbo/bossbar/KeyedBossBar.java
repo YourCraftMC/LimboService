@@ -20,17 +20,14 @@
 package com.loohp.limbo.bossbar;
 
 import com.loohp.limbo.player.Player;
-import com.loohp.limbo.utils.BossBarUtil;
+import cn.ycraft.limbo.util.BossBarUtil;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.geysermc.mcprotocollib.protocol.data.game.BossBarAction;
-import org.geysermc.mcprotocollib.protocol.data.game.BossBarColor;
-import org.geysermc.mcprotocollib.protocol.data.game.BossBarDivision;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundBossEventPacket;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;

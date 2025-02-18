@@ -26,7 +26,7 @@ import com.loohp.limbo.entity.DataWatcher.WatchableObject;
 import com.loohp.limbo.entity.Entity;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.player.Player;
-import com.loohp.limbo.utils.EntityUtil;
+import cn.ycraft.limbo.util.EntityUtil;
 import com.loohp.limbo.utils.SchematicConversionUtils;
 import net.querz.mca.Chunk;
 import net.querz.nbt.tag.CompoundTag;
@@ -36,7 +36,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundRemoveEntitiesPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.LinkedHashMap;

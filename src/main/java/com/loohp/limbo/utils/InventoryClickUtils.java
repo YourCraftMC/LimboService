@@ -19,6 +19,7 @@
 
 package com.loohp.limbo.utils;
 
+import cn.ycraft.limbo.util.ItemUtil;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.events.inventory.InventoryClickEvent;
 import com.loohp.limbo.events.inventory.InventoryDragEvent;

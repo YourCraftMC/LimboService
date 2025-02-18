@@ -1,6 +1,7 @@
-package com.loohp.limbo.utils;
+package cn.ycraft.limbo.util;
 
 import com.loohp.limbo.registry.BuiltInRegistries;
+import com.loohp.limbo.utils.BitsUtils;
 import com.loohp.limbo.world.Environment;
 import com.loohp.limbo.world.GeneratedBlockDataMappings;
 import io.netty.buffer.ByteBuf;
@@ -29,7 +30,6 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ChunkUtil {
     public static ClientboundLevelChunkWithLightPacket create(int chunkX, int chunkZ, Chunk chunk, Environment environment, List<Byte[]> skylightArrays, List<Byte[]> blocklightArrays) {

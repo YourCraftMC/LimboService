@@ -22,6 +22,7 @@ package com.loohp.limbo.inventory;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponents;
 
 import java.util.Collections;
@@ -94,7 +95,7 @@ public class ItemStack implements Cloneable {
             return null;
         }
         try {
-            return component(DataComponentType.CUSTOM_NAME);
+            return component(DataComponentTypes.CUSTOM_NAME);
         } catch (Exception e) {
             return null;
         }
@@ -104,7 +105,7 @@ public class ItemStack implements Cloneable {
         if (type().equals(AIR.type())) {
             return this;
         }
-        return component(DataComponentType.CUSTOM_NAME, component);
+        return component(DataComponentTypes.CUSTOM_NAME, component);
     }
 
     public int getMaxStackSize() {

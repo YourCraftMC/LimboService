@@ -23,7 +23,6 @@ import com.loohp.limbo.Limbo;
 import com.loohp.limbo.scheduler.LimboScheduler.CurrentSchedulerTask;
 import com.loohp.limbo.scheduler.LimboScheduler.LimboSchedulerTask;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -73,11 +72,7 @@ public class Tick {
 				tick.incrementAndGet();
 				instance.getPlayers().forEach(each -> {
 					if (each.clientConnection.isReady()) {
-						try {
-							each.playerInteractManager.update();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+                        each.playerInteractManager.update();
 						/*
 						try {
 							each.getDataWatcher().update();

@@ -1,4 +1,4 @@
-package com.loohp.limbo.utils;
+package cn.ycraft.limbo.util;
 
 import com.loohp.limbo.entity.DataWatcher;
 import com.loohp.limbo.entity.Entity;
@@ -9,7 +9,7 @@ import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.EntityMetadata;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
@@ -68,49 +68,49 @@ public class EntityUtil {
                     //	break;
                     case POSITION:
                         if (watch.isOptional()) {
-                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataType.OPTIONAL_POSITION, Optional.ofNullable(((Vector3i) watch.getValue()))));
+                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.OPTIONAL_POSITION, Optional.ofNullable(((Vector3i) watch.getValue()))));
                         } else {
-                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataType.POSITION, ((Vector3i) watch.getValue())));
+                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.POSITION, ((Vector3i) watch.getValue())));
                         }
                         break;
                     case BOOLEAN:
-                        list.add(new BooleanEntityMetadata(watch.getIndex(), MetadataType.BOOLEAN, ((boolean) watch.getValue())));
+                        list.add(new BooleanEntityMetadata(watch.getIndex(), MetadataTypes.BOOLEAN, ((boolean) watch.getValue())));
                         break;
                     case BYTE:
-                        list.add(new ByteEntityMetadata(watch.getIndex(), MetadataType.BYTE, ((byte) watch.getValue())));
+                        list.add(new ByteEntityMetadata(watch.getIndex(), MetadataTypes.BYTE, ((byte) watch.getValue())));
                         break;
                     case CHAT:
                         if (watch.isOptional()) {
-                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataType.OPTIONAL_CHAT, Optional.ofNullable(((Component) watch.getValue()))));
+                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.OPTIONAL_CHAT, Optional.ofNullable(((Component) watch.getValue()))));
                         } else {
-                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataType.CHAT, ((Component) watch.getValue())));
+                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.CHAT, ((Component) watch.getValue())));
                         }
                         break;
                     //case DIRECTION:
                     //	break;
                     case FLOAT:
-                        list.add(new FloatEntityMetadata(watch.getIndex(), MetadataType.FLOAT, (float) watch.getValue()));
+                        list.add(new FloatEntityMetadata(watch.getIndex(), MetadataTypes.FLOAT, (float) watch.getValue()));
                         break;
                     //case NBT:
                     //	break;
                     //case PARTICLE:
                     //	break;
                     case POSE:
-                        list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataType.POSE, (Pose) watch.getValue()));
+                        list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.POSE, (Pose) watch.getValue()));
                         break;
                     case ROTATION:
-                        list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataType.ROTATION, (Vector3f) watch.getValue()));
+                        list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.ROTATION, (Vector3f) watch.getValue()));
                         break;
                     //case SLOT:
                     //	break;
                     case STRING:
-                        list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataType.STRING, ((String) watch.getValue())));
+                        list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.STRING, ((String) watch.getValue())));
                         break;
                     case UUID:
-                        list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataType.OPTIONAL_UUID, Optional.ofNullable(((UUID) watch.getValue()))));
+                        list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.OPTIONAL_UUID, Optional.ofNullable(((UUID) watch.getValue()))));
                         break;
                     case VARINT:
-                        list.add(new IntEntityMetadata(watch.getIndex(), MetadataType.INT, (int) watch.getValue()));
+                        list.add(new IntEntityMetadata(watch.getIndex(), MetadataTypes.INT, (int) watch.getValue()));
                         break;
                     //case VILLAGER_DATA:
                     //	break;

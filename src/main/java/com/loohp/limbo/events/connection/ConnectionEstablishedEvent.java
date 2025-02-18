@@ -20,7 +20,7 @@
 package com.loohp.limbo.events.connection;
 
 import com.loohp.limbo.events.Event;
-import com.loohp.limbo.network.ClientConnection;
+import cn.ycraft.limbo.network.ClientConnection;
 
 public class ConnectionEstablishedEvent extends Event {
 

@@ -1,4 +1,4 @@
-package com.loohp.limbo.network;
+package cn.ycraft.limbo.network;
 
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.events.player.PlayerJoinEvent;

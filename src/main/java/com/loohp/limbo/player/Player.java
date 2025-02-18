@@ -35,9 +35,9 @@ import com.loohp.limbo.inventory.InventoryHolder;
 import com.loohp.limbo.inventory.InventoryView;
 import com.loohp.limbo.inventory.TitledInventory;
 import com.loohp.limbo.location.Location;
-import com.loohp.limbo.network.ClientConnection;
+import cn.ycraft.limbo.network.ClientConnection;
 import com.loohp.limbo.utils.BungeecordAdventureConversionUtils;
-import com.loohp.limbo.utils.SoundUtil;
+import cn.ycraft.limbo.util.SoundUtil;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.identity.Identity;
@@ -53,19 +53,16 @@ import net.kyori.adventure.title.Title.Times;
 import net.kyori.adventure.title.TitlePart;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import org.cloudburstmc.math.vector.Vector3d;
 import org.geysermc.mcprotocollib.network.packet.Packet;
-import org.geysermc.mcprotocollib.protocol.data.game.chat.MessageSignature;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerSpawnInfo;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
-import org.geysermc.mcprotocollib.protocol.data.game.inventory.ContainerType;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.GameEvent;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundResourcePackPushPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.*;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundEntityPositionSyncPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosRotPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundRespawnPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundStopSoundPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundTabListPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHeldSlotPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerClosePacket;
@@ -338,7 +335,7 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
         chat(message, verbose, null, Instant.now());
     }
 
-    public void chat(String message, boolean verbose, MessageSignature saltSignature, Instant time) {
+    public void chat(String message, boolean verbose, byte[] saltSignature, Instant time) {
         if (Limbo.getInstance().getServerProperties().isAllowChat()) {
             PlayerChatEvent event = Limbo.getInstance().getEventsManager().callEvent(new PlayerChatEvent(this, CHAT_DEFAULT_FORMAT, message, false));
             if (!event.isCancelled()) {
@@ -449,7 +446,7 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
         sendMessage(source, message, type, null, Instant.now());
     }
 
-    public void sendMessage(Identity source, Component message, MessageType type, MessageSignature signature, Instant time) {
+    public void sendMessage(Identity source, Component message, MessageType type, byte[] signature, Instant time) {
         Packet chat;
         switch (type) {
             case CHAT:

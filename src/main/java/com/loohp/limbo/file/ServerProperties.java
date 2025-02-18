@@ -111,7 +111,7 @@ public class ServerProperties {
         levelName = Key.key(level[0]);
         schemFileName = level[1];
         levelDimension = Key.key(prop.getProperty("level-dimension"));
-        defaultGamemode = GameMode.fromName(Key.key(prop.getProperty("default-gamemode")).value());
+        defaultGamemode = GameMode.valueOf(Key.key(prop.getProperty("default-gamemode")).value().toUpperCase(Locale.ENGLISH));
         String[] locStr = prop.getProperty("world-spawn").split(";");
         World world = Limbo.getInstance().getWorld(locStr[0]);
         double x = Double.parseDouble(locStr[1]);

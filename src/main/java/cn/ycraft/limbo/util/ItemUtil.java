@@ -15,6 +15,9 @@ public class ItemUtil {
     }
 
     public static com.loohp.limbo.inventory.ItemStack to(@Nullable ItemStack itemStack) {
+        if (itemStack == null) {
+            return null;
+        }
         return new com.loohp.limbo.inventory.ItemStack(BuiltInRegistries.ITEM_REGISTRY.fromId(itemStack.getId()), itemStack.getAmount(), itemStack.getDataComponents());
     }
 }

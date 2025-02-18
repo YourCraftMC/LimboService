@@ -19,14 +19,12 @@
 
 package com.loohp.limbo.inventory;
 
-import com.loohp.limbo.registry.DataComponentType;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.querz.nbt.tag.Tag;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponents;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 public class ItemStack implements Cloneable {
@@ -35,17 +33,17 @@ public class ItemStack implements Cloneable {
 
     private final Key material;
     private final int amount;
-    private final Map<Key, Tag<?>> components;
+    private final DataComponents components;
 
     public ItemStack(Key material) {
         this(material, 1);
     }
 
     public ItemStack(Key material, int amount) {
-        this(material, amount, Collections.emptyMap());
+        this(material, amount, new DataComponents(Collections.emptyMap()));
     }
 
-    public ItemStack(Key material, int amount, Map<Key, Tag<?>> components) {
+    public ItemStack(Key material, int amount, DataComponents components) {
         this.material = material;
         this.amount = amount;
         this.components = components;
@@ -73,21 +71,21 @@ public class ItemStack implements Cloneable {
         return new ItemStack(material, amount, components);
     }
 
-    public Map<Key, Tag<?>> components() {
-        return new HashMap<>(components);
+    public DataComponents components() {
+        return components;
     }
 
-    public ItemStack components(Map<Key, Tag<?>> components) {
+    public ItemStack components(DataComponents components) {
         return new ItemStack(material, amount, components);
     }
 
     public <T> T component(DataComponentType<T> type) {
-        return type.getCodec().decode(components.get(type.getKey()));
+        return components.get(type);
     }
 
     public <T> ItemStack component(DataComponentType<T> type, T value) {
-        Map<Key, Tag<?>> components = components();
-        components.put(type.getKey(), type.getCodec().encode(value));
+        DataComponents components = components().clone();
+        components.put(type, value);
         return components(components);
     }
 

@@ -42,7 +42,11 @@ public class DeclareCommands {
         }
 
         List<CommandNode> nodes = new ArrayList<>();
-        nodes.add(new CommandNode(CommandType.ROOT, true, new int[0], OptionalInt.empty(), "", CommandParser.STRING, StringProperties.GREEDY_PHRASE, Key.key("ask_server")));
+        int[] childIndices = new int[commands.size()];
+        for (int i = 0; i < commands.size(); i++) {
+            childIndices[i] = i + 1;
+        }
+        nodes.add(new CommandNode(CommandType.ROOT, true, childIndices, OptionalInt.empty(), "", CommandParser.STRING, StringProperties.GREEDY_PHRASE, Key.key("ask_server")));
         for (String command : commands) {
             nodes.add(new CommandNode(CommandType.LITERAL, true, new int[0], OptionalInt.empty(), command, CommandParser.STRING, StringProperties.GREEDY_PHRASE, Key.key("ask_server")));
         }

@@ -75,8 +75,10 @@ public class ServerConnection {
 
             @Override
             public void sessionAdded(SessionAddedEvent event) {
+                event.getSession().addListener(new ClientSessionAdapter());
                 ClientConnection sc = new ClientConnection(event.getSession());
                 clients.put(event.getSession(), sc);
+                event.getSession().addListener(sc);
 
                 InetSocketAddress inetAddress = ((InetSocketAddress) event.getSession().getRemoteAddress());
                 ServerProperties properties = Limbo.getInstance().getServerProperties();

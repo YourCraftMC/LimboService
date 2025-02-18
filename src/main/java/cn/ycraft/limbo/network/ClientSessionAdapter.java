@@ -1,5 +1,7 @@
 package cn.ycraft.limbo.network;
 
+import cn.ycraft.limbo.util.ChunkUtil;
+import cn.ycraft.limbo.util.ItemUtil;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.entity.EntityEquipment;
 import com.loohp.limbo.events.inventory.AnvilRenameInputEvent;
@@ -15,23 +17,31 @@ import com.loohp.limbo.location.Location;
 import com.loohp.limbo.player.Player;
 import com.loohp.limbo.player.PlayerInventory;
 import com.loohp.limbo.registry.BuiltInRegistries;
+import com.loohp.limbo.registry.RegistryCustom;
 import com.loohp.limbo.utils.CustomStringUtils;
 import com.loohp.limbo.utils.InventoryClickUtils;
-import cn.ycraft.limbo.util.ItemUtil;
 import com.loohp.limbo.world.BlockState;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.querz.nbt.tag.CompoundTag;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.nbt.NbtMap;
+import org.geysermc.mcprotocollib.network.Flag;
 import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.network.event.session.DisconnectingEvent;
+import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
 import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
 import org.geysermc.mcprotocollib.network.packet.Packet;
+import org.geysermc.mcprotocollib.protocol.data.game.RegistryEntry;
 import org.geysermc.mcprotocollib.protocol.data.game.ResourcePackStatus;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.object.Direction;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundResourcePackPacket;
+import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundFinishConfigurationPacket;
+import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundCommandSuggestionsPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHeldSlotPacket;
@@ -46,6 +56,7 @@ import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class ClientSessionAdapter extends SessionAdapter {
@@ -67,9 +78,51 @@ public class ClientSessionAdapter extends SessionAdapter {
         }
     };
 
+    private static final List<ClientboundRegistryDataPacket> REGISTRIES_DATA = new ArrayList<>();
+    private static final ClientboundFinishConfigurationPacket FINISH_CONFIGURATION = new ClientboundFinishConfigurationPacket();
+    private static final Flag<Boolean> REGISTRY_FINISH = new Flag<>("limbo:registry_finish", Boolean.class);
+
+    static {
+        try {
+            for (RegistryCustom registryCustom : RegistryCustom.getRegistries()) {
+                Map<Key, CompoundTag> map = registryCustom.getEntries();
+                ArrayList<RegistryEntry> entries = new ArrayList<>();
+                for (Map.Entry<Key, CompoundTag> entry : map.entrySet()) {
+                    entries.add(new RegistryEntry(entry.getKey(), (NbtMap) ChunkUtil.convert(entry.getValue())));
+                }
+                ClientboundRegistryDataPacket registryDataPacket = new ClientboundRegistryDataPacket(registryCustom.getIdentifier(), entries);
+                REGISTRIES_DATA.add(registryDataPacket);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void packetSending(PacketSendingEvent event) {
+        Packet packet = event.getPacket();
+        if (packet instanceof ClientboundRegistryDataPacket) {
+            if (!REGISTRIES_DATA.contains(packet)) {
+                event.setCancelled(true);
+            }
+        }
+        if (packet instanceof ClientboundFinishConfigurationPacket) {
+            if (packet != FINISH_CONFIGURATION) {
+                event.setCancelled(true);
+                for (ClientboundRegistryDataPacket registryDataPacket : REGISTRIES_DATA) {
+                    event.getSession().send(registryDataPacket);
+                }
+                event.getSession().send(FINISH_CONFIGURATION);
+            }
+        }
+    }
+
     @Override
     public void packetReceived(Session session, Packet packet) {
         Player player = session.getFlag(PlayerLoginHandler.PLAYER_FLAG);
+        if (player == null) {
+            return;
+        }
         checkMovePacket(packet, player);
         checkCommandSuggestions(packet, player);
         checkChat(packet, player);

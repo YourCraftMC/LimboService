@@ -12,7 +12,6 @@ import net.querz.mca.Section;
 import net.querz.nbt.io.NBTOutputStream;
 import net.querz.nbt.tag.CompoundTag;
 import net.querz.nbt.tag.ListTag;
-import net.querz.nbt.tag.Tag;
 import org.cloudburstmc.nbt.NBTInputStream;
 import org.cloudburstmc.nbt.NbtMap;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
@@ -56,7 +55,7 @@ public class ChunkUtil {
         dataOut.release();
 
 
-        NbtMap heightMaps = convert(chunk.getHeightMaps());
+        NbtMap heightMaps = (NbtMap) convert(chunk.getHeightMaps());
         ListTag<CompoundTag> tileEntities = chunk.getTileEntities();
         BlockEntityInfo[] blockEntities = new BlockEntityInfo[tileEntities.size()];
         int index = 0;
@@ -68,7 +67,7 @@ public class ChunkUtil {
             blockEntities[index] = new BlockEntityInfo(
                     x, y, z,
                     BlockEntityType.from(id),
-                    convert(each)
+                    (NbtMap) convert(each)
             );
 
             ++index;
@@ -205,15 +204,16 @@ public class ChunkUtil {
         return dataOut;
     }
 
-    private static NbtMap convert(CompoundTag original) {
+    public static Object convert(CompoundTag original) {
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
              NBTOutputStream stream = new NBTOutputStream(outputStream);) {
-            stream.writeRawTag(original, Tag.DEFAULT_MAX_DEPTH);
+            stream.writeTag(original, Integer.MAX_VALUE);
+            stream.flush();
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
                  DataInputStream input = new DataInputStream(inputStream);
                  NBTInputStream nbtInputStream = new NBTInputStream(input);) {
-                return (NbtMap) nbtInputStream.readTag();
+                return nbtInputStream.readTag(Integer.MAX_VALUE);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

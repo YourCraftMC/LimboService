@@ -173,7 +173,9 @@ public class Schematic {
 
                     if (pos[0] == x && pos[1] == y && pos[2] == z) {
                         ListTag<CompoundTag> newTag = chunk.getTileEntities();
-                        newTag.add(SchematicConversionUtils.toTileEntityTag(tag));
+                        CompoundTag data = tag.getCompoundTag("Data");
+                        data.remove("id");
+                        newTag.add(data);
                         chunk.setTileEntities(newTag);
                         itr.remove();
                         break;

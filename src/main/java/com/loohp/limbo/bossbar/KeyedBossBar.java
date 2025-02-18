@@ -19,11 +19,15 @@
 
 package com.loohp.limbo.bossbar;
 
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutBoss;
 import com.loohp.limbo.player.Player;
+import com.loohp.limbo.utils.BossBarUtil;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import org.geysermc.mcprotocollib.protocol.data.game.BossBarAction;
+import org.geysermc.mcprotocollib.protocol.data.game.BossBarColor;
+import org.geysermc.mcprotocollib.protocol.data.game.BossBarDivision;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundBossEventPacket;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -84,20 +88,22 @@ public class KeyedBossBar {
     }
 
     public boolean showPlayer(Player player) {
-        PacketPlayOutBoss packetPlayOutBoss = new PacketPlayOutBoss(this, PacketPlayOutBoss.BossBarAction.ADD);
-        try {
-            player.clientConnection.sendPacket(packetPlayOutBoss);
-        } catch (IOException ignore) {
-        }
+        ClientboundBossEventPacket packetPlayOutBoss = new ClientboundBossEventPacket(uuid).withAction(BossBarAction.ADD)
+                .withTitle(getProperties().name())
+                .withHealth(getProperties().progress())
+                .withColor(BossBarUtil.color(getProperties().color()))
+                .withDivision(BossBarUtil.from(getProperties().overlay()))
+                .withDarkenSky(getProperties().hasFlag(BossBar.Flag.DARKEN_SCREEN))
+                .withShowFog(getProperties().hasFlag(BossBar.Flag.CREATE_WORLD_FOG))
+                .withPlayEndMusic(getProperties().hasFlag(BossBar.Flag.PLAY_BOSS_MUSIC))
+                ;
+        player.clientConnection.sendPacket(packetPlayOutBoss);
         return players.add(player);
     }
 
     public boolean hidePlayer(Player player) {
-        PacketPlayOutBoss packetPlayOutBoss = new PacketPlayOutBoss(this, PacketPlayOutBoss.BossBarAction.REMOVE);
-        try {
-            player.clientConnection.sendPacket(packetPlayOutBoss);
-        } catch (IOException ignore) {
-        }
+        ClientboundBossEventPacket packetPlayOutBoss = new ClientboundBossEventPacket(getUuid()).withAction(BossBarAction.REMOVE);
+        player.clientConnection.sendPacket(packetPlayOutBoss);
         return players.remove(player);
     }
 
@@ -111,61 +117,54 @@ public class KeyedBossBar {
 
         @Override
         public void bossBarNameChanged(@NotNull BossBar bar, @NotNull Component oldName, @NotNull Component newName) {
-            PacketPlayOutBoss packetPlayOutBoss = new PacketPlayOutBoss(parent, PacketPlayOutBoss.BossBarAction.UPDATE_NAME);
+            ClientboundBossEventPacket packetPlayOutBoss = new ClientboundBossEventPacket(parent.getUuid())
+                    .withAction(BossBarAction.UPDATE_TITLE);
             for (Player player : parent.getPlayers()) {
-                try {
-                    player.clientConnection.sendPacket(packetPlayOutBoss);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                player.clientConnection.sendPacket(packetPlayOutBoss);
             }
         }
 
         @Override
         public void bossBarProgressChanged(@NotNull BossBar bar, float oldProgress, float newProgress) {
-            PacketPlayOutBoss packetPlayOutBoss = new PacketPlayOutBoss(parent, PacketPlayOutBoss.BossBarAction.UPDATE_PROGRESS);
+            ClientboundBossEventPacket packetPlayOutBoss = new ClientboundBossEventPacket(parent.getUuid())
+                    .withAction(BossBarAction.UPDATE_HEALTH)
+                    .withHealth(newProgress);
             for (Player player : parent.getPlayers()) {
-                try {
-                    player.clientConnection.sendPacket(packetPlayOutBoss);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                player.clientConnection.sendPacket(packetPlayOutBoss);
             }
         }
 
         @Override
         public void bossBarColorChanged(@NotNull BossBar bar, BossBar.@NotNull Color oldColor, BossBar.@NotNull Color newColor) {
-            PacketPlayOutBoss packetPlayOutBoss = new PacketPlayOutBoss(parent, PacketPlayOutBoss.BossBarAction.UPDATE_STYLE);
+            ClientboundBossEventPacket packetPlayOutBoss = new ClientboundBossEventPacket(parent.getUuid())
+                    .withAction(BossBarAction.UPDATE_STYLE)
+                    .withColor(BossBarUtil.color(newColor))
+                    .withDivision(BossBarUtil.from(bar.overlay()));
             for (Player player : parent.getPlayers()) {
-                try {
-                    player.clientConnection.sendPacket(packetPlayOutBoss);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                player.clientConnection.sendPacket(packetPlayOutBoss);
             }
         }
 
         @Override
         public void bossBarOverlayChanged(@NotNull BossBar bar, BossBar.@NotNull Overlay oldOverlay, BossBar.@NotNull Overlay newOverlay) {
-            PacketPlayOutBoss packetPlayOutBoss = new PacketPlayOutBoss(parent, PacketPlayOutBoss.BossBarAction.UPDATE_STYLE);
+            ClientboundBossEventPacket packetPlayOutBoss = new ClientboundBossEventPacket(parent.getUuid())
+                    .withAction(BossBarAction.UPDATE_STYLE)
+                    .withColor(BossBarUtil.color(bar.color()))
+                    .withDivision(BossBarUtil.from(bar.overlay()));
             for (Player player : parent.getPlayers()) {
-                try {
-                    player.clientConnection.sendPacket(packetPlayOutBoss);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                player.clientConnection.sendPacket(packetPlayOutBoss);
             }
         }
 
         @Override
         public void bossBarFlagsChanged(@NotNull BossBar bar, @NotNull Set<BossBar.Flag> flagsAdded, @NotNull Set<BossBar.Flag> flagsRemoved) {
-            PacketPlayOutBoss packetPlayOutBoss = new PacketPlayOutBoss(parent, PacketPlayOutBoss.BossBarAction.UPDATE_PROPERTIES);
+            ClientboundBossEventPacket packetPlayOutBoss = new ClientboundBossEventPacket(parent.getUuid())
+                    .withAction(BossBarAction.UPDATE_FLAGS)
+                    .withDarkenSky(parent.getProperties().hasFlag(BossBar.Flag.DARKEN_SCREEN))
+                    .withShowFog(parent.getProperties().hasFlag(BossBar.Flag.CREATE_WORLD_FOG))
+                    .withPlayEndMusic(parent.getProperties().hasFlag(BossBar.Flag.PLAY_BOSS_MUSIC));
             for (Player player : parent.getPlayers()) {
-                try {
-                    player.clientConnection.sendPacket(packetPlayOutBoss);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                player.clientConnection.sendPacket(packetPlayOutBoss);
             }
         }
 

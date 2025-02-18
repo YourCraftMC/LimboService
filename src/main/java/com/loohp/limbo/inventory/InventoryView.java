@@ -19,13 +19,13 @@
 
 package com.loohp.limbo.inventory;
 
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutSetSlot;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutWindowData;
 import com.loohp.limbo.player.Player;
 import com.loohp.limbo.player.PlayerInventory;
+import com.loohp.limbo.utils.ItemUtil;
 import net.kyori.adventure.text.Component;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetDataPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundSetCursorItemPacket;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -324,12 +324,8 @@ public class InventoryView {
             Integer id = topInventory.getUnsafe().c().get(player);
             if (id != null) {
                 properties.put(prop, value);
-                PacketPlayOutWindowData packet = new PacketPlayOutWindowData(id, prop.getId(), value);
-                try {
-                    player.clientConnection.sendPacket(packet);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                ClientboundContainerSetDataPacket packet = new ClientboundContainerSetDataPacket(id, prop.getId(), value);
+                player.clientConnection.sendPacket(packet);
             }
         }
     }
@@ -339,11 +335,7 @@ public class InventoryView {
             topInventory.updateInventory(player);
         }
         bottomInventory.updateInventory(player);
-        try {
-            player.clientConnection.sendPacket(new PacketPlayOutSetSlot(-1, -1, 0, carriedItem));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        player.clientConnection.sendPacket(new ClientboundSetCursorItemPacket(ItemUtil.from(carriedItem)));
     }
 
     @SuppressWarnings("DeprecatedIsStillUsed")

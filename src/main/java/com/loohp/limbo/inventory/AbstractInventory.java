@@ -20,20 +20,13 @@
 package com.loohp.limbo.inventory;
 
 import com.loohp.limbo.location.Location;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutSetSlot;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutWindowItems;
 import com.loohp.limbo.player.Player;
+import com.loohp.limbo.utils.ItemUtil;
 import net.kyori.adventure.key.Key;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetSlotPacket;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.IntUnaryOperator;
@@ -63,12 +56,8 @@ public abstract class AbstractInventory implements Inventory {
         this.inverseSlotConvertor = inverseSlotConvertor == null ? IntUnaryOperator.identity() : inverseSlotConvertor;
         this.listener = (inventory, slot, oldItem, newItem) -> {
             for (Map.Entry<Player, Integer> entry : viewers.entrySet()) {
-                try {
-                    PacketPlayOutSetSlot packet = new PacketPlayOutSetSlot(entry.getValue(), 0, this.slotConvertor.applyAsInt(slot), newItem);
-                    entry.getKey().clientConnection.sendPacket(packet);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                ClientboundContainerSetSlotPacket packet = new ClientboundContainerSetSlotPacket(entry.getValue(), 0, this.slotConvertor.applyAsInt(slot), ItemUtil.from(newItem));
+                entry.getKey().clientConnection.sendPacket(packet);
             }
         };
         this.maxStackSize = 64;
@@ -81,32 +70,23 @@ public abstract class AbstractInventory implements Inventory {
         if (windowId == null) {
             return;
         }
-        ItemStack[] itemStackArray = new ItemStack[IntStream.range(0, inventory.length()).map(slotConvertor).max().orElse(-1) + 1];
+        org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack[] itemStackArray = new org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack[IntStream.range(0, inventory.length()).map(slotConvertor).max().orElse(-1) + 1];
         for (int i = 0; i < inventory.length(); i++) {
-            itemStackArray[slotConvertor.applyAsInt(i)] = getItem(i);
+            itemStackArray[slotConvertor.applyAsInt(i)] = ItemUtil.from(getItem(i));
         }
-        try {
-            PacketPlayOutWindowItems packet = new PacketPlayOutWindowItems(windowId, 0, Arrays.asList(itemStackArray), ItemStack.AIR);
-            player.clientConnection.sendPacket(packet);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ClientboundContainerSetContentPacket packet = new ClientboundContainerSetContentPacket(windowId, 0, itemStackArray, ItemUtil.AIR);
+        player.clientConnection.sendPacket(packet);
     }
 
     @Override
     public void updateInventory() {
-        ItemStack[] itemStackArray = new ItemStack[IntStream.range(0, inventory.length()).map(slotConvertor).max().orElse(0)];
+        org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack[] itemStackArray = new org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack[IntStream.range(0, inventory.length()).map(slotConvertor).max().orElse(0)];
         for (int i = 0; i < inventory.length(); i++) {
-            itemStackArray[slotConvertor.applyAsInt(i)] = getItem(i);
+            itemStackArray[slotConvertor.applyAsInt(i)] = ItemUtil.from(getItem(i));
         }
-        List<ItemStack> itemStacks = Arrays.asList(itemStackArray);
         for (Map.Entry<Player, Integer> entry : viewers.entrySet()) {
-            try {
-                PacketPlayOutWindowItems packet = new PacketPlayOutWindowItems(entry.getValue(), 0, itemStacks, ItemStack.AIR);
-                entry.getKey().clientConnection.sendPacket(packet);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            ClientboundContainerSetContentPacket packet = new ClientboundContainerSetContentPacket(entry.getValue(), 0, itemStackArray, ItemUtil.AIR);
+            entry.getKey().clientConnection.sendPacket(packet);
         }
     }
 

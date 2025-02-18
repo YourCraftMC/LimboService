@@ -22,36 +22,26 @@ package com.loohp.limbo.utils;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.events.inventory.InventoryClickEvent;
 import com.loohp.limbo.events.inventory.InventoryDragEvent;
-import com.loohp.limbo.inventory.ClickType;
-import com.loohp.limbo.inventory.Inventory;
-import com.loohp.limbo.inventory.InventoryAction;
-import com.loohp.limbo.inventory.InventoryClickType;
-import com.loohp.limbo.inventory.InventoryType;
-import com.loohp.limbo.inventory.InventoryView;
-import com.loohp.limbo.inventory.ItemStack;
-import com.loohp.limbo.network.protocol.packets.PacketPlayInWindowClick;
-import com.loohp.limbo.network.protocol.packets.PacketPlayOutSetSlot;
+import com.loohp.limbo.inventory.*;
 import com.loohp.limbo.player.Player;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
+import org.geysermc.mcprotocollib.protocol.data.game.inventory.*;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetSlotPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.inventory.ServerboundContainerClickPacket;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InventoryClickUtils {
 
     private static final Map<Player, QuickCraftInfo> QUICK_CRAFT_INFO = Collections.synchronizedMap(new WeakHashMap<>());
 
-    public static synchronized void handle(Player player, PacketPlayInWindowClick packetplayinwindowclick) {
+    public static synchronized void handle(Player player, ServerboundContainerClickPacket packetplayinwindowclick) {
         InventoryClickEvent event;
 
         InventoryView inventory = player.getInventoryView();
-        InventoryType.SlotType type = inventory.getSlotType(packetplayinwindowclick.getSlotNum());
-        int rawSlot = packetplayinwindowclick.getSlotNum();
+        InventoryType.SlotType type = inventory.getSlotType(packetplayinwindowclick.getSlot());
+        int rawSlot = packetplayinwindowclick.getSlot();
 
         boolean cancelled = player.getGamemode().equals(GameMode.SPECTATOR);
         ClickType click = ClickType.UNKNOWN;
@@ -59,20 +49,21 @@ public class InventoryClickUtils {
 
         ItemStack itemstack = null;
 
-        switch (packetplayinwindowclick.getClickType()) {
-            case PICKUP:
-                if (packetplayinwindowclick.getButtonNum() == 0) {
+        ContainerAction param = packetplayinwindowclick.getParam();
+        switch (packetplayinwindowclick.getAction()) {
+            case CLICK_ITEM:
+                action = InventoryAction.NOTHING; // Don't want to repeat ourselves
+                if (param == ClickItemAction.LEFT_CLICK) {
                     click = ClickType.LEFT;
-                } else if (packetplayinwindowclick.getButtonNum() == 1) {
+                } else if (param == ClickItemAction.RIGHT_CLICK) {
                     click = ClickType.RIGHT;
                 }
-                if (packetplayinwindowclick.getButtonNum() == 0 || packetplayinwindowclick.getButtonNum() == 1) {
-                    action = InventoryAction.NOTHING; // Don't want to repeat ourselves
-                    if (packetplayinwindowclick.getSlotNum() == -999) {
+                if (param instanceof ClickItemAction) {
+                    if (packetplayinwindowclick.getSlot() == -999) {
                         if (inventory.getCarriedItem() != null) {
-                            action = packetplayinwindowclick.getButtonNum() == 0 ? InventoryAction.DROP_ALL_CURSOR : InventoryAction.DROP_ONE_CURSOR;
+                            action = param.getId() == 0 ? InventoryAction.DROP_ALL_CURSOR : InventoryAction.DROP_ONE_CURSOR;
                         }
-                    } else if (packetplayinwindowclick.getSlotNum() < 0)  {
+                    } else if (packetplayinwindowclick.getSlot() < 0) {
                         action = InventoryAction.NOTHING;
                     } else {
                         ItemStack clickedItem = inventory.getItem(rawSlot);
@@ -80,14 +71,14 @@ public class InventoryClickUtils {
                             ItemStack cursor = inventory.getCarriedItem();
                             if (clickedItem == null) {
                                 if (cursor != null) {
-                                    action = packetplayinwindowclick.getButtonNum() == 0 ? InventoryAction.PLACE_ALL : InventoryAction.PLACE_ONE;
+                                    action = param.getId() == 0 ? InventoryAction.PLACE_ALL : InventoryAction.PLACE_ONE;
                                 }
                             } else {
                                 if (cursor == null) {
-                                    action = packetplayinwindowclick.getButtonNum() == 0 ? InventoryAction.PICKUP_ALL : InventoryAction.PICKUP_HALF;
+                                    action = param.getId() == 0 ? InventoryAction.PICKUP_ALL : InventoryAction.PICKUP_HALF;
                                 } else {
                                     if (clickedItem.isSimilar(cursor)) {
-                                        int toPlace = packetplayinwindowclick.getButtonNum() == 0 ? cursor.amount() : 1;
+                                        int toPlace = param.getId() == 0 ? cursor.amount() : 1;
                                         toPlace = Math.min(toPlace, clickedItem.getMaxStackSize() - clickedItem.amount());
                                         toPlace = Math.min(toPlace, cursor.getMaxStackSize() - clickedItem.amount());
                                         if (toPlace == 1) {
@@ -108,14 +99,14 @@ public class InventoryClickUtils {
                     }
                 }
                 break;
-            case QUICK_MOVE:
-                if (packetplayinwindowclick.getButtonNum() == 0) {
+            case SHIFT_CLICK_ITEM:
+                if (param == ShiftClickItemAction.LEFT_CLICK) {
                     click = ClickType.SHIFT_LEFT;
-                } else if (packetplayinwindowclick.getButtonNum() == 1) {
+                } else if (param == ShiftClickItemAction.RIGHT_CLICK) {
                     click = ClickType.SHIFT_RIGHT;
                 }
-                if (packetplayinwindowclick.getButtonNum() == 0 || packetplayinwindowclick.getButtonNum() == 1) {
-                    if (packetplayinwindowclick.getSlotNum() < 0) {
+                if (param instanceof ShiftClickItemAction) {
+                    if (packetplayinwindowclick.getSlot() < 0) {
                         action = InventoryAction.NOTHING;
                     } else {
                         ItemStack slot = inventory.getItem(rawSlot);
@@ -127,11 +118,11 @@ public class InventoryClickUtils {
                     }
                 }
                 break;
-            case SWAP:
-                if ((packetplayinwindowclick.getButtonNum() >= 0 && packetplayinwindowclick.getButtonNum() < 9) || packetplayinwindowclick.getButtonNum() == 40) {
-                    click = (packetplayinwindowclick.getButtonNum() == 40) ? ClickType.SWAP_OFFHAND : ClickType.NUMBER_KEY;
+            case MOVE_TO_HOTBAR_SLOT:
+                if (param instanceof MoveToHotbarAction) {
+                    click = (param == MoveToHotbarAction.OFF_HAND) ? ClickType.SWAP_OFFHAND : ClickType.NUMBER_KEY;
                     ItemStack clickedSlot = inventory.getItem(rawSlot);
-                    ItemStack hotbar = inventory.getPlayer().getInventory().getItem(packetplayinwindowclick.getButtonNum());
+                    ItemStack hotbar = inventory.getPlayer().getInventory().getItem(param.getId());
                     boolean canCleanSwap = hotbar == null || inventory.getInventory(rawSlot).equals(inventory.getPlayer().getInventory()); // the slot will accept the hotbar item
                     if (clickedSlot != null) {
                         if (canCleanSwap) {
@@ -146,10 +137,10 @@ public class InventoryClickUtils {
                     }
                 }
                 break;
-            case CLONE:
-                if (packetplayinwindowclick.getButtonNum() == 2) {
+            case CREATIVE_GRAB_MAX_STACK:
+                if (param instanceof CreativeGrabAction) {
                     click = ClickType.MIDDLE;
-                    if (packetplayinwindowclick.getSlotNum() < 0) {
+                    if (packetplayinwindowclick.getSlot() < 0) {
                         action = InventoryAction.NOTHING;
                     } else {
                         ItemStack slot = inventory.getItem(rawSlot);
@@ -164,9 +155,9 @@ public class InventoryClickUtils {
                     action = InventoryAction.UNKNOWN;
                 }
                 break;
-            case THROW:
-                if (packetplayinwindowclick.getSlotNum() >= 0) {
-                    if (packetplayinwindowclick.getButtonNum() == 0) {
+            case DROP_ITEM:
+                if (packetplayinwindowclick.getSlot() >= 0) {
+                    if (param == DropItemAction.DROP_FROM_SELECTED) {
                         click = ClickType.DROP;
                         ItemStack slot = inventory.getItem(rawSlot);
                         if (inventory.isSlot(rawSlot) && slot != null && !slot.type().equals(ItemStack.AIR.type())) {
@@ -174,7 +165,7 @@ public class InventoryClickUtils {
                         } else {
                             action = InventoryAction.NOTHING;
                         }
-                    } else if (packetplayinwindowclick.getButtonNum() == 1) {
+                    } else if (param == DropItemAction.DROP_SELECTED_STACK) {
                         click = ClickType.CONTROL_DROP;
                         ItemStack slot = inventory.getItem(rawSlot);
                         if (inventory.isSlot(rawSlot) && slot != null && !slot.type().equals(ItemStack.AIR.type())) {
@@ -186,16 +177,16 @@ public class InventoryClickUtils {
                 } else {
                     // Sane default (because this happens when they are holding nothing. Don't ask why.)
                     click = ClickType.LEFT;
-                    if (packetplayinwindowclick.getButtonNum() == 1) {
+                    if (param == DropItemAction.DROP_SELECTED_STACK) {
                         click = ClickType.RIGHT;
                     }
                     action = InventoryAction.NOTHING;
                 }
                 break;
-            case PICKUP_ALL:
+            case SPREAD_ITEM:
                 click = ClickType.DOUBLE_CLICK;
                 action = InventoryAction.NOTHING;
-                if (packetplayinwindowclick.getSlotNum() >= 0 && inventory.getCarriedItem() != null) {
+                if (packetplayinwindowclick.getSlot() >= 0 && inventory.getCarriedItem() != null) {
                     ItemStack cursor = inventory.getCarriedItem();
                     int amount = cursor == null ? 0 : cursor.amount();
                     action = InventoryAction.NOTHING;
@@ -205,7 +196,7 @@ public class InventoryClickUtils {
                     }
                 }
                 break;
-            case QUICK_CRAFT: {
+            case FILL_STACK: {
                 QuickCraftInfo quickCraft;
                 synchronized (QUICK_CRAFT_INFO) {
                     quickCraft = QUICK_CRAFT_INFO.get(player);
@@ -213,19 +204,19 @@ public class InventoryClickUtils {
                         QUICK_CRAFT_INFO.put(player, quickCraft = new QuickCraftInfo());
                     }
                 }
-                int slotNum = packetplayinwindowclick.getSlotNum();
-                int buttonNum = packetplayinwindowclick.getButtonNum();
+                int slot = packetplayinwindowclick.getSlot();
+                int button = param.getId();
                 int quickcraftStatus = quickCraft.quickcraftStatus;
                 ItemStack itemstack1;
                 int l;
 
-                quickCraft.quickcraftStatus = getQuickcraftHeader(buttonNum);
+                quickCraft.quickcraftStatus = getQuickcraftHeader(button);
                 if ((quickcraftStatus != 1 || quickCraft.quickcraftStatus != 2) && quickcraftStatus != quickCraft.quickcraftStatus) {
                     quickCraft.resetQuickCraft();
                 } else if (inventory.getCarriedItem() == null) {
                     quickCraft.resetQuickCraft();
                 } else if (quickCraft.quickcraftStatus == 0) {
-                    quickCraft.quickcraftType = getQuickcraftType(buttonNum);
+                    quickCraft.quickcraftType = getQuickcraftType(button);
                     if (isValidQuickcraftType(quickCraft.quickcraftType, player)) {
                         quickCraft.quickcraftStatus = 1;
                         quickCraft.quickcraftSlots.clear();
@@ -234,8 +225,8 @@ public class InventoryClickUtils {
                     }
                 } else if (quickCraft.quickcraftStatus == 1) {
                     itemstack = inventory.getCarriedItem();
-                    if (canItemQuickReplace(inventory, slotNum, itemstack, true) && (quickCraft.quickcraftType == 2 || itemstack.amount() > quickCraft.quickcraftSlots.size())) {
-                        quickCraft.quickcraftSlots.add(slotNum);
+                    if (canItemQuickReplace(inventory, slot, itemstack, true) && (quickCraft.quickcraftType == 2 || itemstack.amount() > quickCraft.quickcraftSlots.size())) {
+                        quickCraft.quickcraftSlots.add(slot);
                     }
                 } else if (quickCraft.quickcraftStatus == 2) {
                     if (!quickCraft.quickcraftSlots.isEmpty()) {
@@ -300,11 +291,11 @@ public class InventoryClickUtils {
             default:
                 break;
         }
-        if (packetplayinwindowclick.getClickType() != InventoryClickType.QUICK_CRAFT) {
+        if (packetplayinwindowclick.getAction() != ContainerActionType.FILL_STACK) {
             if (click == ClickType.NUMBER_KEY) {
-                event = new InventoryClickEvent(inventory, type, packetplayinwindowclick.getSlotNum(), click, action, packetplayinwindowclick.getButtonNum());
+                event = new InventoryClickEvent(inventory, type, packetplayinwindowclick.getSlot(), click, action, param.getId());
             } else {
-                event = new InventoryClickEvent(inventory, type, packetplayinwindowclick.getSlotNum(), click, action);
+                event = new InventoryClickEvent(inventory, type, packetplayinwindowclick.getSlot(), click, action);
             }
 
             event.setCancelled(cancelled);
@@ -315,45 +306,41 @@ public class InventoryClickUtils {
             }
 
             if (event.isCancelled()) {
-                try {
-                    switch (action) {
-                        // Modified other slots
-                        case PICKUP_ALL:
-                        case MOVE_TO_OTHER_INVENTORY:
-                        case HOTBAR_MOVE_AND_READD:
-                        case HOTBAR_SWAP:
-                        case COLLECT_TO_CURSOR:
-                        case UNKNOWN:
-                            player.getInventoryView().updateView();
-                            break;
-                        // Modified cursor and clicked
-                        case PICKUP_SOME:
-                        case PICKUP_HALF:
-                        case PICKUP_ONE:
-                        case PLACE_ALL:
-                        case PLACE_SOME:
-                        case PLACE_ONE:
-                        case SWAP_WITH_CURSOR:
-                            player.clientConnection.sendPacket(new PacketPlayOutSetSlot(-1, -1, 0, inventory.getCarriedItem()));
-                            player.clientConnection.sendPacket(new PacketPlayOutSetSlot(inventory.getUnsafe().a(), 0, packetplayinwindowclick.getSlotNum(), inventory.getItem(packetplayinwindowclick.getSlotNum())));
-                            break;
-                        // Modified clicked only
-                        case DROP_ALL_SLOT:
-                        case DROP_ONE_SLOT:
-                            player.clientConnection.sendPacket(new PacketPlayOutSetSlot(inventory.getUnsafe().a(), 0, packetplayinwindowclick.getSlotNum(), inventory.getItem(packetplayinwindowclick.getSlotNum())));
-                            break;
-                        // Modified cursor only
-                        case DROP_ALL_CURSOR:
-                        case DROP_ONE_CURSOR:
-                        case CLONE_STACK:
-                            player.clientConnection.sendPacket(new PacketPlayOutSetSlot(-1, -1, 0, inventory.getCarriedItem()));
-                            break;
-                        // Nothing
-                        case NOTHING:
-                            break;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                switch (action) {
+                    // Modified other slots
+                    case PICKUP_ALL:
+                    case MOVE_TO_OTHER_INVENTORY:
+                    case HOTBAR_MOVE_AND_READD:
+                    case HOTBAR_SWAP:
+                    case COLLECT_TO_CURSOR:
+                    case UNKNOWN:
+                        player.getInventoryView().updateView();
+                        break;
+                    // Modified cursor and clicked
+                    case PICKUP_SOME:
+                    case PICKUP_HALF:
+                    case PICKUP_ONE:
+                    case PLACE_ALL:
+                    case PLACE_SOME:
+                    case PLACE_ONE:
+                    case SWAP_WITH_CURSOR:
+                        player.clientConnection.sendPacket(new ClientboundContainerSetSlotPacket(-1, -1, 0, ItemUtil.from(inventory.getCarriedItem())));
+                        player.clientConnection.sendPacket(new ClientboundContainerSetSlotPacket(inventory.getUnsafe().a(), 0, packetplayinwindowclick.getSlot(), ItemUtil.from(inventory.getItem(packetplayinwindowclick.getSlot()))));
+                        break;
+                    // Modified clicked only
+                    case DROP_ALL_SLOT:
+                    case DROP_ONE_SLOT:
+                        player.clientConnection.sendPacket(new ClientboundContainerSetSlotPacket(inventory.getUnsafe().a(), 0, packetplayinwindowclick.getSlot(), ItemUtil.from(inventory.getItem(packetplayinwindowclick.getSlot()))));
+                        break;
+                    // Modified cursor only
+                    case DROP_ALL_CURSOR:
+                    case DROP_ONE_CURSOR:
+                    case CLONE_STACK:
+                        player.clientConnection.sendPacket(new ClientboundContainerSetSlotPacket(-1, -1, 0, ItemUtil.from(inventory.getCarriedItem())));
+                        break;
+                    // Nothing
+                    case NOTHING:
+                        break;
                 }
             } else {
                 switch (event.getAction()) {
@@ -451,9 +438,9 @@ public class InventoryClickUtils {
                         break;
                     }
                     case HOTBAR_SWAP: {
-                        int hotbarNum = event.getClick().equals(ClickType.SWAP_OFFHAND) ? 40 : event.getHotbarKey();
-                        ItemStack item = inventory.getPlayer().getInventory().getItem(hotbarNum);
-                        inventory.getPlayer().getInventory().setItem(hotbarNum, event.getCurrentItem());
+                        int hotbar = event.getClick().equals(ClickType.SWAP_OFFHAND) ? 40 : event.getHotbarKey();
+                        ItemStack item = inventory.getPlayer().getInventory().getItem(hotbar);
+                        inventory.getPlayer().getInventory().setItem(hotbar, event.getCurrentItem());
                         inventory.setItem(event.getRawSlot(), item);
                         break;
                     }

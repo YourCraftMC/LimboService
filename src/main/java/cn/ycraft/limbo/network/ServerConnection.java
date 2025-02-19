@@ -23,6 +23,7 @@ import cn.ycraft.limbo.config.ServerConfig;
 import cn.ycraft.limbo.network.protocol.LimboProtocol;
 import cn.ycraft.limbo.network.server.ForwardData;
 import com.loohp.limbo.Limbo;
+import com.loohp.limbo.events.connection.ConnectionEstablishedEvent;
 import com.loohp.limbo.events.player.PlayerQuitEvent;
 import com.loohp.limbo.events.status.StatusPingEvent;
 import com.loohp.limbo.player.Player;
@@ -89,6 +90,7 @@ public class ServerConnection {
                 event.getSession().addListener(packetHandler);
                 event.getSession().addListener(sc);
                 clients.put(event.getSession(), sc);
+                Limbo.getInstance().getEventsManager().callEvent(new ConnectionEstablishedEvent(sc));
 
                 if (ServerConfig.HANDSHAKE_VERBOSE.getNotNull()) {
                     InetSocketAddress inetAddress = ((InetSocketAddress) event.getSession().getRemoteAddress());

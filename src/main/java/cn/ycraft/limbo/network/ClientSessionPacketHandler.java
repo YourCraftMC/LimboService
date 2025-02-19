@@ -1,5 +1,6 @@
 package cn.ycraft.limbo.network;
 
+import cn.ycraft.limbo.event.connection.PacketReceiveEvent;
 import cn.ycraft.limbo.util.ChunkUtil;
 import cn.ycraft.limbo.util.ItemUtil;
 import com.loohp.limbo.Limbo;
@@ -134,6 +135,9 @@ public class ClientSessionPacketHandler extends SessionAdapter {
     public void packetReceived(Session session, Packet packet) {
         Player player = session.getFlag(NetworkConstants.PLAYER_FLAG);
         if (player == null) {
+            return;
+        }
+        if (Limbo.getInstance().getEventsManager().callEvent(new PacketReceiveEvent(player.clientConnection, packet)).isCancelled()) {
             return;
         }
         checkMovePacket(packet, player);

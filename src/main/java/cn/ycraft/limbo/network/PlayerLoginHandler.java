@@ -1,12 +1,12 @@
 package cn.ycraft.limbo.network;
 
+import cn.ycraft.limbo.config.ServerConfig;
 import cn.ycraft.limbo.network.server.ForwardData;
 import cn.ycraft.limbo.util.EntityUtil;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.events.player.PlayerJoinEvent;
 import com.loohp.limbo.events.player.PlayerLoginEvent;
 import com.loohp.limbo.events.player.PlayerSpawnEvent;
-import com.loohp.limbo.file.ServerProperties;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.player.Player;
 import com.loohp.limbo.player.PlayerInteractManager;
@@ -14,8 +14,10 @@ import com.loohp.limbo.utils.DeclareCommands;
 import com.loohp.limbo.world.World;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import jdk.internal.foreign.abi.aarch64.AArch64Architecture;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.auth.GameProfile;
@@ -46,23 +48,28 @@ public class PlayerLoginHandler implements ServerLoginHandler {
     public void loggedIn(Session session) {
         ClientConnection clientConnection = session.getFlag(NetworkConstants.CLIENT_CONNECTION_FLAG);
         ClientSessionPacketHandler packetHandler = session.getFlag(NetworkConstants.CLIENT_SESSION_PACKET_HANDLER_FLAG);
-        ForwardData forwardedSkin = session.getFlag(NetworkConstants.FORWARD_FLAG);
+        ForwardData forwardedData = session.getFlag(NetworkConstants.FORWARD_FLAG);
         GameProfile profile = session.getFlag(MinecraftConstants.PROFILE_KEY);
 
-        if (forwardedSkin.uuid != null) {
-            profile = new GameProfile(forwardedSkin.uuid, forwardedSkin.username != null ? forwardedSkin.username : profile.getName());
+        if (forwardedData.uuid != null) {
+            profile = new GameProfile(forwardedData.uuid, forwardedData.username != null ? forwardedData.username : profile.getName());
         }
-        if (forwardedSkin.velocityDataFrom != null) {
-            profile = new GameProfile(forwardedSkin.velocityDataFrom.uuid, forwardedSkin.velocityDataFrom.username != null ? forwardedSkin.velocityDataFrom.username : profile.getName());
+        if (forwardedData.velocityDataFrom != null) {
+            profile = new GameProfile(forwardedData.velocityDataFrom.uuid, forwardedData.velocityDataFrom.username != null ? forwardedData.velocityDataFrom.username : profile.getName());
         }
-        if (forwardedSkin.properties != null) {
-            profile.setProperties(forwardedSkin.properties);
+        if (forwardedData.properties != null) {
+            profile.setProperties(forwardedData.properties);
         }
-        if (forwardedSkin.velocityDataFrom != null) {
-            profile.setProperties(forwardedSkin.velocityDataFrom.properties);
+        if (forwardedData.velocityDataFrom != null) {
+            profile.setProperties(forwardedData.velocityDataFrom.properties);
         }
 
-        Player player = new Player(clientConnection, profile.getName(), profile.getId(), Limbo.getInstance().getNextEntityId(), Limbo.getInstance().getServerProperties().getWorldSpawn(), new PlayerInteractManager());
+        if (!ServerConfig.ENFORCE_WHITELIST.getNotNull() && ServerConfig.whitelist.containsKey(profile.getId())) {
+            session.disconnect(Component.text("You are not whitelisted on the server"));
+            return;
+        }
+
+        Player player = new Player(clientConnection, profile.getName(), profile.getId(), Limbo.getInstance().getNextEntityId(), ServerConfig.WORLD_SPAWN.get(), new PlayerInteractManager());
         player.setSkinLayers((byte) (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40));
 
         PlayerLoginEvent event = Limbo.getInstance().getEventsManager().callEvent(new PlayerLoginEvent(clientConnection, false, Component.empty()));
@@ -74,66 +81,29 @@ public class PlayerLoginHandler implements ServerLoginHandler {
 
         Limbo.getInstance().getUnsafe().a(player);
 
-        ServerProperties properties = Limbo.getInstance().getServerProperties();
-        Location worldSpawn = properties.getWorldSpawn();
+        Location worldSpawn = ServerConfig.WORLD_SPAWN.getNotNull();
 
         PlayerSpawnEvent spawnEvent = Limbo.getInstance().getEventsManager().callEvent(new PlayerSpawnEvent(player, worldSpawn));
         worldSpawn = spawnEvent.getSpawnLocation();
         World world = worldSpawn.getWorld();
-        session.send(new ClientboundLoginPacket(
-                0,
-                false,
-                new Key[]{Key.key("minecraft:" + world.getName())},
-                properties.getMaxPlayers(),
-                8,
-                8,
-                !properties.isReducedDebugInfo(),
-                true,
-                false,
-                new PlayerSpawnInfo(
-                        world.getEnvironment().getId(),
-                        Key.key("minecraft:" + world.getName()),
-                        0,
-                        properties.getDefaultGamemode(),
-                        properties.getDefaultGamemode(),
-                        false,
-                        true,
-                        null,
-                        0,
-                        0
-                ),
-                false
-        ));
-        Limbo.getInstance().getUnsafe().a(player, properties.getDefaultGamemode());
+        session.send(new ClientboundLoginPacket(0, false, new Key[]{Key.key("minecraft:" + world.getName())}, ServerConfig.MAX_PLAYERS.getNotNull(), 8, 8, !ServerConfig.REDUCED_DEBUG_INFO.getNotNull(), true, false, new PlayerSpawnInfo(world.getEnvironment().getId(), Key.key("minecraft:" + world.getName()), 0, ServerConfig.DEFAULT_GAMEMODE.getNotNull(), ServerConfig.DEFAULT_GAMEMODE.getNotNull(), false, true, null, 0, 0), false));
+        Limbo.getInstance().getUnsafe().a(player, ServerConfig.DEFAULT_GAMEMODE.getNotNull());
 
 
         ByteBuf buffer = Unpooled.buffer();
-        MinecraftTypes.writeString(buffer, properties.getServerModName());
+        MinecraftTypes.writeString(buffer, Limbo.LIMBO_BRAND);
         byte[] bytes = new byte[buffer.readableBytes()];
         buffer.readBytes(bytes);
         clientConnection.sendPluginMessage(ClientConnection.BRAND_ANNOUNCE_CHANNEL, bytes);
 
-        ClientboundPlayerInfoUpdatePacket infoUpdatePacket = new ClientboundPlayerInfoUpdatePacket(EnumSet.of(PlayerListEntryAction.ADD_PLAYER, PlayerListEntryAction.UPDATE_GAME_MODE, PlayerListEntryAction.UPDATE_LISTED, PlayerListEntryAction.UPDATE_LATENCY, PlayerListEntryAction.UPDATE_DISPLAY_NAME), new PlayerListEntry[]{new PlayerListEntry(
-                profile.getId(),
-                profile,
-                true,
-                9,
-                properties.getDefaultGamemode(),
-                Component.text(profile.getName()),
-                true,
-                0,
-                null,
-                0,
-                null,
-                null
-        )});
+        ClientboundPlayerInfoUpdatePacket infoUpdatePacket = new ClientboundPlayerInfoUpdatePacket(EnumSet.of(PlayerListEntryAction.ADD_PLAYER, PlayerListEntryAction.UPDATE_GAME_MODE, PlayerListEntryAction.UPDATE_LISTED, PlayerListEntryAction.UPDATE_LATENCY, PlayerListEntryAction.UPDATE_DISPLAY_NAME), new PlayerListEntry[]{new PlayerListEntry(profile.getId(), profile, true, 9, ServerConfig.DEFAULT_GAMEMODE.getNotNull(), Component.text(profile.getName()), true, 0, null, 0, null, null)});
         clientConnection.sendPacket(infoUpdatePacket);
 
-        ClientboundPlayerAbilitiesPacket abilitiesPacket = new ClientboundPlayerAbilitiesPacket(true, properties.isAllowFlight(), false, properties.getDefaultGamemode() == GameMode.CREATIVE, 0.05F, 0.1F);
+        ClientboundPlayerAbilitiesPacket abilitiesPacket = new ClientboundPlayerAbilitiesPacket(true, ServerConfig.ALLOW_FLIGHT.getNotNull(), false, ServerConfig.DEFAULT_GAMEMODE.getNotNull() == GameMode.CREATIVE, 0.05F, 0.1F);
         clientConnection.sendPacket(abilitiesPacket);
 
         InetSocketAddress inetAddress = (InetSocketAddress) clientConnection.getInetAddress();
-        String str = (properties.isLogPlayerIPAddresses() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + inetAddress.getPort() + "|" + player.getName() + "(" + player.getUniqueId() + ")";
+        String str = (ServerConfig.LOG_PLAYER_IP_ADDRESSES.getNotNull() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + inetAddress.getPort() + "|" + player.getName() + "(" + player.getUniqueId() + ")";
         Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Player had connected to the Limbo server!");
 
         ClientboundGameEventPacket chunkStartEvent = new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null);
@@ -173,10 +143,10 @@ public class PlayerLoginHandler implements ServerLoginHandler {
 //        }
 
         // RESOURCEPACK CODE CONRIBUTED BY GAMERDUCK123
-        if (!properties.getResourcePackLink().equalsIgnoreCase("")) {
-            if (!properties.getResourcePackSHA1().equalsIgnoreCase("")) {
+        if (!ServerConfig.RESOURCE_PACK.getNotNull().equalsIgnoreCase("")) {
+            if (!ServerConfig.RESOURCE_PACK_SHA1.getNotNull().equalsIgnoreCase("")) {
                 //SEND RESOURCEPACK
-                player.setResourcePack(properties.getResourcePackLink(), properties.getResourcePackSHA1(), properties.getResourcePackRequired(), properties.getResourcePackPrompt());
+                player.setResourcePack(ServerConfig.RESOURCE_PACK.getNotNull(), ServerConfig.RESOURCE_PACK_SHA1.getNotNull(), ServerConfig.REQUIRED_RESOURCE_PACK.getNotNull(), GsonComponentSerializer.gson().deserialize(ServerConfig.RESOURCE_PACK_PROMPT.getNotNull()));
             } else {
                 //NO SHA
                 Limbo.getInstance().getConsole().sendMessage("ResourcePacks require SHA1s");
@@ -186,7 +156,7 @@ public class PlayerLoginHandler implements ServerLoginHandler {
         }
 
         // PLAYER LIST HEADER AND FOOTER CODE CONRIBUTED BY GAMERDUCK123
-        player.sendPlayerListHeaderAndFooter(properties.getTabHeader(), properties.getTabFooter());
+        player.sendPlayerListHeaderAndFooter(GsonComponentSerializer.gson().deserialize(ServerConfig.TAB_HEADER.getNotNull()), GsonComponentSerializer.gson().deserialize(ServerConfig.TAB_FOOTER.getNotNull()));
 
         session.setFlag(NetworkConstants.PLAYER_FLAG, player);
     }

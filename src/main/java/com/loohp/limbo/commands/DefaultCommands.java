@@ -19,10 +19,15 @@
 
 package com.loohp.limbo.commands;
 
+import cn.ycraft.limbo.config.ServerConfig;
 import com.loohp.limbo.Console;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.player.Player;
+import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
@@ -53,12 +58,12 @@ public class DefaultCommands implements CommandExecutor, TabCompletor {
             if (sender.hasPermission("limboserver.spawn")) {
                 if (args.length == 1 && sender instanceof Player) {
                     Player player = (Player) sender;
-                    player.teleport(Limbo.getInstance().getServerProperties().getWorldSpawn());
+                    player.teleport(ServerConfig.WORLD_SPAWN.getNotNull());
                     player.sendMessage(ChatColor.GOLD + "Teleporting you to spawn!");
                 } else if (args.length == 2) {
                     Player player = Limbo.getInstance().getPlayer(args[1]);
                     if (player != null) {
-                        player.teleport(Limbo.getInstance().getServerProperties().getWorldSpawn());
+                        player.teleport(ServerConfig.WORLD_SPAWN.getNotNull());
                         sender.sendMessage(ChatColor.GOLD + "Teleporting " + player.getName() + " to spawn!");
                     } else {
                         sender.sendMessage(ChatColor.RED + "Player not found!");
@@ -183,13 +188,22 @@ public class DefaultCommands implements CommandExecutor, TabCompletor {
                 } else if (!args[1].equalsIgnoreCase("reload")) {
                     sender.sendMessage(ChatColor.RED + "Invalid usage!");
                 } else {
-                    Limbo.getInstance().getServerProperties().reloadWhitelist();
+                    ServerConfig.reloadWhitelist();
                     sender.sendMessage("Whitelist has been reloaded");
                 }
             } else {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to use that command!");
             }
             return;
+        }
+        if (args[0].equalsIgnoreCase("book")) {
+            sender.openBook(Book.builder()
+                    .title(Component.text("Limbo").color(NamedTextColor.RED))
+                    .pages(
+                            Component.text("page1").decorate(TextDecoration.BOLD),
+                            Component.text("page1").decorate(TextDecoration.OBFUSCATED)
+                    )
+                    .build());
         }
     }
 

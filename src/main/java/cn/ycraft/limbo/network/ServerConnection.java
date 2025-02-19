@@ -19,13 +19,14 @@
 
 package cn.ycraft.limbo.network;
 
+import cn.ycraft.limbo.config.ServerConfig;
 import cn.ycraft.limbo.network.protocol.LimboProtocol;
 import cn.ycraft.limbo.network.server.ForwardData;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.events.player.PlayerQuitEvent;
 import com.loohp.limbo.events.status.StatusPingEvent;
-import com.loohp.limbo.file.ServerProperties;
 import com.loohp.limbo.player.Player;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.network.event.server.ServerAdapter;
 import org.geysermc.mcprotocollib.network.event.server.ServerBoundEvent;
@@ -33,7 +34,6 @@ import org.geysermc.mcprotocollib.network.event.server.SessionAddedEvent;
 import org.geysermc.mcprotocollib.network.event.server.SessionRemovedEvent;
 import org.geysermc.mcprotocollib.network.server.NetworkServer;
 import org.geysermc.mcprotocollib.protocol.MinecraftConstants;
-import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.status.PlayerInfo;
 import org.geysermc.mcprotocollib.protocol.data.status.ServerStatusInfo;
 import org.geysermc.mcprotocollib.protocol.data.status.VersionInfo;
@@ -90,10 +90,11 @@ public class ServerConnection {
                 event.getSession().addListener(sc);
                 clients.put(event.getSession(), sc);
 
-                InetSocketAddress inetAddress = ((InetSocketAddress) event.getSession().getRemoteAddress());
-                ServerProperties properties = Limbo.getInstance().getServerProperties();
-                String str = (properties.isLogPlayerIPAddresses() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + inetAddress.getPort();
-                Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Legacy Status has pinged");
+                if (ServerConfig.HANDSHAKE_VERBOSE.getNotNull()) {
+                    InetSocketAddress inetAddress = ((InetSocketAddress) event.getSession().getRemoteAddress());
+                    String str = (ServerConfig.LOG_PLAYER_IP_ADDRESSES.getNotNull() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + inetAddress.getPort();
+                    Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Legacy Status has pinged");
+                }
             }
 
             @Override
@@ -108,7 +109,7 @@ public class ServerConnection {
 
                 Limbo.getInstance().getEventsManager().callEvent(new PlayerQuitEvent(player));
 
-                String str = (Limbo.getInstance().getServerProperties().isLogPlayerIPAddresses() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + inetAddress.getPort() + "|" + player.getName();
+                String str = (ServerConfig.LOG_PLAYER_IP_ADDRESSES.getNotNull() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + inetAddress.getPort() + "|" + player.getName();
                 Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Player had disconnected!");
                 Limbo.getInstance().getUnsafe().b(player);
                 Limbo.getInstance().getServerConnection().getClients().remove(session);
@@ -120,8 +121,17 @@ public class ServerConnection {
         server.setGlobalFlag(MinecraftConstants.SERVER_INFO_BUILDER_KEY, new ServerInfoBuilder() {
             @Override
             public ServerStatusInfo buildInfo(Session session) {
-                ServerProperties p = Limbo.getInstance().getServerProperties();
-                StatusPingEvent event = Limbo.getInstance().getEventsManager().callEvent(new StatusPingEvent(getClient(session), p.getVersionString(), p.getProtocol(), p.getMotd(), p.getMaxPlayers(), Limbo.getInstance().getPlayers().size(), p.getFavicon().orElse(null)));
+                StatusPingEvent event = Limbo.getInstance().getEventsManager().callEvent(
+                        new StatusPingEvent(
+                                getClient(session),
+                                ServerConfig.VERSION.getNotNull(),
+                                Limbo.getInstance().SERVER_IMPLEMENTATION_PROTOCOL,
+                                GsonComponentSerializer.gson().deserialize(ServerConfig.MOTD.getNotNull()),
+                                ServerConfig.MAX_PLAYERS.getNotNull(),
+                                Limbo.getInstance().getPlayers().size(),
+                                ServerConfig.FAVICON
+                        )
+                );
                 return new ServerStatusInfo(event.getMotd(),
                         new PlayerInfo(event.getMaxPlayers(), event.getPlayersOnline(), new ArrayList<>()),
                         new VersionInfo(event.getVersion(), event.getProtocol()),

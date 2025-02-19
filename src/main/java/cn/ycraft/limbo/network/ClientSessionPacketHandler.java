@@ -1,5 +1,6 @@
 package cn.ycraft.limbo.network;
 
+import cn.ycraft.limbo.config.ServerConfig;
 import cn.ycraft.limbo.event.connection.PacketReceiveEvent;
 import cn.ycraft.limbo.util.ChunkUtil;
 import cn.ycraft.limbo.util.ItemUtil;
@@ -9,7 +10,6 @@ import com.loohp.limbo.events.inventory.AnvilRenameInputEvent;
 import com.loohp.limbo.events.inventory.InventoryCloseEvent;
 import com.loohp.limbo.events.inventory.InventoryCreativeEvent;
 import com.loohp.limbo.events.player.*;
-import com.loohp.limbo.file.ServerProperties;
 import com.loohp.limbo.inventory.AnvilInventory;
 import com.loohp.limbo.inventory.EquipmentSlot;
 import com.loohp.limbo.inventory.Inventory;
@@ -21,13 +21,10 @@ import com.loohp.limbo.player.PlayerInventory;
 import com.loohp.limbo.registry.BuiltInRegistries;
 import com.loohp.limbo.registry.RegistryCustom;
 import com.loohp.limbo.utils.CustomStringUtils;
-import com.loohp.limbo.utils.ForwardingUtils;
 import com.loohp.limbo.utils.InventoryClickUtils;
-import com.loohp.limbo.utils.MojangAPIUtils;
 import com.loohp.limbo.world.BlockState;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.querz.nbt.tag.CompoundTag;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -46,7 +43,6 @@ import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.Serverbound
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundResourcePackPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundFinishConfigurationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
-import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundCommandSuggestionsPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHeldSlotPacket;
@@ -56,22 +52,12 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.Serverbound
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundCommandSuggestionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.inventory.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
-import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
-import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundCustomQueryAnswerPacket;
-import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundHelloPacket;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.BiConsumer;
 
 public class ClientSessionPacketHandler extends SessionAdapter {
@@ -168,7 +154,7 @@ public class ClientSessionPacketHandler extends SessionAdapter {
 
         Limbo.getInstance().getEventsManager().callEvent(new PlayerQuitEvent(player));
 
-        String str = (Limbo.getInstance().getServerProperties().isLogPlayerIPAddresses() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + inetAddress.getPort() + "|" + player.getName();
+        String str = (ServerConfig.LOG_PLAYER_IP_ADDRESSES.getNotNull() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + inetAddress.getPort() + "|" + player.getName();
         Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Player had disconnected!");
         Limbo.getInstance().getUnsafe().b(player);
         Limbo.getInstance().getServerConnection().getClients().remove(session);
@@ -332,7 +318,7 @@ public class ClientSessionPacketHandler extends SessionAdapter {
             ServerboundResourcePackPacket rpcheck = (ServerboundResourcePackPacket) packet;
             // Pass on result to the events
             Limbo.getInstance().getEventsManager().callEvent(new PlayerResourcePackStatusEvent(player, rpcheck.getStatus()));
-            if (rpcheck.getStatus() == ResourcePackStatus.DECLINED && Limbo.getInstance().getServerProperties().getResourcePackRequired()) {
+            if (rpcheck.getStatus() == ResourcePackStatus.DECLINED && ServerConfig.REQUIRED_RESOURCE_PACK.getNotNull()) {
                 player.disconnect(Component.translatable("multiplayer.requiredTexturePrompt.disconnect"));
             }
         }

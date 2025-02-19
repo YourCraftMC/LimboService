@@ -231,6 +231,11 @@
 			<id>opencollab-releases</id>
 			<url>https://repo.opencollab.dev/maven-releases</url>
 		</repository>
+		<repository>
+			<id>maven</id>
+			<name>Maven Central</name>
+			<url>https://repo1.maven.org/maven2</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
@@ -331,6 +336,11 @@
 			<version>1.21.4-SNAPSHOT</version>
 		</dependency>
 
+		<dependency>
+			<groupId>cc.carm.lib</groupId>
+			<artifactId>easyconfiguration-yaml</artifactId>
+			<version>4.0.1</version>
+		</dependency>
 	</dependencies>
 
 </project>

@@ -19,6 +19,7 @@
 
 package com.loohp.limbo.player;
 
+import cn.ycraft.limbo.config.ServerConfig;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.entity.Entity;
 import com.loohp.limbo.location.Location;
@@ -71,7 +72,7 @@ public class PlayerInteractManager {
 			return;
 		}
 
-		int viewDistanceChunks = Limbo.getInstance().getServerProperties().getViewDistance();
+		int viewDistanceChunks = ServerConfig.VIEW_DISTANCE.getNotNull();
 		int viewDistanceBlocks = viewDistanceChunks << 4;
 		Location location = player.getLocation();
 		Set<Entity> entitiesInRange = player.getWorld().getEntities().stream().filter(each -> each.getLocation().distanceSquared(location) < viewDistanceBlocks * viewDistanceBlocks).collect(Collectors.toSet());

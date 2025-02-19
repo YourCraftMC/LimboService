@@ -19,6 +19,7 @@
 
 package com.loohp.limbo.player;
 
+import cn.ycraft.limbo.config.ServerConfig;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.commands.CommandSender;
 import com.loohp.limbo.entity.DataWatcher;
@@ -253,7 +254,7 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
                                 100,
                                 getGamemode(),
                                 getGamemode(),
-                                !Limbo.getInstance().getServerProperties().isReducedDebugInfo(),
+                                !ServerConfig.REDUCED_DEBUG_INFO.getNotNull(),
                                 false,
                                 null,
                                 100,
@@ -342,7 +343,7 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
     }
 
     public void chat(String message, boolean verbose, byte[] saltSignature, Instant time) {
-        if (Limbo.getInstance().getServerProperties().isAllowChat()) {
+        if (ServerConfig.ALLOW_CHAT.getNotNull()) {
             PlayerChatEvent event = Limbo.getInstance().getEventsManager().callEvent(new PlayerChatEvent(this, CHAT_DEFAULT_FORMAT, message, false));
             if (!event.isCancelled()) {
                 if (hasPermission("limboserver.chat")) {

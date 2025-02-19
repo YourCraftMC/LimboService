@@ -19,6 +19,7 @@
 
 package com.loohp.limbo.utils;
 
+import cn.ycraft.limbo.config.ServerConfig;
 import com.loohp.limbo.Limbo;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -50,7 +51,7 @@ public class ForwardingUtils {
         boolean foundValid = false;
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
-            for (String secret : Limbo.getInstance().getServerProperties().getForwardingSecrets()) {
+            for (String secret : ServerConfig.FORWARDING_SECRETS.getNotNull()) {
                 SecretKey key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
                 mac.init(key);
                 mac.update(data, 32, data.length - 32);

@@ -19,8 +19,8 @@
 
 package cn.ycraft.limbo.network;
 
+import cn.ycraft.limbo.config.ServerConfig;
 import com.loohp.limbo.Limbo;
-import com.loohp.limbo.file.ServerProperties;
 import com.loohp.limbo.player.Player;
 import com.loohp.limbo.utils.BungeecordAdventureConversionUtils;
 import net.kyori.adventure.key.Key;
@@ -89,9 +89,8 @@ public class ClientConnection extends SessionAdapter {
     public void packetSent(Session session, Packet packet) {
         if (packet instanceof ClientboundLoginDisconnectPacket) {
             ClientboundLoginDisconnectPacket disconnectPacket = (ClientboundLoginDisconnectPacket) packet;
-            ServerProperties properties = Limbo.getInstance().getServerProperties();
-            if (!properties.isReducedDebugInfo()) {
-                String str = (properties.isLogPlayerIPAddresses() ? ((InetSocketAddress) inetAddress).getHostName() : "<ip address withheld>") + ":" + ((InetSocketAddress) session.getLocalAddress()).getPort();
+            if (!ServerConfig.REDUCED_DEBUG_INFO.getNotNull()) {
+                String str = (ServerConfig.LOG_PLAYER_IP_ADDRESSES.getNotNull() ? ((InetSocketAddress) inetAddress).getHostName() : "<ip address withheld>") + ":" + ((InetSocketAddress) session.getLocalAddress()).getPort();
                 Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Player disconnected with the reason " + PlainTextComponentSerializer.plainText().serialize(disconnectPacket.getReason()));
             }
         }

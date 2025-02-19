@@ -19,6 +19,7 @@
 
 package com.loohp.limbo.scheduler;
 
+import cn.ycraft.limbo.config.ServerConfig;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.scheduler.LimboScheduler.CurrentSchedulerTask;
 import com.loohp.limbo.scheduler.LimboScheduler.LimboSchedulerTask;
@@ -40,7 +41,7 @@ public class Tick {
 	
 	public Tick(Limbo instance) {
 		new Thread(() -> {
-			tickingInterval = (int) Math.round(1000.0 / Limbo.getInstance().getServerProperties().getDefinedTicksPerSecond());
+			tickingInterval = (int) Math.round(1000.0 / ServerConfig.TICKS_PER_SECOND.getNotNull());
 
 			for (int i = 0; i < 4; i++) {
 				Thread thread = new Thread(() -> {

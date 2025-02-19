@@ -111,7 +111,7 @@ public class InventoryView {
             throw new IllegalArgumentException("Slot " + rawSlot + " greater than inventory slot count");
         }
 
-        if (rawSlot < topInventory.getSize()) {
+        if (topInventory != null && rawSlot < topInventory.getSize()) {
             return getTopInventory();
         } else {
             return getBottomInventory();

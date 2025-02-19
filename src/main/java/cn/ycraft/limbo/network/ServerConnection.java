@@ -49,15 +49,17 @@ public class ServerConnection {
 
     private final String ip;
     private final int port;
+    private final boolean onlineMode;
     private final boolean silent;
     private Map<Session, ClientConnection> clients;
 
     private NetworkServer server;
 
-    public ServerConnection(String ip, int port, boolean silent) {
+    public ServerConnection(String ip, int port, boolean onlineMode, boolean silent) {
         this.clients = new HashMap<>();
         this.ip = ip;
         this.port = port;
+        this.onlineMode = onlineMode;
         this.silent = silent;
         start();
     }
@@ -68,7 +70,8 @@ public class ServerConnection {
 
     void start() {
         server = new NetworkServer(new InetSocketAddress(this.ip, this.port), LimboProtocol::new);
-        server.setGlobalFlag(MinecraftConstants.ENCRYPT_CONNECTION, false);
+        server.setGlobalFlag(MinecraftConstants.ENCRYPT_CONNECTION, onlineMode);
+        server.setGlobalFlag(MinecraftConstants.SHOULD_AUTHENTICATE, onlineMode);
         server.setGlobalFlag(MinecraftConstants.SERVER_LOGIN_HANDLER_KEY, new PlayerLoginHandler());
         clients();
         motd();

@@ -170,6 +170,7 @@ public final class Limbo {
 
     private String bindIp;
     private int bindPort;
+    private boolean onlineMode;
 
 	@SuppressWarnings("unchecked")
 	public Limbo() throws IOException, ParseException, NumberFormatException, ClassNotFoundException, InterruptedException {
@@ -179,6 +180,7 @@ public final class Limbo {
 		isRunning = new AtomicBoolean(true);
         bindIp = ServerConfig.SERVER_IP.getNotNull();
         bindPort = ServerConfig.SERVER_PORT.getNotNull();
+		onlineMode = ServerConfig.ONLINE_MODE.getNotNull();
 
 		if (!noGui) {
 			while (!GUI.loadFinish) {
@@ -257,7 +259,7 @@ public final class Limbo {
 			}
 		}
 
-        server = new ServerConnection(bindIp, bindPort, false);
+		server = new ServerConnection(bindIp, bindPort, onlineMode, false);
 
 		metrics = new Metrics();
 
@@ -566,5 +568,13 @@ public final class Limbo {
 
     public void setBindPort(int bindPort) {
         this.bindPort = bindPort;
+    }
+
+    public boolean isOnlineMode() {
+        return onlineMode;
+    }
+
+    public void setOnlineMode(boolean onlineMode) {
+        this.onlineMode = onlineMode;
     }
 }

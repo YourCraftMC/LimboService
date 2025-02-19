@@ -2,6 +2,7 @@ package cn.ycraft.limbo.network.server;
 
 import cn.ycraft.limbo.config.ServerConfig;
 import cn.ycraft.limbo.network.NetworkConstants;
+import cn.ycraft.limbo.network.protocol.LimboProtocol;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.utils.ForwardingUtils;
 import net.kyori.adventure.key.Key;
@@ -21,6 +22,7 @@ import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundC
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundHelloPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundCustomQueryAnswerPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundHelloPacket;
+import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundKeyPacket;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -32,16 +34,22 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.security.PrivateKey;
+import java.util.Arrays;
+import java.util.Random;
 import java.util.UUID;
 
 public class LimboServerListener extends ServerListener {
+    private final byte[] _challenge = new byte[4];
+
     public LimboServerListener(NbtMap networkCodec) {
         super(networkCodec);
+        new Random().nextBytes(_challenge);
     }
 
     @Override
     public void packetReceived(Session session, Packet packet) {
-        MinecraftProtocol protocol = (MinecraftProtocol) session.getPacketProtocol();
+        LimboProtocol protocol = (LimboProtocol) session.getPacketProtocol();
         if (protocol.getInboundState() == ProtocolState.LOGIN) {
             if (packet instanceof ServerboundHelloPacket) {
                 ServerboundHelloPacket helloPacket = (ServerboundHelloPacket) packet;
@@ -54,10 +62,21 @@ public class LimboServerListener extends ServerListener {
                 }
 
                 if (session.getFlag(MinecraftConstants.ENCRYPT_CONNECTION, true)) {
-                    session.send(new ClientboundHelloPacket($getServerId(), $getKeyPair().getPublic(), $getChallenge(), session.getFlag(MinecraftConstants.SHOULD_AUTHENTICATE, true)));
+                    session.send(new ClientboundHelloPacket($getServerId(), $getKeyPair().getPublic(), _challenge, session.getFlag(MinecraftConstants.SHOULD_AUTHENTICATE, true)));
                 } else {
                     new Thread(() -> $auth(session, false, null)).start();
                 }
+                return;
+            } else if (packet instanceof ServerboundKeyPacket) {
+                ServerboundKeyPacket keyPacket = (ServerboundKeyPacket) packet;
+                PrivateKey privateKey = $getKeyPair().getPrivate();
+                if (!Arrays.equals(this._challenge, keyPacket.getEncryptedChallenge(privateKey))) {
+                    throw new IllegalStateException("Protocol error");
+                }
+
+                SecretKey key = keyPacket.getSecretKey(privateKey);
+                session.setEncryption(protocol.createEncryption(key));
+                (new Thread(() -> $auth(session, session.getFlag(MinecraftConstants.SHOULD_AUTHENTICATE, true), key))).start();
                 return;
             }
         }
@@ -65,7 +84,7 @@ public class LimboServerListener extends ServerListener {
             ServerboundCustomQueryAnswerPacket answerPacket = (ServerboundCustomQueryAnswerPacket) packet;
             if (answerPacket.getTransactionId() == session.getFlag(NetworkConstants.FORWARD_FLAG).id) {
                 if (answerPacket.getData() == null) {
-                    session.disconnect("Unknown login plugin response packet!");
+                    session.disconnect("Invalid Login");
                     return;
                 }
                 if (ForwardingUtils.validateVelocityModernResponse(answerPacket.getData())) {
@@ -200,7 +219,6 @@ public class LimboServerListener extends ServerListener {
     private static final Field usernameField;
     private static final Field serverIdField;
     private static final Field keyPairField;
-    private static final Field challengeField;
 
     static {
         try {
@@ -209,7 +227,6 @@ public class LimboServerListener extends ServerListener {
             usernameField = ServerListener.class.getDeclaredField("username");
             serverIdField = ServerListener.class.getDeclaredField("SERVER_ID");
             keyPairField = ServerListener.class.getDeclaredField("KEY_PAIR");
-            challengeField = ServerListener.class.getDeclaredField("challenge");
 
             authMethod.setAccessible(true);
             beginLoginMethod.setAccessible(true);
@@ -257,15 +274,6 @@ public class LimboServerListener extends ServerListener {
     public static java.security.KeyPair $getKeyPair() {
         try {
             return (java.security.KeyPair) keyPairField.get(null);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static byte[] $getChallenge() {
-        try {
-            return (byte[]) challengeField.get(null);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }

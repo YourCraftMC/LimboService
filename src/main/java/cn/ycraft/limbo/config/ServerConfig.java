@@ -35,7 +35,19 @@ public class ServerConfig implements Configuration {
     @HeaderComments({"Whether this server is behind a bungeecord proxy", "Mutually exclusive with velocity-modern and bungee-guard"})
     public static final ConfiguredValue<Boolean> BUNGEECORD = ConfiguredValue.of(false);
     @HeaderComments("GameMode, survival, creative, adventure, spectator")
-    public static final ConfiguredValue<GameMode> DEFAULT_GAMEMODE = ConfiguredValue.of(GameMode.CREATIVE);
+    public static final ConfiguredValue<GameMode> DEFAULT_GAMEMODE = ConfiguredValue.builderOf(GameMode.class)
+            .fromString()
+            .parse(str -> {
+                try {
+                    int i = Integer.parseInt(str);
+                    return GameMode.byId(i);
+                } catch (Exception e) {
+                    return GameMode.valueOf(str.toUpperCase(Locale.ENGLISH));
+                }
+            })
+            .serialize(Enum::name)
+            .defaults(GameMode.CREATIVE)
+            .build();
     @HeaderComments("Whether to enforce the player whitelist. If true, enforces the whitelist from 'whitelist.json'")
     public static final ConfiguredValue<Boolean> ENFORCE_WHITELIST = ConfiguredValue.of(false);
     @HeaderComments("For Velocity Modern Forwarding or BungeeGuard a list (separated by `;`) of valid secrets")
@@ -57,6 +69,8 @@ public class ServerConfig implements Configuration {
     public static final ConfiguredValue<Integer> MAX_PLAYERS = ConfiguredValue.of(-1);
     @HeaderComments("Server list message in Json")
     public static final ConfiguredValue<String> MOTD = ConfiguredValue.of("{\"text\":\"\",\"extra\":[{\"text\":\"Limbo Server!\",\"color\":\"yellow\"}]}");
+    @HeaderComments("Whether the server should be online mode")
+    public static final ConfiguredValue<Boolean> ONLINE_MODE = ConfiguredValue.of(true);
     @HeaderComments("Reduce debug info")
     public static final ConfiguredValue<Boolean> REDUCED_DEBUG_INFO = ConfiguredValue.of(true);
     @HeaderComments("Whether to kick players if they do not accept the server resource pack")

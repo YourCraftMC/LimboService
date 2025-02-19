@@ -18,6 +18,6 @@ public class ItemUtil {
         if (itemStack == null) {
             return null;
         }
-        return new com.loohp.limbo.inventory.ItemStack(BuiltInRegistries.ITEM_REGISTRY.fromId(itemStack.getId()), itemStack.getAmount(), itemStack.getDataComponents());
+        return new com.loohp.limbo.inventory.ItemStack(BuiltInRegistries.ITEM_REGISTRY.fromId(itemStack.getId()), itemStack.getAmount(), itemStack.getDataComponentsPatch());
     }
 }

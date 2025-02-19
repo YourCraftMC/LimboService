@@ -30,10 +30,7 @@ import com.loohp.limbo.events.inventory.InventoryCloseEvent;
 import com.loohp.limbo.events.inventory.InventoryOpenEvent;
 import com.loohp.limbo.events.player.PlayerChatEvent;
 import com.loohp.limbo.events.player.PlayerTeleportEvent;
-import com.loohp.limbo.inventory.Inventory;
-import com.loohp.limbo.inventory.InventoryHolder;
-import com.loohp.limbo.inventory.InventoryView;
-import com.loohp.limbo.inventory.TitledInventory;
+import com.loohp.limbo.inventory.*;
 import com.loohp.limbo.location.Location;
 import cn.ycraft.limbo.network.ClientConnection;
 import com.loohp.limbo.utils.BungeecordAdventureConversionUtils;
@@ -47,6 +44,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.Sound.Emitter;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.ComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
@@ -55,8 +53,12 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerSpawnInfo;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.Filterable;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.WrittenBookContent;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.GameEvent;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundResourcePackPushPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundRespawnPacket;
@@ -66,6 +68,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.Clientbound
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHeldSlotPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerClosePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundOpenBookPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundOpenScreenPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundSoundPacket;
@@ -74,9 +77,12 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.title.*;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class Player extends LivingEntity implements CommandSender, InventoryHolder {
 
@@ -468,7 +474,18 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
 
     @Override
     public void openBook(Book book) {
-        throw new UnsupportedOperationException("This function has not been implemented yet.");
+       ItemStack item = getInventory().getItem(8);
+        byte selectedSlot = getSelectedSlot();
+        ItemStack itemStack = new ItemStack(Key.key("written_book"));
+        String title = LegacyComponentSerializer.legacySection().serialize(book.title());
+        String author = LegacyComponentSerializer.legacySection().serialize(book.author());
+        List<Filterable<Component>> pages = book.pages().stream().map(page -> new Filterable<>(page, page)).collect(Collectors.toList());
+        itemStack.component(DataComponentTypes.WRITTEN_BOOK_CONTENT, new WrittenBookContent(new Filterable<>(title, title), author, 0, pages, false));
+        getInventory().setItem(8, itemStack);
+        setSelectedSlot((byte) 8);
+        clientConnection.sendPacket(new ClientboundOpenBookPacket(Hand.MAIN_HAND));
+        getInventory().setItem(8, item);
+        setSelectedSlot(selectedSlot);
     }
 
     @Override

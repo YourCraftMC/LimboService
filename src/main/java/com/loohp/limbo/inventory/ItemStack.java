@@ -24,8 +24,9 @@ import net.kyori.adventure.text.Component;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponents;
+import org.jetbrains.annotations.Contract;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class ItemStack implements Cloneable {
@@ -41,7 +42,7 @@ public class ItemStack implements Cloneable {
     }
 
     public ItemStack(Key material, int amount) {
-        this(material, amount, new DataComponents(Collections.emptyMap()));
+        this(material, amount, new DataComponents(new HashMap<>()));
     }
 
     public ItemStack(Key material, int amount, DataComponents components) {
@@ -76,6 +77,7 @@ public class ItemStack implements Cloneable {
         return components;
     }
 
+    @Contract("_ -> new")
     public ItemStack components(DataComponents components) {
         return new ItemStack(material, amount, components);
     }
@@ -84,10 +86,11 @@ public class ItemStack implements Cloneable {
         return components.get(type);
     }
 
+    @Contract("_, _ -> this")
     public <T> ItemStack component(DataComponentType<T> type, T value) {
-        DataComponents components = components().clone();
+        DataComponents components = components();
         components.put(type, value);
-        return components(components);
+        return this;
     }
 
     public Component displayName() {
@@ -101,6 +104,7 @@ public class ItemStack implements Cloneable {
         }
     }
 
+    @Contract("_ -> this")
     public ItemStack displayName(Component component) {
         if (type().equals(AIR.type())) {
             return this;

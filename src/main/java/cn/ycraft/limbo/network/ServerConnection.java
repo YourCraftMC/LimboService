@@ -62,6 +62,10 @@ public class ServerConnection {
         start();
     }
 
+    public NetworkServer getServer() {
+        return server;
+    }
+
     void start() {
         server = new NetworkServer(new InetSocketAddress(this.ip, this.port), LimboProtocol::new);
         server.setGlobalFlag(MinecraftConstants.ENCRYPT_CONNECTION, false);

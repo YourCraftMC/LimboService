@@ -168,12 +168,17 @@ public final class Limbo {
             .indent(2)
             .build();
 
+    private String bindIp;
+    private int bindPort;
+
 	@SuppressWarnings("unchecked")
 	public Limbo() throws IOException, ParseException, NumberFormatException, ClassNotFoundException, InterruptedException {
 		instance = this;
         serverConfigHolder.initialize(ServerConfig.class);
 		unsafe = new Unsafe(this);
 		isRunning = new AtomicBoolean(true);
+        bindIp = ServerConfig.SERVER_IP.getNotNull();
+        bindPort = ServerConfig.SERVER_PORT.getNotNull();
 
 		if (!noGui) {
 			while (!GUI.loadFinish) {
@@ -197,8 +202,13 @@ public final class Limbo {
 		worlds.add(loadDefaultWorld());
 		Location spawn = ServerConfig.WORLD_SPAWN.getNotNull();
 		ServerConfig.WORLD_SPAWN.set(new Location(getWorld(ServerConfig.getLevelName().value()), spawn.getX(), spawn.getY(), spawn.getZ(), spawn.getYaw(), spawn.getPitch()));
+        try {
+            serverConfigHolder.save();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-		if (!NetworkUtils.available(ServerConfig.SERVER_PORT.getNotNull())) {
+        if (!NetworkUtils.available(ServerConfig.SERVER_PORT.getNotNull())) {
 			console.sendMessage("");
 			console.sendMessage("*****FAILED TO BIND PORT [" + ServerConfig.SERVER_PORT.getNotNull() + "]*****");
 			console.sendMessage("*****PORT ALREADY IN USE*****");
@@ -247,7 +257,7 @@ public final class Limbo {
 			}
 		}
 
-        server = new ServerConnection(ServerConfig.SERVER_IP.getNotNull(), ServerConfig.SERVER_PORT.getNotNull(), false);
+        server = new ServerConnection(bindIp, bindPort, false);
 
 		metrics = new Metrics();
 
@@ -542,4 +552,19 @@ public final class Limbo {
 		}
 	}
 
+    public String getBindIp() {
+        return bindIp;
+    }
+
+    public void setBindIp(String bindIp) {
+        this.bindIp = bindIp;
+    }
+
+    public int getBindPort() {
+        return bindPort;
+    }
+
+    public void setBindPort(int bindPort) {
+        this.bindPort = bindPort;
+    }
 }

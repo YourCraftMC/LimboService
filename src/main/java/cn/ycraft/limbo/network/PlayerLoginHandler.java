@@ -156,7 +156,17 @@ public class PlayerLoginHandler implements ServerLoginHandler {
         }
 
         // PLAYER LIST HEADER AND FOOTER CODE CONRIBUTED BY GAMERDUCK123
-        player.sendPlayerListHeaderAndFooter(GsonComponentSerializer.gson().deserialize(ServerConfig.TAB_HEADER.getNotNull()), GsonComponentSerializer.gson().deserialize(ServerConfig.TAB_FOOTER.getNotNull()));
+        String headerStr = ServerConfig.TAB_HEADER.getNotNull();
+        String footerStr = ServerConfig.TAB_FOOTER.getNotNull();
+        Component header = Component.empty();
+        Component footer = Component.empty();
+        if (!headerStr.isEmpty()) {
+            header = GsonComponentSerializer.gson().deserialize(headerStr);
+        }
+        if (!footerStr.isEmpty()) {
+            footer = GsonComponentSerializer.gson().deserialize(footerStr);
+        }
+        player.sendPlayerListHeaderAndFooter(header, footer);
 
         session.setFlag(NetworkConstants.PLAYER_FLAG, player);
     }

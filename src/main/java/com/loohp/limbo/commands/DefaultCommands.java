@@ -196,15 +196,6 @@ public class DefaultCommands implements CommandExecutor, TabCompletor {
             }
             return;
         }
-        if (args[0].equalsIgnoreCase("book")) {
-            sender.openBook(Book.builder()
-                    .title(Component.text("Limbo").color(NamedTextColor.RED))
-                    .pages(
-                            Component.text("page1").decorate(TextDecoration.BOLD),
-                            Component.text("page1").decorate(TextDecoration.OBFUSCATED)
-                    )
-                    .build());
-        }
     }
 
     @Override

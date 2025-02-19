@@ -55,6 +55,10 @@ public class ClientConnection extends SessionAdapter {
         return inetAddress;
     }
 
+    public void setInetAddress(SocketAddress inetAddress) {
+        this.inetAddress = inetAddress;
+    }
+
     public void setLastPacketTimestamp(long payLoad) {
         this.lastPacketTimestamp.set(payLoad);
     }

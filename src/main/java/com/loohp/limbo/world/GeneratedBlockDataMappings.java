@@ -20,6 +20,7 @@
 package com.loohp.limbo.world;
 
 import com.loohp.limbo.Limbo;
+import net.kyori.adventure.key.Key;
 import net.querz.nbt.io.SNBTUtil;
 import net.querz.nbt.tag.CompoundTag;
 import org.json.simple.JSONArray;
@@ -27,13 +28,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -54,6 +52,24 @@ public class GeneratedBlockDataMappings {
 			e.printStackTrace();
 		}		
 	}
+
+	public static int getGlobalPaletteIDFromKey(Key key) {
+		String blockId = key.asString();
+		JSONObject data = (JSONObject) globalPalette.get(blockId);
+		Object obj = data.get("properties");
+		if (obj == null) {
+			return ((Number) ((JSONObject) ((JSONArray) data.get("states")).get(0)).get("id")).intValue();
+		}
+
+		for (Object entry : (JSONArray) data.get("states")) {
+			if (((JSONObject) entry).containsKey("default") && ((boolean) ((JSONObject) entry).get("default"))) {
+				return ((Number) ((JSONObject) entry).get("id")).intValue();
+			}
+		}
+
+		throw new IllegalStateException();
+	}
+
 	
 	@SuppressWarnings("unchecked")
 	public static int getGlobalPaletteIDFromState(CompoundTag tag) {

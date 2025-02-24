@@ -153,7 +153,7 @@
         <dependency>
             <groupId>com.github.Querz</groupId>
             <artifactId>NBT</artifactId>
-            <version>5.5</version>
+            <version>6.1</version>
             <scope>compile</scope>
         </dependency>
 

@@ -31,7 +31,7 @@
         <minecraft.version>1.21.4</minecraft.version>
 
         <deps.easyplugin.version>1.5.12</deps.easyplugin.version>
-        <deps.easyconfifuration.version>4.0.6</deps.easyconfifuration.version>
+        <deps.easyconfifuration.version>4.0.11</deps.easyconfifuration.version>
     </properties>
 
     <groupId>cn.ycraft</groupId>

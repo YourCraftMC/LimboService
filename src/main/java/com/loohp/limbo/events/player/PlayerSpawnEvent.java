@@ -25,18 +25,18 @@ import com.loohp.limbo.player.Player;
 
 public class PlayerSpawnEvent extends PlayerEvent {
 
-	private Location spawnLocation;
+    private Location spawnLocation;
 
-	public PlayerSpawnEvent(Player player, Location spawnLoc) {
-		super(player);
-		spawnLocation = spawnLoc;
-	}
+    public PlayerSpawnEvent(Player player, Location spawnLoc) {
+        super(player);
+        spawnLocation = spawnLoc;
+    }
 
-	public Location getSpawnLocation() {
-		return spawnLocation;
-	}
+    public Location getSpawnLocation() {
+        return spawnLocation;
+    }
 
-	public void setSpawnLocation(Location spawnLocation) {
-		this.spawnLocation = spawnLocation;
-	}
+    public void setSpawnLocation(Location spawnLocation) {
+        this.spawnLocation = spawnLocation;
+    }
 }

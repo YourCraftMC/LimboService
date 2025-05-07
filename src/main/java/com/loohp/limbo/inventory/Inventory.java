@@ -77,7 +77,7 @@ public interface Inventory extends Iterable<ItemStack> {
      * Stores the ItemStack at the given index of the inventory.
      *
      * @param index The index where to put the ItemStack
-     * @param item The ItemStack to set
+     * @param item  The ItemStack to set
      */
     void setItem(int index, ItemStack item);
 
@@ -140,9 +140,9 @@ public interface Inventory extends Iterable<ItemStack> {
      * contents and replaces it with the ItemStacks given in the array.
      *
      * @param items A complete replacement for the contents; the length must
-     *     be less than or equal to {@link #getSize()}.
+     *              be less than or equal to {@link #getSize()}.
      * @throws IllegalArgumentException If the array has more items than the
-     *     inventory.
+     *                                  inventory.
      */
     void setContents(ItemStack[] items) throws IllegalArgumentException;
 
@@ -164,7 +164,7 @@ public interface Inventory extends Iterable<ItemStack> {
      *
      * @param items The ItemStacks to use as storage contents
      * @throws IllegalArgumentException If the array has more items than the
-     * inventory.
+     *                                  inventory.
      */
     void setStorageContents(ItemStack[] items) throws IllegalArgumentException;
 
@@ -187,7 +187,7 @@ public interface Inventory extends Iterable<ItemStack> {
      *
      * @param item The ItemStack to match against
      * @return false if item is null, true if any exactly matching ItemStacks
-     *     were found
+     * were found
      */
     @Contract("null -> false")
     boolean contains(ItemStack item);
@@ -197,9 +197,9 @@ public interface Inventory extends Iterable<ItemStack> {
      * material, adding to at least the minimum amount specified.
      *
      * @param material The material to check for
-     * @param amount The minimum amount
+     * @param amount   The minimum amount
      * @return true if amount is less than 1, true if enough ItemStacks were
-     *     found to add to the given amount
+     * found to add to the given amount
      * @throws IllegalArgumentException if material is null
      */
     boolean contains(Key material, int amount) throws IllegalArgumentException;
@@ -211,10 +211,10 @@ public interface Inventory extends Iterable<ItemStack> {
      * An ItemStack only counts if both the type and the amount of the stack
      * match.
      *
-     * @param item the ItemStack to match against
+     * @param item   the ItemStack to match against
      * @param amount how many identical stacks to check for
      * @return false if item is null, true if amount less than 1, true if
-     *     amount of exactly matching ItemStacks were found
+     * amount of exactly matching ItemStacks were found
      * @see #containsAtLeast(ItemStack, int)
      */
     @Contract("null, _ -> false")
@@ -224,10 +224,10 @@ public interface Inventory extends Iterable<ItemStack> {
      * Checks if the inventory contains ItemStacks matching the given
      * ItemStack whose amounts sum to at least the minimum amount specified.
      *
-     * @param item the ItemStack to match against
+     * @param item   the ItemStack to match against
      * @param amount the minimum amount
      * @return false if item is null, true if amount less than 1, true if
-     *     enough ItemStacks were found to add to the given amount
+     * enough ItemStacks were found to add to the given amount
      */
     @Contract("null, _ -> false")
     boolean containsAtLeast(ItemStack item, int amount);
@@ -351,7 +351,7 @@ public interface Inventory extends Iterable<ItemStack> {
      * @return The holder of the inventory; null if it has no holder.
      */
     InventoryHolder getHolder();
-    
+
     @Override
     ListIterator<ItemStack> iterator();
 

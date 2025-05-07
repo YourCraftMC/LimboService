@@ -26,36 +26,36 @@ import com.loohp.limbo.inventory.ItemStack;
 
 public class InventoryCreativeEvent extends InventoryEvent implements Cancellable {
 
-	private boolean cancelled;
-	private final int slot;
-	private ItemStack newItem;
+    private boolean cancelled;
+    private final int slot;
+    private ItemStack newItem;
 
-	public InventoryCreativeEvent(InventoryView inventoryView, int slot, ItemStack newItem) {
-		super(inventoryView, inventoryView.getBottomInventory());
-		this.slot = slot;
-		this.newItem = newItem;
-		this.cancelled = false;
-	}
+    public InventoryCreativeEvent(InventoryView inventoryView, int slot, ItemStack newItem) {
+        super(inventoryView, inventoryView.getBottomInventory());
+        this.slot = slot;
+        this.newItem = newItem;
+        this.cancelled = false;
+    }
 
-	public int getSlot() {
-		return slot;
-	}
+    public int getSlot() {
+        return slot;
+    }
 
-	@Override
-	public boolean isCancelled() {
-		return cancelled;
-	}
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
+    }
 
-	@Override
-	public void setCancelled(boolean cancelled) {
-		this.cancelled = cancelled;
-	}
+    @Override
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
 
-	public ItemStack getNewItem() {
-		return newItem == null ? null : newItem.clone();
-	}
+    public ItemStack getNewItem() {
+        return newItem == null ? null : newItem.clone();
+    }
 
-	public void setNewItem(ItemStack newItem) {
-		this.newItem = newItem == null ? null : newItem.clone();
-	}
+    public void setNewItem(ItemStack newItem) {
+        this.newItem = newItem == null ? null : newItem.clone();
+    }
 }

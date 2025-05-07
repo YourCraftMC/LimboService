@@ -207,7 +207,7 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
     public void remove() {
 
     }
-	
+
 	/*
 	public Entity getLeftShoulder() {
 		return leftShoulder;
@@ -244,16 +244,16 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
             super.teleport(location);
             if (!world.equals(location.getWorld())) {
                 ClientboundRespawnPacket respawn = new ClientboundRespawnPacket(new PlayerSpawnInfo(
-                        location.getWorld().getEnvironment().getId(), Key.key(location.getWorld().getName()), 100,
-                        getGamemode(), getGamemode(),
-                        !ServerConfig.LOGS.REDUCED_DEBUG_INFO.resolve(),
-                        false, null, 100, 5
+                    location.getWorld().getEnvironment().getId(), Key.key(location.getWorld().getName()), 100,
+                    getGamemode(), getGamemode(),
+                    !ServerConfig.LOGS.REDUCED_DEBUG_INFO.resolve(),
+                    false, null, 100, 5
                 ), false, true);
                 clientConnection.sendPacket(respawn);
             }
             ClientboundPlayerPositionPacket positionLook = new ClientboundPlayerPositionPacket(
-                    1, location.getX(), location.getY(), location.getZ(),
-                    0, 0, 0, location.getYaw(), location.getPitch()
+                1, location.getX(), location.getY(), location.getZ(),
+                0, 0, 0, location.getYaw(), location.getPitch()
             );
             clientConnection.sendPacket(positionLook);
         }
@@ -398,8 +398,8 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
     @Override
     public void playSound(@NotNull Sound sound, double x, double y, double z) {
         ClientboundSoundPacket namedSoundEffect = new ClientboundSoundPacket(
-                SoundUtil.from(sound.name()), SoundUtil.from(sound.source()),
-                x, y, z, sound.volume(), sound.pitch(), sound.seed().orElse(ThreadLocalRandom.current().nextLong())
+            SoundUtil.from(sound.name()), SoundUtil.from(sound.source()),
+            x, y, z, sound.volume(), sound.pitch(), sound.seed().orElse(ThreadLocalRandom.current().nextLong())
         );
         clientConnection.sendPacket(namedSoundEffect);
     }

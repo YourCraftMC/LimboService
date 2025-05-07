@@ -25,15 +25,15 @@ public class InternalPlugin extends LimboPlugin {
     @Override
     public void onEnable() {
         LiteLimboFactory.create(this)
-                .commands(
-                        new AllowlistCommands(),
-                        new GameModeCommand(),
-                        new KickCommand(),
-                        new SayCommand(),
-                        new SpawnCommand(),
-                        new StopCommand(),
-                        new VersionCommand()
-                )
-                .build();
+            .commands(
+                new AllowlistCommands(),
+                new GameModeCommand(),
+                new KickCommand(),
+                new SayCommand(),
+                new SpawnCommand(),
+                new StopCommand(),
+                new VersionCommand()
+            )
+            .build();
     }
 }

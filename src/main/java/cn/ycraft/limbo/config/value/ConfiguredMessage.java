@@ -25,7 +25,7 @@ public class ConfiguredMessage extends ConfiguredText<Component, Audience> {
     }
 
     public static final LegacyComponentSerializer LEGACY_COMPONENT_SERIALIZER = LegacyComponentSerializer.builder()
-            .hexColors().useUnusualXRepeatedCharacterHexFormat().build();
+        .hexColors().useUnusualXRepeatedCharacterHexFormat().build();
 
     public ConfiguredMessage(@NotNull ValueManifest<TextContents> manifest,
                              @NotNull BiFunction<Audience, String, String> parser,

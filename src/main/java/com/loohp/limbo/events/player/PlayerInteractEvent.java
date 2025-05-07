@@ -29,60 +29,60 @@ import com.loohp.limbo.world.BlockState;
 
 public class PlayerInteractEvent extends PlayerEvent implements Cancellable {
 
-	public enum Action {
+    public enum Action {
 
-		LEFT_CLICK_AIR,
-		LEFT_CLICK_BLOCK,
-		PHYSICAL,
-		RIGHT_CLICK_AIR,
-		RIGHT_CLICK_BLOCK
+        LEFT_CLICK_AIR,
+        LEFT_CLICK_BLOCK,
+        PHYSICAL,
+        RIGHT_CLICK_AIR,
+        RIGHT_CLICK_BLOCK
 
     }
 
-	private boolean cancelled = false;
-	private final Action action;
-	private final ItemStack item;
-	private final BlockState clickedBlock;
-	private final BlockFace clickedFace;
-	private final EquipmentSlot hand;
+    private boolean cancelled = false;
+    private final Action action;
+    private final ItemStack item;
+    private final BlockState clickedBlock;
+    private final BlockFace clickedFace;
+    private final EquipmentSlot hand;
 
-	public PlayerInteractEvent(Player player, Action action, ItemStack item, BlockState clickedBlock, BlockFace clickedFace, EquipmentSlot hand) {
-		super(player);
-		this.action = action;
-		this.item = item;
-		this.clickedBlock = clickedBlock;
-		this.clickedFace = clickedFace;
-		this.hand = hand;
-	}
+    public PlayerInteractEvent(Player player, Action action, ItemStack item, BlockState clickedBlock, BlockFace clickedFace, EquipmentSlot hand) {
+        super(player);
+        this.action = action;
+        this.item = item;
+        this.clickedBlock = clickedBlock;
+        this.clickedFace = clickedFace;
+        this.hand = hand;
+    }
 
-	public Action getAction() {
-		return action;
-	}
+    public Action getAction() {
+        return action;
+    }
 
-	public ItemStack getItem() {
-		return item;
-	}
+    public ItemStack getItem() {
+        return item;
+    }
 
-	public BlockState getClickedBlock() {
-		return clickedBlock;
-	}
+    public BlockState getClickedBlock() {
+        return clickedBlock;
+    }
 
-	public BlockFace getClickedFace() {
-		return clickedFace;
-	}
+    public BlockFace getClickedFace() {
+        return clickedFace;
+    }
 
-	public EquipmentSlot getHand() {
-		return hand;
-	}
+    public EquipmentSlot getHand() {
+        return hand;
+    }
 
-	@Override
-	public void setCancelled(boolean cancelled) {
-		this.cancelled = cancelled;
-	}
+    @Override
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
 
-	@Override
-	public boolean isCancelled() {
-		return cancelled;
-	}
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
+    }
 
 }

@@ -47,8 +47,8 @@ public class LimboCommand<SOURCE> {
 
     public LiteralArgumentBuilder<SOURCE> toLiteral() {
         LiteralArgumentBuilder<SOURCE> baseArgument = LiteralArgumentBuilder.<SOURCE>literal(baseRoute.getName())
-                .executes(this::execute)
-                .requires(canUse());
+            .executes(this::execute)
+            .requires(canUse());
 
         this.appendRoute(baseArgument, baseRoute);
         return baseArgument;
@@ -57,8 +57,8 @@ public class LimboCommand<SOURCE> {
     private void appendRoute(LiteralArgumentBuilder<SOURCE> baseLiteral, CommandRoute<SOURCE> route) {
         boolean isBase = route == baseRoute;
         LiteralArgumentBuilder<SOURCE> literal = isBase
-                ? baseLiteral
-                : LiteralArgumentBuilder.<SOURCE>literal(route.getName()).executes(this::execute);
+            ? baseLiteral
+            : LiteralArgumentBuilder.<SOURCE>literal(route.getName()).executes(this::execute);
 
         literal.then(this.createArguments());
 
@@ -73,9 +73,9 @@ public class LimboCommand<SOURCE> {
     @NotNull
     private RequiredArgumentBuilder<SOURCE, String> createArguments() {
         return RequiredArgumentBuilder
-                .<SOURCE, String>argument(settings.getInputInspectionDisplay(), StringArgumentType.greedyString())
-                .executes(this::execute)
-                .suggests(this::suggests);
+            .<SOURCE, String>argument(settings.getInputInspectionDisplay(), StringArgumentType.greedyString())
+            .executes(this::execute)
+            .suggests(this::suggests);
     }
 
     private int execute(CommandContext<SOURCE> context) {

@@ -23,9 +23,9 @@ public class SayCommand implements DefaultCommands {
     public void execute(@Bind Limbo limbo, @Sender CommandSender sender, @Varargs("messages") String messages) throws Exception {
         String name = sender instanceof Console ? "Server" : sender.getName();
         Component message = text()
-                .append(text("[").append(text(name)).append(text("] ")).color(NamedTextColor.GRAY))
-                .append(text(messages))
-                .build();
+            .append(text("[").append(text(name)).append(text("] ")).color(NamedTextColor.GRAY))
+            .append(text(messages))
+            .build();
 
         limbo.sendMessage(message);
     }

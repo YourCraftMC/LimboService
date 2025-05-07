@@ -71,10 +71,10 @@ public class PlayerLoginHandler implements ServerLoginHandler {
         }
 
         Player player = new Player(
-                clientConnection, profile.getName(), profile.getId(),
-                Limbo.getInstance().getNextEntityId(),
-                ServerConfig.WORLD.SPAWNPOINT.resolve(),
-                new PlayerInteractManager()
+            clientConnection, profile.getName(), profile.getId(),
+            Limbo.getInstance().getNextEntityId(),
+            ServerConfig.WORLD.SPAWNPOINT.resolve(),
+            new PlayerInteractManager()
         );
         player.setSkinLayers((byte) (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40));
 
@@ -93,12 +93,12 @@ public class PlayerLoginHandler implements ServerLoginHandler {
         worldSpawn = spawnEvent.getSpawnLocation();
         World world = worldSpawn.getWorld();
         session.send(new ClientboundLoginPacket(
-                0, false, new Key[]{Key.key("minecraft:" + world.getName())},
-                ServerConfig.SERVER.MAX_PLAYERS.resolve(), 8, 8,
-                !ServerConfig.LOGS.REDUCED_DEBUG_INFO.resolve(),
-                true, false, new PlayerSpawnInfo(world.getEnvironment().getId(),
-                Key.key("minecraft:" + world.getName()), 0, ServerConfig.PLAYER.DEFAULT_GAMEMODE.resolve(),
-                ServerConfig.PLAYER.DEFAULT_GAMEMODE.resolve(), false, true, null, 0, 0), false
+            0, false, new Key[]{Key.key("minecraft:" + world.getName())},
+            ServerConfig.SERVER.MAX_PLAYERS.resolve(), 8, 8,
+            !ServerConfig.LOGS.REDUCED_DEBUG_INFO.resolve(),
+            true, false, new PlayerSpawnInfo(world.getEnvironment().getId(),
+            Key.key("minecraft:" + world.getName()), 0, ServerConfig.PLAYER.DEFAULT_GAMEMODE.resolve(),
+            ServerConfig.PLAYER.DEFAULT_GAMEMODE.resolve(), false, true, null, 0, 0), false
         ));
         Limbo.getInstance().getUnsafe().a(player, ServerConfig.PLAYER.DEFAULT_GAMEMODE.resolve());
 
@@ -109,19 +109,19 @@ public class PlayerLoginHandler implements ServerLoginHandler {
         clientConnection.sendPluginMessage(ClientConnection.BRAND_ANNOUNCE_CHANNEL, bytes);
 
         ClientboundPlayerInfoUpdatePacket infoUpdatePacket = new ClientboundPlayerInfoUpdatePacket(EnumSet.of(
-                PlayerListEntryAction.ADD_PLAYER, PlayerListEntryAction.UPDATE_GAME_MODE,
-                PlayerListEntryAction.UPDATE_LISTED, PlayerListEntryAction.UPDATE_LATENCY,
-                PlayerListEntryAction.UPDATE_DISPLAY_NAME
+            PlayerListEntryAction.ADD_PLAYER, PlayerListEntryAction.UPDATE_GAME_MODE,
+            PlayerListEntryAction.UPDATE_LISTED, PlayerListEntryAction.UPDATE_LATENCY,
+            PlayerListEntryAction.UPDATE_DISPLAY_NAME
         ), new PlayerListEntry[]{new PlayerListEntry(
-                profile.getId(), profile, true, 9, ServerConfig.PLAYER.DEFAULT_GAMEMODE.resolve(),
-                Component.text(profile.getName()), true, 0, null, 0, null, null)
+            profile.getId(), profile, true, 9, ServerConfig.PLAYER.DEFAULT_GAMEMODE.resolve(),
+            Component.text(profile.getName()), true, 0, null, 0, null, null)
         });
         clientConnection.sendPacket(infoUpdatePacket);
 
         ClientboundPlayerAbilitiesPacket abilitiesPacket = new ClientboundPlayerAbilitiesPacket(
-                true, ServerConfig.PLAYER.ALLOW_FLIGHT.resolve(), false,
-                ServerConfig.PLAYER.DEFAULT_GAMEMODE.resolve() == GameMode.CREATIVE,
-                0.05F, 0.1F
+            true, ServerConfig.PLAYER.ALLOW_FLIGHT.resolve(), false,
+            ServerConfig.PLAYER.DEFAULT_GAMEMODE.resolve() == GameMode.CREATIVE,
+            0.05F, 0.1F
         );
         clientConnection.sendPacket(abilitiesPacket);
 
@@ -172,9 +172,9 @@ public class PlayerLoginHandler implements ServerLoginHandler {
             if (!ServerConfig.RESOURCE_PACK.SHA1.resolve().equalsIgnoreCase("")) {
                 //SEND RESOURCEPACK
                 player.setResourcePack(
-                        ServerConfig.RESOURCE_PACK.URL.resolve(), ServerConfig.RESOURCE_PACK.SHA1.resolve(),
-                        ServerConfig.RESOURCE_PACK.FORCE.resolve(),
-                        GsonComponentSerializer.gson().deserialize(ServerConfig.RESOURCE_PACK.PROMPT.resolve())
+                    ServerConfig.RESOURCE_PACK.URL.resolve(), ServerConfig.RESOURCE_PACK.SHA1.resolve(),
+                    ServerConfig.RESOURCE_PACK.FORCE.resolve(),
+                    GsonComponentSerializer.gson().deserialize(ServerConfig.RESOURCE_PACK.PROMPT.resolve())
                 );
             } else {
                 //NO SHA

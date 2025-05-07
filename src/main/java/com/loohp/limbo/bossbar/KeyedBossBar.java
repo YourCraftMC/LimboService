@@ -87,14 +87,13 @@ public class KeyedBossBar {
 
     public boolean showPlayer(Player player) {
         ClientboundBossEventPacket packetPlayOutBoss = new ClientboundBossEventPacket(uuid).withAction(BossBarAction.ADD)
-                .withTitle(getProperties().name())
-                .withHealth(getProperties().progress())
-                .withColor(BossBarUtil.color(getProperties().color()))
-                .withDivision(BossBarUtil.from(getProperties().overlay()))
-                .withDarkenSky(getProperties().hasFlag(BossBar.Flag.DARKEN_SCREEN))
-                .withShowFog(getProperties().hasFlag(BossBar.Flag.CREATE_WORLD_FOG))
-                .withPlayEndMusic(getProperties().hasFlag(BossBar.Flag.PLAY_BOSS_MUSIC))
-                ;
+            .withTitle(getProperties().name())
+            .withHealth(getProperties().progress())
+            .withColor(BossBarUtil.color(getProperties().color()))
+            .withDivision(BossBarUtil.from(getProperties().overlay()))
+            .withDarkenSky(getProperties().hasFlag(BossBar.Flag.DARKEN_SCREEN))
+            .withShowFog(getProperties().hasFlag(BossBar.Flag.CREATE_WORLD_FOG))
+            .withPlayEndMusic(getProperties().hasFlag(BossBar.Flag.PLAY_BOSS_MUSIC));
         player.clientConnection.sendPacket(packetPlayOutBoss);
         return players.add(player);
     }
@@ -116,7 +115,7 @@ public class KeyedBossBar {
         @Override
         public void bossBarNameChanged(@NotNull BossBar bar, @NotNull Component oldName, @NotNull Component newName) {
             ClientboundBossEventPacket packetPlayOutBoss = new ClientboundBossEventPacket(parent.getUuid())
-                    .withAction(BossBarAction.UPDATE_TITLE);
+                .withAction(BossBarAction.UPDATE_TITLE);
             for (Player player : parent.getPlayers()) {
                 player.clientConnection.sendPacket(packetPlayOutBoss);
             }
@@ -125,8 +124,8 @@ public class KeyedBossBar {
         @Override
         public void bossBarProgressChanged(@NotNull BossBar bar, float oldProgress, float newProgress) {
             ClientboundBossEventPacket packetPlayOutBoss = new ClientboundBossEventPacket(parent.getUuid())
-                    .withAction(BossBarAction.UPDATE_HEALTH)
-                    .withHealth(newProgress);
+                .withAction(BossBarAction.UPDATE_HEALTH)
+                .withHealth(newProgress);
             for (Player player : parent.getPlayers()) {
                 player.clientConnection.sendPacket(packetPlayOutBoss);
             }
@@ -135,9 +134,9 @@ public class KeyedBossBar {
         @Override
         public void bossBarColorChanged(@NotNull BossBar bar, BossBar.@NotNull Color oldColor, BossBar.@NotNull Color newColor) {
             ClientboundBossEventPacket packetPlayOutBoss = new ClientboundBossEventPacket(parent.getUuid())
-                    .withAction(BossBarAction.UPDATE_STYLE)
-                    .withColor(BossBarUtil.color(newColor))
-                    .withDivision(BossBarUtil.from(bar.overlay()));
+                .withAction(BossBarAction.UPDATE_STYLE)
+                .withColor(BossBarUtil.color(newColor))
+                .withDivision(BossBarUtil.from(bar.overlay()));
             for (Player player : parent.getPlayers()) {
                 player.clientConnection.sendPacket(packetPlayOutBoss);
             }
@@ -146,9 +145,9 @@ public class KeyedBossBar {
         @Override
         public void bossBarOverlayChanged(@NotNull BossBar bar, BossBar.@NotNull Overlay oldOverlay, BossBar.@NotNull Overlay newOverlay) {
             ClientboundBossEventPacket packetPlayOutBoss = new ClientboundBossEventPacket(parent.getUuid())
-                    .withAction(BossBarAction.UPDATE_STYLE)
-                    .withColor(BossBarUtil.color(bar.color()))
-                    .withDivision(BossBarUtil.from(bar.overlay()));
+                .withAction(BossBarAction.UPDATE_STYLE)
+                .withColor(BossBarUtil.color(bar.color()))
+                .withDivision(BossBarUtil.from(bar.overlay()));
             for (Player player : parent.getPlayers()) {
                 player.clientConnection.sendPacket(packetPlayOutBoss);
             }
@@ -157,10 +156,10 @@ public class KeyedBossBar {
         @Override
         public void bossBarFlagsChanged(@NotNull BossBar bar, @NotNull Set<BossBar.Flag> flagsAdded, @NotNull Set<BossBar.Flag> flagsRemoved) {
             ClientboundBossEventPacket packetPlayOutBoss = new ClientboundBossEventPacket(parent.getUuid())
-                    .withAction(BossBarAction.UPDATE_FLAGS)
-                    .withDarkenSky(parent.getProperties().hasFlag(BossBar.Flag.DARKEN_SCREEN))
-                    .withShowFog(parent.getProperties().hasFlag(BossBar.Flag.CREATE_WORLD_FOG))
-                    .withPlayEndMusic(parent.getProperties().hasFlag(BossBar.Flag.PLAY_BOSS_MUSIC));
+                .withAction(BossBarAction.UPDATE_FLAGS)
+                .withDarkenSky(parent.getProperties().hasFlag(BossBar.Flag.DARKEN_SCREEN))
+                .withShowFog(parent.getProperties().hasFlag(BossBar.Flag.CREATE_WORLD_FOG))
+                .withPlayEndMusic(parent.getProperties().hasFlag(BossBar.Flag.PLAY_BOSS_MUSIC));
             for (Player player : parent.getPlayers()) {
                 player.clientConnection.sendPacket(packetPlayOutBoss);
             }

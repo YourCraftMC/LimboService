@@ -83,10 +83,10 @@ public class Metrics {
 
             // Inform the server owners about bStats
             config.setHeader(
-                    "bStats collects some data for plugin authors like how many servers are using their plugins.\n" +
-                            "To honor their work, you should not disable it.\n" +
-                            "This has nearly no effect on the server performance!\n" +
-                            "Check out https://bStats.org/ to learn more :)"
+                "bStats collects some data for plugin authors like how many servers are using their plugins.\n" +
+                    "To honor their work, you should not disable it.\n" +
+                    "This has nearly no effect on the server performance!\n" +
+                    "Check out https://bStats.org/ to learn more :)"
             );
             try {
                 config.saveConfig(configFile);

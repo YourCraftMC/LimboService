@@ -38,83 +38,83 @@ import java.util.Map;
 import java.util.Objects;
 
 public class GeneratedBlockDataMappings {
-	
-	private static JSONObject globalPalette = new JSONObject();
-	
-	static {
-		String block = "reports/blocks.json";
-		InputStream inputStream = Limbo.class.getClassLoader().getResourceAsStream(block);
-		if (inputStream == null) {
-			throw new RuntimeException("Failed to load " + block + " from jar!");
-		}
-        try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-        	globalPalette = (JSONObject) new JSONParser().parse(reader);
-		} catch (IOException | ParseException e) {
-			e.printStackTrace();
-		}		
-	}
 
-	public static int getGlobalPaletteIDFromKey(Key key) {
-		String blockId = key.asString();
-		JSONObject data = (JSONObject) globalPalette.get(blockId);
-		Object obj = data.get("properties");
-		if (obj == null) {
-			return ((Number) ((JSONObject) ((JSONArray) data.get("states")).get(0)).get("id")).intValue();
-		}
+    private static JSONObject globalPalette = new JSONObject();
 
-		for (Object entry : (JSONArray) data.get("states")) {
-			if (((JSONObject) entry).containsKey("default") && ((boolean) ((JSONObject) entry).get("default"))) {
-				return ((Number) ((JSONObject) entry).get("id")).intValue();
-			}
-		}
-
-		throw new IllegalStateException();
-	}
-
-	
-	@SuppressWarnings("unchecked")
-	public static int getGlobalPaletteIDFromState(CompoundTag tag) {
-		try {
-			String blockname = tag.getString("Name");
-
-			JSONObject data = (JSONObject) globalPalette.get(blockname);
-			Object obj = data.get("properties");
-			if (obj == null) {
-				return ((Number) ((JSONObject) ((JSONArray) data.get("states")).get(0)).get("id")).intValue();
-			}
-
-			if (tag.containsKey("Properties")) {
-				CompoundTag blockProp = tag.get("Properties", CompoundTag.class);
-				Map<String, String> blockstate = new HashMap<>();
-				for (String key : blockProp.keySet()) {
-					blockstate.put(key, blockProp.getString(key));
-				}
-
-				for (Object entry : (JSONArray) data.get("states")) {
-					JSONObject jsonobj = (JSONObject) entry;
-					if (((JSONObject) jsonobj.get("properties")).keySet().stream().allMatch(key -> Objects.equals(blockstate.get(key), ((JSONObject) jsonobj.get("properties")).get(key)))) {
-						return ((Number) jsonobj.get("id")).intValue();
-					}
-				}
-			}
-
-			for (Object entry : (JSONArray) data.get("states")) {
-				if (((JSONObject) entry).containsKey("default") && ((boolean) ((JSONObject) entry).get("default"))) {
-					return ((Number) ((JSONObject) entry).get("id")).intValue();
-				}
-			}
-
-			throw new IllegalStateException();
-		} catch (Throwable e) {
-			String snbt;
-            try {
-				snbt = SNBTUtil.toSNBT(tag);
-            } catch (IOException e1) {
-				snbt = tag.valueToString();
-            }
-			new IllegalStateException("Unable to get global palette id for " + snbt + " (Is this scheme created in the same Minecraft version as Limbo?)", e).printStackTrace();
+    static {
+        String block = "reports/blocks.json";
+        InputStream inputStream = Limbo.class.getClassLoader().getResourceAsStream(block);
+        if (inputStream == null) {
+            throw new RuntimeException("Failed to load " + block + " from jar!");
         }
-		return 0;
-	}
+        try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+            globalPalette = (JSONObject) new JSONParser().parse(reader);
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static int getGlobalPaletteIDFromKey(Key key) {
+        String blockId = key.asString();
+        JSONObject data = (JSONObject) globalPalette.get(blockId);
+        Object obj = data.get("properties");
+        if (obj == null) {
+            return ((Number) ((JSONObject) ((JSONArray) data.get("states")).get(0)).get("id")).intValue();
+        }
+
+        for (Object entry : (JSONArray) data.get("states")) {
+            if (((JSONObject) entry).containsKey("default") && ((boolean) ((JSONObject) entry).get("default"))) {
+                return ((Number) ((JSONObject) entry).get("id")).intValue();
+            }
+        }
+
+        throw new IllegalStateException();
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public static int getGlobalPaletteIDFromState(CompoundTag tag) {
+        try {
+            String blockname = tag.getString("Name");
+
+            JSONObject data = (JSONObject) globalPalette.get(blockname);
+            Object obj = data.get("properties");
+            if (obj == null) {
+                return ((Number) ((JSONObject) ((JSONArray) data.get("states")).get(0)).get("id")).intValue();
+            }
+
+            if (tag.containsKey("Properties")) {
+                CompoundTag blockProp = tag.get("Properties", CompoundTag.class);
+                Map<String, String> blockstate = new HashMap<>();
+                for (String key : blockProp.keySet()) {
+                    blockstate.put(key, blockProp.getString(key));
+                }
+
+                for (Object entry : (JSONArray) data.get("states")) {
+                    JSONObject jsonobj = (JSONObject) entry;
+                    if (((JSONObject) jsonobj.get("properties")).keySet().stream().allMatch(key -> Objects.equals(blockstate.get(key), ((JSONObject) jsonobj.get("properties")).get(key)))) {
+                        return ((Number) jsonobj.get("id")).intValue();
+                    }
+                }
+            }
+
+            for (Object entry : (JSONArray) data.get("states")) {
+                if (((JSONObject) entry).containsKey("default") && ((boolean) ((JSONObject) entry).get("default"))) {
+                    return ((Number) ((JSONObject) entry).get("id")).intValue();
+                }
+            }
+
+            throw new IllegalStateException();
+        } catch (Throwable e) {
+            String snbt;
+            try {
+                snbt = SNBTUtil.toSNBT(tag);
+            } catch (IOException e1) {
+                snbt = tag.valueToString();
+            }
+            new IllegalStateException("Unable to get global palette id for " + snbt + " (Is this scheme created in the same Minecraft version as Limbo?)", e).printStackTrace();
+        }
+        return 0;
+    }
 
 }

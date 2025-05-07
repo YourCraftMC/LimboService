@@ -75,9 +75,9 @@ public class ChunkUtil {
                 Limbo.getInstance().getConsole().sendMessage("Unknown block entity type: " + blockId);
             }
             blockEntities[index] = new BlockEntityInfo(
-                    x, y, z,
-                    blockEntityType,
-                    (NbtMap) convert(each)
+                x, y, z,
+                blockEntityType,
+                (NbtMap) convert(each)
             );
 
             ++index;

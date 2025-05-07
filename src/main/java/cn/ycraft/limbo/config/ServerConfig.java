@@ -18,9 +18,9 @@ import java.util.Objects;
 public interface ServerConfig extends Configuration {
 
     @HeaderComments({
-            "Statistics Settings",
-            "This option is used to help developers count plug-in versions and usage, and it will never affect performance and user experience.",
-            "Of course, you can also choose to turn it off here for this daemon."
+        "Statistics Settings",
+        "This option is used to help developers count plug-in versions and usage, and it will never affect performance and user experience.",
+        "Of course, you can also choose to turn it off here for this daemon."
     })
     ConfiguredValue<Boolean> METRICS = ConfiguredValue.of(true);
 
@@ -49,8 +49,8 @@ public interface ServerConfig extends Configuration {
 
         @HeaderComments("Server list favicon (May be left blank)")
         ConfiguredValue<Favicon> FAVICON = ConfiguredValue.builderOf(Favicon.class).fromString()
-                .parse(Favicon::load).serialize(Favicon::path)
-                .defaults(Favicon.load("server-icon.png")).build();
+            .parse(Favicon::load).serialize(Favicon::path)
+            .defaults(Favicon.load("server-icon.png")).build();
 
         interface TAB_LIST extends Configuration {
             @HeaderComments("Tab-List Footer (May be left blank)")
@@ -65,19 +65,19 @@ public interface ServerConfig extends Configuration {
     interface PLAYER extends Configuration {
 
         @HeaderComments({
-                "The players' defaultGameMode.",
-                "from: survival, creative, adventure, spectator"
+            "The players' defaultGameMode.",
+            "from: survival, creative, adventure, spectator"
         })
         ConfiguredValue<GameMode> DEFAULT_GAMEMODE = ConfiguredValue.builderOf(GameMode.class).fromString()
-                .parse(str -> {
-                    try {
-                        int i = Integer.parseInt(str);
-                        return GameMode.byId(i);
-                    } catch (Exception e) {
-                        return GameMode.valueOf(str.toUpperCase(Locale.ENGLISH));
-                    }
-                })
-                .serialize(Enum::name).defaults(GameMode.CREATIVE).build();
+            .parse(str -> {
+                try {
+                    int i = Integer.parseInt(str);
+                    return GameMode.byId(i);
+                } catch (Exception e) {
+                    return GameMode.valueOf(str.toUpperCase(Locale.ENGLISH));
+                }
+            })
+            .serialize(Enum::name).defaults(GameMode.CREATIVE).build();
 
         @HeaderComments("The player's chat format, empty for disable chat functions")
         ConfiguredValue<String> CHAT_FORMAT = ConfiguredValue.of("<%(name)> %(message)");
@@ -103,8 +103,8 @@ public interface ServerConfig extends Configuration {
         ConfiguredValue<Boolean> CONNECTION_VERBOSE = ConfiguredValue.of(true);
 
         @HeaderComments({
-                "Whether the IP addresseses of players should be logged",
-                "If not enabled player IP addresses will be replaced by <ip address withheld> in logs"
+            "Whether the IP addresseses of players should be logged",
+            "If not enabled player IP addresses will be replaced by <ip address withheld> in logs"
         })
         ConfiguredValue<Boolean> DISPLAY_IP_ADDRESS = ConfiguredValue.of(true);
 
@@ -113,26 +113,26 @@ public interface ServerConfig extends Configuration {
     interface PROXY extends Configuration {
 
         @HeaderComments({
-                "Whether this server is behind a bungeecord proxy with BungeeGuard installed (velocity can do this too for <1.13)",
-                "Mutually exclusive with bungeecord and velocity-modern"
+            "Whether this server is behind a bungeecord proxy with BungeeGuard installed (velocity can do this too for <1.13)",
+            "Mutually exclusive with bungeecord and velocity-modern"
         })
         ConfiguredValue<Boolean> BUNGEE_GUARD = ConfiguredValue.of(false);
 
         @HeaderComments({
-                "Whether this server is behind a bungeecord proxy",
-                "Mutually exclusive with velocity-modern and bungee-guard"
+            "Whether this server is behind a bungeecord proxy",
+            "Mutually exclusive with velocity-modern and bungee-guard"
         })
         ConfiguredValue<Boolean> BUNGEECORD = ConfiguredValue.of(false);
 
         @HeaderComments({
-                "Whether this server is behind a velocity proxy with modern player forwarding",
-                "Mutually exclusive with BungeeCord and bungee-guard"
+            "Whether this server is behind a velocity proxy with modern player forwarding",
+            "Mutually exclusive with BungeeCord and bungee-guard"
         })
         ConfiguredValue<Boolean> VELOCITY_MODERN = ConfiguredValue.of(false);
 
         @HeaderComments("For Velocity Modern Forwarding or BungeeGuard a list of valid secrets")
         ConfiguredList<String> FORWARDING_SECRETS = ConfiguredList.builderOf(String.class)
-                .fromString().defaults().build();
+            .fromString().defaults().build();
 
     }
 
@@ -143,27 +143,27 @@ public interface ServerConfig extends Configuration {
 
         @HeaderComments({"Dimensions.", "Choose from: \"minecraft:overworld\", \"minecraft:the_nether\" or \"minecraft:the_end\""})
         ConfiguredValue<Environment> DIMENSION = ConfiguredValue.builderOf(Environment.class).fromString()
-                .parse(s -> Objects.requireNonNull(Environment.fromKey(Key.key(s.toLowerCase(Locale.ENGLISH)))))
-                .serialize(env -> env.getKey().asString())
-                .defaults(Environment.NORMAL)
-                .build();
+            .parse(s -> Objects.requireNonNull(Environment.fromKey(Key.key(s.toLowerCase(Locale.ENGLISH)))))
+            .serialize(env -> env.getKey().asString())
+            .defaults(Environment.NORMAL)
+            .build();
 
         @HeaderComments("Spawn location")
         ConfiguredValue<Location> SPAWNPOINT = ConfiguredValue.builderOf(Location.class).fromSection()
-                .parse(section -> new Location(
-                        null, // Will be set after the world is loaded
-                        section.getDouble("x", 0.0),
-                        section.getDouble("y", 0.0),
-                        section.getDouble("z", 0.0),
-                        section.getFloat("yaw", 0f),
-                        section.getFloat("pitch", 0f)
-                )).serialize((holder, data, loc) -> {
-                    data.put("x", loc.getX());
-                    data.put("y", loc.getY());
-                    data.put("z", loc.getZ());
-                    if (loc.getPitch() != 0) data.put("pitch", loc.getPitch());
-                    if (loc.getYaw() != 0) data.put("yaw", loc.getYaw());
-                }).defaults(new Location(null, 20.5, 17, 22.5, -90, 0)).build();
+            .parse(section -> new Location(
+                null, // Will be set after the world is loaded
+                section.getDouble("x", 0.0),
+                section.getDouble("y", 0.0),
+                section.getDouble("z", 0.0),
+                section.getFloat("yaw", 0f),
+                section.getFloat("pitch", 0f)
+            )).serialize((holder, data, loc) -> {
+                data.put("x", loc.getX());
+                data.put("y", loc.getY());
+                data.put("z", loc.getZ());
+                if (loc.getPitch() != 0) data.put("pitch", loc.getPitch());
+                if (loc.getYaw() != 0) data.put("yaw", loc.getYaw());
+            }).defaults(new Location(null, 20.5, 17, 22.5, -90, 0)).build();
 
     }
 
@@ -179,7 +179,7 @@ public interface ServerConfig extends Configuration {
 
         @HeaderComments("JSON formatted text to show when prompting the player to install the resource pack (May be left blank)")
         ConfiguredValue<String> PROMPT = ConfiguredValue.of(
-                "{\"text\"\\:\"\",\"extra\"\\:[{\"text\"\\:\"Install server resource pack\\!\",\"color\"\\:\"yellow\"}]}"
+            "{\"text\"\\:\"\",\"extra\"\\:[{\"text\"\\:\"Install server resource pack\\!\",\"color\"\\:\"yellow\"}]}"
         );
 
         @HeaderComments("Server resource pack hash (May be left blank)")

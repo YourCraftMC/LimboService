@@ -420,7 +420,7 @@ public class Vector implements Cloneable {
      * Matrix</a>.
      *
      * @param angle the angle to rotate the vector about. This angle is passed
-     * in radians
+     *              in radians
      * @return the same vector
      */
     public Vector rotateAroundX(double angle) {
@@ -441,7 +441,7 @@ public class Vector implements Cloneable {
      * Matrix</a>.
      *
      * @param angle the angle to rotate the vector about. This angle is passed
-     * in radians
+     *              in radians
      * @return the same vector
      */
     public Vector rotateAroundY(double angle) {
@@ -462,7 +462,7 @@ public class Vector implements Cloneable {
      * Matrix</a>.
      *
      * @param angle the angle to rotate the vector about. This angle is passed
-     * in radians
+     *              in radians
      * @return the same vector
      */
     public Vector rotateAroundZ(double angle) {
@@ -486,14 +486,14 @@ public class Vector implements Cloneable {
      * with the scaling of a non-unit axis vector, you can use
      * {@link Vector#rotateAroundNonUnitAxis(Vector, double)}.
      *
-     * @param axis the axis to rotate the vector around. If the passed vector is
-     * not of length 1, it gets copied and normalized before using it for the
-     * rotation. Please use {@link Vector#normalize()} on the instance before
-     * passing it to this method
+     * @param axis  the axis to rotate the vector around. If the passed vector is
+     *              not of length 1, it gets copied and normalized before using it for the
+     *              rotation. Please use {@link Vector#normalize()} on the instance before
+     *              passing it to this method
      * @param angle the angle to rotate the vector around the axis
      * @return the same vector
      * @throws IllegalArgumentException if the provided axis vector instance is
-     * null
+     *                                  null
      */
     public Vector rotateAroundAxis(Vector axis, double angle) throws IllegalArgumentException {
         Preconditions.checkArgument(axis != null, "The provided axis vector was null");
@@ -515,11 +515,11 @@ public class Vector implements Cloneable {
      * about the scaling of the vector, use
      * {@link Vector#rotateAroundAxis(Vector, double)}
      *
-     * @param axis the axis to rotate the vector around.
+     * @param axis  the axis to rotate the vector around.
      * @param angle the angle to rotate the vector around the axis
      * @return the same vector
      * @throws IllegalArgumentException if the provided axis vector instance is
-     * null
+     *                                  null
      */
     public Vector rotateAroundNonUnitAxis(Vector axis, double angle) throws IllegalArgumentException {
         Preconditions.checkArgument(axis != null, "The provided axis vector was null");
@@ -532,14 +532,14 @@ public class Vector implements Cloneable {
         double dotProduct = this.dot(axis);
 
         double xPrime = x2 * dotProduct * (1d - cosTheta)
-                + x * cosTheta
-                + (-z2 * y + y2 * z) * sinTheta;
+            + x * cosTheta
+            + (-z2 * y + y2 * z) * sinTheta;
         double yPrime = y2 * dotProduct * (1d - cosTheta)
-                + y * cosTheta
-                + (z2 * x - x2 * z) * sinTheta;
+            + y * cosTheta
+            + (z2 * x - x2 * z) * sinTheta;
         double zPrime = z2 * dotProduct * (1d - cosTheta)
-                + z * cosTheta
-                + (-y2 * x + x2 * y) * sinTheta;
+            + z * cosTheta
+            + (-y2 * x + x2 * y) * sinTheta;
 
         return setX(xPrime).setY(yPrime).setZ(zPrime);
     }
@@ -767,7 +767,7 @@ public class Vector implements Cloneable {
      * Gets a Location version of this vector.
      *
      * @param world The world to link the location to.
-     * @param yaw The desired yaw.
+     * @param yaw   The desired yaw.
      * @param pitch The desired pitch.
      * @return the location
      */
@@ -780,9 +780,9 @@ public class Vector implements Cloneable {
      *
      * @return A block vector.
     public BlockVector toBlockVector() {
-        return new BlockVector(x, y, z);
+    return new BlockVector(x, y, z);
     }
-    */
+     */
 
     /**
      * Check if each component of this Vector is finite.

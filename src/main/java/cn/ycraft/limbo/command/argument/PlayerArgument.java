@@ -24,7 +24,7 @@ public class PlayerArgument extends ArgumentResolver<CommandSender, Player> {
     @Override
     public SuggestionResult suggest(Invocation<CommandSender> invocation, Argument<Player> argument, SuggestionContext context) {
         return Limbo.getInstance().getPlayers()
-                .stream()
-                .collect(SuggestionResult.collector(Player::getName, t -> t.getUniqueId().toString()));
+            .stream()
+            .collect(SuggestionResult.collector(Player::getName, t -> t.getUniqueId().toString()));
     }
 }

@@ -23,7 +23,7 @@ package com.loohp.limbo.events.inventory;
 import com.loohp.limbo.events.Cancellable;
 import com.loohp.limbo.inventory.InventoryView;
 
-public class AnvilRenameInputEvent extends InventoryEvent implements Cancellable  {
+public class AnvilRenameInputEvent extends InventoryEvent implements Cancellable {
 
     private boolean cancelled;
     private String input;

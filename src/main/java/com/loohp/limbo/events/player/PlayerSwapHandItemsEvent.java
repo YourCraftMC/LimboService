@@ -26,41 +26,41 @@ import com.loohp.limbo.player.Player;
 
 public class PlayerSwapHandItemsEvent extends PlayerEvent implements Cancellable {
 
-	private boolean cancelled;
-	private ItemStack mainHandItem;
-	private ItemStack offHandItem;
+    private boolean cancelled;
+    private ItemStack mainHandItem;
+    private ItemStack offHandItem;
 
-	public PlayerSwapHandItemsEvent(Player player, ItemStack mainHandItem, ItemStack offHandItem) {
-		super(player);
-		this.mainHandItem = mainHandItem;
-		this.offHandItem = offHandItem;
-		this.cancelled = false;
-	}
+    public PlayerSwapHandItemsEvent(Player player, ItemStack mainHandItem, ItemStack offHandItem) {
+        super(player);
+        this.mainHandItem = mainHandItem;
+        this.offHandItem = offHandItem;
+        this.cancelled = false;
+    }
 
-	public ItemStack getMainHandItem() {
-		return mainHandItem;
-	}
+    public ItemStack getMainHandItem() {
+        return mainHandItem;
+    }
 
-	public void setMainHandItem(ItemStack mainHandItem) {
-		this.mainHandItem = mainHandItem;
-	}
+    public void setMainHandItem(ItemStack mainHandItem) {
+        this.mainHandItem = mainHandItem;
+    }
 
-	public ItemStack getOffHandItem() {
-		return offHandItem;
-	}
+    public ItemStack getOffHandItem() {
+        return offHandItem;
+    }
 
-	public void setOffHandItem(ItemStack offHandItem) {
-		this.offHandItem = offHandItem;
-	}
+    public void setOffHandItem(ItemStack offHandItem) {
+        this.offHandItem = offHandItem;
+    }
 
-	@Override
-	public void setCancelled(boolean cancelled) {
-		this.cancelled = cancelled;
-	}
+    @Override
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
 
-	@Override
-	public boolean isCancelled() {
-		return cancelled;
-	}
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
+    }
 
 }

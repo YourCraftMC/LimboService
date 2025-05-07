@@ -25,27 +25,27 @@ public interface AllowlistConfig extends Configuration {
     }
 
     @HeaderComments({
-            "Whether to reverse the allowlist,",
-            " if true, will make this an exclusion list or \"banned list\".",
+        "Whether to reverse the allowlist,",
+        " if true, will make this an exclusion list or \"banned list\".",
     })
     ConfiguredValue<Boolean> REVERSED = ConfiguredValue.of(true);
 
     @HeaderComments({
-            "The list of players to allow or disallow.",
-            " If the allowlist is reversed, players on this list will be disallowed.",
-            " If the allowlist is not reversed, players not on this list will be disallowed."
+        "The list of players to allow or disallow.",
+        " If the allowlist is reversed, players on this list will be disallowed.",
+        " If the allowlist is not reversed, players not on this list will be disallowed."
     })
     ConfiguredList<UUID> BY_UUID = ConfiguredList.builderOf(UUID.class).fromString()
-            .parse(UUID::fromString).serialize(UUID::toString)
-            .defaults().build();
+        .parse(UUID::fromString).serialize(UUID::toString)
+        .defaults().build();
 
     @HeaderComments({
-            "The list of players' name to allow or disallow.",
-            " If the allowlist is reversed, players on this list will be disallowed.",
-            " If the allowlist is not reversed, players not on this list will be disallowed."
+        "The list of players' name to allow or disallow.",
+        " If the allowlist is reversed, players on this list will be disallowed.",
+        " If the allowlist is not reversed, players not on this list will be disallowed."
     })
     ConfiguredList<String> BY_NAME = ConfiguredList.builderOf(String.class).fromString()
-            .defaults().build();
+        .defaults().build();
 
 
 }

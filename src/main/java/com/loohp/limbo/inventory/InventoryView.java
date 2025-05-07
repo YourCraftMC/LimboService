@@ -89,10 +89,10 @@ public class InventoryView {
 
     /**
      * Gets the inventory corresponding to the given raw slot ID.
-     *
+     * <p>
      * If the slot ID is {@link #OUTSIDE} null will be returned, otherwise
      * behaviour for illegal and negative slot IDs is undefined.
-     *
+     * <p>
      * May be used with {@link #convertSlot(int)} to directly index an
      * underlying inventory.
      *

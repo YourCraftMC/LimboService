@@ -29,7 +29,7 @@ public class GameModeArgument extends ArgumentResolver<CommandSender, GameMode> 
     @Override
     public SuggestionResult suggest(Invocation<CommandSender> invocation, Argument<GameMode> argument, SuggestionContext context) {
         return Arrays.stream(GameMode.values())
-                .collect(SuggestionResult.collector(g -> g.name().toLowerCase(Locale.ENGLISH), Enum::name));
+            .collect(SuggestionResult.collector(g -> g.name().toLowerCase(Locale.ENGLISH), Enum::name));
     }
 
     public static @Nullable GameMode parseGameMode(@NotNull String mode) {

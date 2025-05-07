@@ -78,7 +78,7 @@ public class YamlOrder extends PropertyUtils {
                     for (Field field : c.getDeclaredFields()) {
                         int modifiers = field.getModifiers();
                         if (!Modifier.isStatic(modifiers) && !Modifier.isTransient(modifiers)
-                                && !properties.containsKey(field.getName())) {
+                            && !properties.containsKey(field.getName())) {
                             properties.put(field.getName(), new FieldProperty(field));
                         }
                     }
@@ -87,10 +87,10 @@ public class YamlOrder extends PropertyUtils {
             default:
                 try {
                     for (PropertyDescriptor property : Introspector.getBeanInfo(type)
-                            .getPropertyDescriptors()) {
+                        .getPropertyDescriptors()) {
                         Method readMethod = property.getReadMethod();
                         if ((readMethod == null || !readMethod.getName().equals("getClass"))
-                                && !isTransient(property)) {
+                            && !isTransient(property)) {
                             properties.put(property.getName(), new MethodProperty(property));
                         }
                     }
@@ -162,7 +162,7 @@ public class YamlOrder extends PropertyUtils {
         }
         if (property == null) {
             throw new YAMLException(
-                    "Unable to find property '" + name + "' on class: " + type.getName());
+                "Unable to find property '" + name + "' on class: " + type.getName());
         }
         return property;
     }
@@ -170,7 +170,7 @@ public class YamlOrder extends PropertyUtils {
     public void setBeanAccess(BeanAccess beanAccess) {
         if (platformFeatureDetector.isRunningOnAndroid() && beanAccess != BeanAccess.FIELD) {
             throw new IllegalArgumentException(
-                    "JVM is Android - only BeanAccess.FIELD is available");
+                "JVM is Android - only BeanAccess.FIELD is available");
         }
 
         if (this.beanAccess != beanAccess) {

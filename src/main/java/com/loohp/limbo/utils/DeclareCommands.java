@@ -119,7 +119,7 @@ public class DeclareCommands {
     }
 
     private static CommandNode createEntry(
-            com.mojang.brigadier.tree.CommandNode<CommandSender> node, Object2IntMap<com.mojang.brigadier.tree.CommandNode<CommandSender>> nodes
+        com.mojang.brigadier.tree.CommandNode<CommandSender> node, Object2IntMap<com.mojang.brigadier.tree.CommandNode<CommandSender>> nodes
     ) {
         boolean isExecute = false;
         int redirect = 0;

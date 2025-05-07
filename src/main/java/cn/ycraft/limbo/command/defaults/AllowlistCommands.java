@@ -70,5 +70,5 @@ public class AllowlistCommands implements DefaultCommands {
 
         limbo.getAllowlistHolder().save();
     }
-    
+
 }

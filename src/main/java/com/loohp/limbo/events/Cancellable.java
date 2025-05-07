@@ -21,9 +21,9 @@
 package com.loohp.limbo.events;
 
 public interface Cancellable {
-	
-	void setCancelled(boolean cancelled);
-	
-	boolean isCancelled();
+
+    void setCancelled(boolean cancelled);
+
+    boolean isCancelled();
 
 }

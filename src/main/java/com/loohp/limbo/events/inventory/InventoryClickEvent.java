@@ -29,88 +29,88 @@ import com.loohp.limbo.inventory.ItemStack;
 
 public class InventoryClickEvent extends InventoryEvent implements Cancellable {
 
-	private boolean cancelled;
-	private final ClickType click;
-	private final InventoryAction action;
-	private final InventoryType.SlotType type;
-	private final int whichSlot;
-	private final int rawSlot;
-	private ItemStack current;
-	private int hotbarKey;
+    private boolean cancelled;
+    private final ClickType click;
+    private final InventoryAction action;
+    private final InventoryType.SlotType type;
+    private final int whichSlot;
+    private final int rawSlot;
+    private ItemStack current;
+    private int hotbarKey;
 
-	public InventoryClickEvent(InventoryView view, InventoryType.SlotType type, int rawSlot, ClickType click, InventoryAction action) {
-		super(view, view.getInventory(rawSlot));
-		this.type = type;
-		this.rawSlot = rawSlot;
-		this.whichSlot = view.convertSlot(rawSlot);
-		this.click = click;
-		this.action = action;
-		this.current = null;
-		this.hotbarKey = -1;
-		this.cancelled = false;
-	}
+    public InventoryClickEvent(InventoryView view, InventoryType.SlotType type, int rawSlot, ClickType click, InventoryAction action) {
+        super(view, view.getInventory(rawSlot));
+        this.type = type;
+        this.rawSlot = rawSlot;
+        this.whichSlot = view.convertSlot(rawSlot);
+        this.click = click;
+        this.action = action;
+        this.current = null;
+        this.hotbarKey = -1;
+        this.cancelled = false;
+    }
 
-	public InventoryClickEvent(InventoryView view, InventoryType.SlotType type, int rawSlot, ClickType click, InventoryAction action, int hotbarKey) {
-		this(view, type, rawSlot, click, action);
-		this.hotbarKey = hotbarKey;
-	}
+    public InventoryClickEvent(InventoryView view, InventoryType.SlotType type, int rawSlot, ClickType click, InventoryAction action, int hotbarKey) {
+        this(view, type, rawSlot, click, action);
+        this.hotbarKey = hotbarKey;
+    }
 
-	public ClickType getClick() {
-		return click;
-	}
+    public ClickType getClick() {
+        return click;
+    }
 
-	public InventoryAction getAction() {
-		return action;
-	}
+    public InventoryAction getAction() {
+        return action;
+    }
 
-	public InventoryType.SlotType getType() {
-		return type;
-	}
+    public InventoryType.SlotType getType() {
+        return type;
+    }
 
-	public int getWhichSlot() {
-		return whichSlot;
-	}
+    public int getWhichSlot() {
+        return whichSlot;
+    }
 
-	public int getRawSlot() {
-		return rawSlot;
-	}
+    public int getRawSlot() {
+        return rawSlot;
+    }
 
-	public int getHotbarKey() {
-		return hotbarKey;
-	}
+    public int getHotbarKey() {
+        return hotbarKey;
+    }
 
-	public ItemStack getCarriedItem() {
-		return getView().getCarriedItem();
-	}
+    public ItemStack getCarriedItem() {
+        return getView().getCarriedItem();
+    }
 
-	@Deprecated
-	public void setCarriedItem(ItemStack stack) {
-		getView().setCarriedItem(stack);
-	}
+    @Deprecated
+    public void setCarriedItem(ItemStack stack) {
+        getView().setCarriedItem(stack);
+    }
 
-	public ItemStack getCurrentItem() {
-		if (type == InventoryType.SlotType.OUTSIDE) {
-			return current;
-		}
-		return getView().getItem(rawSlot);
-	}
+    public ItemStack getCurrentItem() {
+        if (type == InventoryType.SlotType.OUTSIDE) {
+            return current;
+        }
+        return getView().getItem(rawSlot);
+    }
 
-	public void setCurrentItem(ItemStack stack) {
-		if (type == InventoryType.SlotType.OUTSIDE) {
-			current = stack;
-		} else {
-			getView().setItem(rawSlot, stack);
-		}
-	}
+    public void setCurrentItem(ItemStack stack) {
+        if (type == InventoryType.SlotType.OUTSIDE) {
+            current = stack;
+        } else {
+            getView().setItem(rawSlot, stack);
+        }
+    }
 
-	@Override
-	public boolean isCancelled() {
-		return cancelled;
-	}
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
+    }
 
-	@Override
-	public void setCancelled(boolean cancelled) {
-		this.cancelled = cancelled;
-	}
+    @Override
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
 
 }

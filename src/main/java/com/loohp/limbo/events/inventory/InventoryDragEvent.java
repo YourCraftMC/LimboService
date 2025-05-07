@@ -32,67 +32,67 @@ import java.util.Set;
 
 public class InventoryDragEvent extends InventoryEvent implements Cancellable {
 
-	private boolean cancelled;
-	private final DragType type;
-	private final Map<Integer, ItemStack> addedItems;
-	private final Set<Integer> containerSlots;
-	private final ItemStack oldCarried;
-	private ItemStack newCarried;
+    private boolean cancelled;
+    private final DragType type;
+    private final Map<Integer, ItemStack> addedItems;
+    private final Set<Integer> containerSlots;
+    private final ItemStack oldCarried;
+    private ItemStack newCarried;
 
-	public InventoryDragEvent(InventoryView view, ItemStack newCarried, ItemStack oldCarried, boolean right, Map<Integer, ItemStack> slots) {
-		super(view, view.getInventory(view.convertSlot(slots.keySet().iterator().next())));
-		this.type = right ? DragType.SINGLE : DragType.EVEN;
-		this.newCarried = newCarried;
-		this.oldCarried = oldCarried;
-		this.addedItems = Collections.unmodifiableMap(slots);
-		Set<Integer> containerSlots = new HashSet<>();
-		for (Integer slot : slots.keySet()) {
-			containerSlots.add(view.convertSlot(slot));
-		}
-		this.containerSlots = Collections.unmodifiableSet(containerSlots);
-		this.cancelled = false;
-	}
+    public InventoryDragEvent(InventoryView view, ItemStack newCarried, ItemStack oldCarried, boolean right, Map<Integer, ItemStack> slots) {
+        super(view, view.getInventory(view.convertSlot(slots.keySet().iterator().next())));
+        this.type = right ? DragType.SINGLE : DragType.EVEN;
+        this.newCarried = newCarried;
+        this.oldCarried = oldCarried;
+        this.addedItems = Collections.unmodifiableMap(slots);
+        Set<Integer> containerSlots = new HashSet<>();
+        for (Integer slot : slots.keySet()) {
+            containerSlots.add(view.convertSlot(slot));
+        }
+        this.containerSlots = Collections.unmodifiableSet(containerSlots);
+        this.cancelled = false;
+    }
 
-	public Map<Integer, ItemStack> getNewItems() {
-		return addedItems;
-	}
+    public Map<Integer, ItemStack> getNewItems() {
+        return addedItems;
+    }
 
-	public Set<Integer> getRawSlots() {
-		return addedItems.keySet();
-	}
+    public Set<Integer> getRawSlots() {
+        return addedItems.keySet();
+    }
 
-	public Set<Integer> getInventorySlots() {
-		return containerSlots;
-	}
+    public Set<Integer> getInventorySlots() {
+        return containerSlots;
+    }
 
-	public ItemStack get() {
-		return newCarried;
-	}
+    public ItemStack get() {
+        return newCarried;
+    }
 
-	public ItemStack getCarriedItem() {
-		return newCarried;
-	}
+    public ItemStack getCarriedItem() {
+        return newCarried;
+    }
 
-	public void setCarriedItem(ItemStack newCursor) {
-		this.newCarried = newCursor;
-	}
+    public void setCarriedItem(ItemStack newCursor) {
+        this.newCarried = newCursor;
+    }
 
-	public ItemStack getOldCarriedItem() {
-		return oldCarried.clone();
-	}
+    public ItemStack getOldCarriedItem() {
+        return oldCarried.clone();
+    }
 
-	public DragType getType() {
-		return type;
-	}
+    public DragType getType() {
+        return type;
+    }
 
-	@Override
-	public boolean isCancelled() {
-		return cancelled;
-	}
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
+    }
 
-	@Override
-	public void setCancelled(boolean cancelled) {
-		this.cancelled = cancelled;
-	}
+    @Override
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
 
 }

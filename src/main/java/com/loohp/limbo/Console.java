@@ -209,6 +209,7 @@ public class Console implements CommandSender {
         reader.getTerminal().flush();
         unstashLine();
     }
+
     public void sendComponent(Component message) {
         stashLine();
         String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());

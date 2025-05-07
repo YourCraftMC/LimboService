@@ -137,9 +137,9 @@ public class ItemStack implements Cloneable {
     @Override
     public String toString() {
         return "ItemStack{" +
-                "material=" + material +
-                ", amount=" + amount +
-                ", components=" + components +
-                '}';
+            "material=" + material +
+            ", amount=" + amount +
+            ", components=" + components +
+            '}';
     }
 }

@@ -134,13 +134,13 @@ public final class Limbo implements ForwardingAudience {
 
         // Initialize the configuration.
         this.configHolder = YAMLConfigFactory.from("config.yml")
-                .option(StandardOptions.PRELOAD, true).build();
+            .option(StandardOptions.PRELOAD, true).build();
         this.configHolder.initialize(ServerConfig.class);
         this.messsageHolder = YAMLConfigFactory.from("messages.yml")
-                .option(StandardOptions.PRELOAD, true).build();
+            .option(StandardOptions.PRELOAD, true).build();
         this.messsageHolder.initialize(ServerMessages.class);
         this.allowlistHolder = YAMLConfigFactory.from("allowlist.yml")
-                .option(StandardOptions.PRELOAD, true).build();
+            .option(StandardOptions.PRELOAD, true).build();
         this.allowlistHolder.initialize(AllowlistConfig.class);
 
         serverHost = ServerConfig.SERVER.HOST.resolve();
@@ -162,9 +162,9 @@ public final class Limbo implements ForwardingAudience {
         worlds.add(loadDefaultWorld());
         Location spawn = ServerConfig.WORLD.SPAWNPOINT.resolve();
         ServerConfig.WORLD.SPAWNPOINT.set(new Location(
-                getWorld(ServerConfig.getLevelName()),
-                spawn.getX(), spawn.getY(), spawn.getZ(),
-                spawn.getYaw(), spawn.getPitch())
+            getWorld(ServerConfig.getLevelName()),
+            spawn.getX(), spawn.getY(), spawn.getZ(),
+            spawn.getYaw(), spawn.getPitch())
         );
 
         if (!NetworkUtils.available(ServerConfig.SERVER.PORT.resolve())) {
@@ -299,9 +299,9 @@ public final class Limbo implements ForwardingAudience {
 
         try {
             World world = Schematic.toWorld(
-                    ServerConfig.getLevelName(),
-                    ServerConfig.WORLD.DIMENSION.resolve(),
-                    (CompoundTag) NBTUtil.read(schem).getTag()
+                ServerConfig.getLevelName(),
+                ServerConfig.WORLD.DIMENSION.resolve(),
+                (CompoundTag) NBTUtil.read(schem).getTag()
             );
             console.sendMessage("Loaded world " + ServerConfig.getLevelName() + "! (" + ServerConfig.WORLD.DIMENSION.resolve().getKey().value() + ")");
             return world;

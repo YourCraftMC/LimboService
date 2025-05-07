@@ -24,8 +24,8 @@ import com.loohp.limbo.inventory.InventoryView;
 
 public class InventoryCloseEvent extends InventoryEvent {
 
-	public InventoryCloseEvent(InventoryView inventoryView) {
-		super(inventoryView, inventoryView.getTopInventory());
-	}
+    public InventoryCloseEvent(InventoryView inventoryView) {
+        super(inventoryView, inventoryView.getTopInventory());
+    }
 
 }

@@ -131,20 +131,20 @@ public class ServerConnection {
     private void motd() {
         server.setGlobalFlag(MinecraftConstants.SERVER_INFO_BUILDER_KEY, session -> {
             StatusPingEvent event = Limbo.getInstance().getEventsManager().callEvent(
-                    new StatusPingEvent(
-                            getClient(session),
-                            ServerConfig.SERVER.VERSION.resolve(),
-                            Limbo.SERVER_IMPLEMENTATION_PROTOCOL,
-                            GsonComponentSerializer.gson().deserialize(ServerConfig.SERVER.MOTD.resolve()),
-                            ServerConfig.SERVER.MAX_PLAYERS.resolve(),
-                            Limbo.getInstance().getPlayers().size(),
-                            ServerConfig.SERVER.FAVICON.resolve().data()
-                    )
+                new StatusPingEvent(
+                    getClient(session),
+                    ServerConfig.SERVER.VERSION.resolve(),
+                    Limbo.SERVER_IMPLEMENTATION_PROTOCOL,
+                    GsonComponentSerializer.gson().deserialize(ServerConfig.SERVER.MOTD.resolve()),
+                    ServerConfig.SERVER.MAX_PLAYERS.resolve(),
+                    Limbo.getInstance().getPlayers().size(),
+                    ServerConfig.SERVER.FAVICON.resolve().data()
+                )
             );
             return new ServerStatusInfo(event.getMotd(),
-                    new PlayerInfo(event.getMaxPlayers(), event.getPlayersOnline(), new ArrayList<>()),
-                    new VersionInfo(event.getVersion(), event.getProtocol()),
-                    event.getFavicon(), false
+                new PlayerInfo(event.getMaxPlayers(), event.getPlayersOnline(), new ArrayList<>()),
+                new VersionInfo(event.getVersion(), event.getProtocol()),
+                event.getFavicon(), false
             );
         });
     }

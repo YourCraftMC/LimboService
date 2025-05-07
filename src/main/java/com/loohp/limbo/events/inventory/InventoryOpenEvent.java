@@ -25,21 +25,21 @@ import com.loohp.limbo.inventory.InventoryView;
 
 public class InventoryOpenEvent extends InventoryEvent implements Cancellable {
 
-	private boolean cancelled;
+    private boolean cancelled;
 
-	public InventoryOpenEvent(InventoryView inventoryView) {
-		super(inventoryView, inventoryView.getTopInventory());
-		this.cancelled = false;
-	}
+    public InventoryOpenEvent(InventoryView inventoryView) {
+        super(inventoryView, inventoryView.getTopInventory());
+        this.cancelled = false;
+    }
 
-	@Override
-	public boolean isCancelled() {
-		return cancelled;
-	}
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
+    }
 
-	@Override
-	public void setCancelled(boolean cancelled) {
-		this.cancelled = cancelled;
-	}
+    @Override
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
 
 }

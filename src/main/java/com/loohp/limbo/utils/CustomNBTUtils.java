@@ -26,53 +26,53 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class CustomNBTUtils {
-	
-	public static CompoundTag getCompoundTagFromJson(JSONObject json) {
-		CompoundTag tag = new CompoundTag();
-		
-		for (Object obj : json.keySet()) {
-			String key = (String) obj;
-			Object rawValue = json.get(key);
 
-			if (rawValue instanceof JSONObject) {
-				tag.put(key, getCompoundTagFromJson((JSONObject) rawValue));
-			} else if (rawValue instanceof JSONArray) {
-				tag.put(key, getListTagFromJson((JSONArray) rawValue));
-			} else if (rawValue instanceof Boolean) {
-				tag.putBoolean(key, (boolean) rawValue);
-			} else if (rawValue instanceof Long) {
-				tag.putLong(key, (long) rawValue);
-			} else if (rawValue instanceof Double) {
-				tag.putDouble(key, (double) rawValue);
-			} else if (rawValue instanceof String) {
-				tag.putString(key, (String) rawValue);
-			}
-		}
-		
-		return tag;
-	}
-	
-	public static ListTag<?> getListTagFromJson(JSONArray json) {
-		if (json.isEmpty()) {
-			return ListTag.createUnchecked(null);
-		}
-		ListTag<?> listTag = ListTag.createUnchecked(null);
-		for (Object rawValue : json) {
-			if (rawValue instanceof JSONObject) {
-				listTag.addUnchecked(getCompoundTagFromJson((JSONObject) rawValue));
-			} else if (rawValue instanceof JSONArray) {
-				listTag.addUnchecked(getListTagFromJson((JSONArray) rawValue));
-			} else if (rawValue instanceof Boolean) {
-				listTag.addBoolean((boolean) rawValue);
-			} else if (rawValue instanceof Long) {
-				listTag.addLong((long) rawValue);
-			} else if (rawValue instanceof Double) {
-				listTag.addDouble((double) rawValue);
-			} else if (rawValue instanceof String) {
-				listTag.addString((String) rawValue);
-			}
-		}
-		return listTag;
-	}
+    public static CompoundTag getCompoundTagFromJson(JSONObject json) {
+        CompoundTag tag = new CompoundTag();
+
+        for (Object obj : json.keySet()) {
+            String key = (String) obj;
+            Object rawValue = json.get(key);
+
+            if (rawValue instanceof JSONObject) {
+                tag.put(key, getCompoundTagFromJson((JSONObject) rawValue));
+            } else if (rawValue instanceof JSONArray) {
+                tag.put(key, getListTagFromJson((JSONArray) rawValue));
+            } else if (rawValue instanceof Boolean) {
+                tag.putBoolean(key, (boolean) rawValue);
+            } else if (rawValue instanceof Long) {
+                tag.putLong(key, (long) rawValue);
+            } else if (rawValue instanceof Double) {
+                tag.putDouble(key, (double) rawValue);
+            } else if (rawValue instanceof String) {
+                tag.putString(key, (String) rawValue);
+            }
+        }
+
+        return tag;
+    }
+
+    public static ListTag<?> getListTagFromJson(JSONArray json) {
+        if (json.isEmpty()) {
+            return ListTag.createUnchecked(null);
+        }
+        ListTag<?> listTag = ListTag.createUnchecked(null);
+        for (Object rawValue : json) {
+            if (rawValue instanceof JSONObject) {
+                listTag.addUnchecked(getCompoundTagFromJson((JSONObject) rawValue));
+            } else if (rawValue instanceof JSONArray) {
+                listTag.addUnchecked(getListTagFromJson((JSONArray) rawValue));
+            } else if (rawValue instanceof Boolean) {
+                listTag.addBoolean((boolean) rawValue);
+            } else if (rawValue instanceof Long) {
+                listTag.addLong((long) rawValue);
+            } else if (rawValue instanceof Double) {
+                listTag.addDouble((double) rawValue);
+            } else if (rawValue instanceof String) {
+                listTag.addString((String) rawValue);
+            }
+        }
+        return listTag;
+    }
 
 }

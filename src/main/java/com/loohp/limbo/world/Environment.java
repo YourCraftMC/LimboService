@@ -28,89 +28,89 @@ import java.util.Set;
 
 public class Environment {
 
-	public static final Environment NORMAL = new Environment(Key.key("minecraft:overworld"), true, 0);
-	public static final Environment NETHER = new Environment(Key.key("minecraft:the_nether"), false, 3);
-	public static final Environment END = new Environment(Key.key("minecraft:the_end"), false,2);
-	
-	public static final Set<Environment> REGISTERED_ENVIRONMENTS = new HashSet<>();
+    public static final Environment NORMAL = new Environment(Key.key("minecraft:overworld"), true, 0);
+    public static final Environment NETHER = new Environment(Key.key("minecraft:the_nether"), false, 3);
+    public static final Environment END = new Environment(Key.key("minecraft:the_end"), false, 2);
 
-	public static Environment fromKey(Key key) {
-		if (key.equals(NORMAL.getKey())) {
-			return NORMAL;
-		} else if (key.equals(NETHER.getKey())) {
-			return NETHER;
-		} else if (key.equals(END.getKey())) {
-			return END;
-		}
-		return null;
-	}
-	
-	@Deprecated
-	public static Environment createCustom(Key key, int id) {
-		return createCustom(key, true, id);
-	}
-	
-	public static Environment createCustom(Key key, boolean hasSkyLight, int id) {
-		if (REGISTERED_ENVIRONMENTS.stream().anyMatch(each -> each.getKey().equals(key))) {
-			throw new IllegalArgumentException("An Environment is already created with this Key");
-		}
-		return new Environment(key, hasSkyLight, id);
-	}
-	
-	public static Environment getCustom(Key key) {
-		return REGISTERED_ENVIRONMENTS.stream().filter(each -> each.getKey().equals(key)).findFirst().orElse(null); 
-	}
-	
-	//=========================
-	
-	private final Key key;
-	private final boolean hasSkyLight;
-	private final int id;
-	
-	private Environment(Key key, boolean hasSkyLight, int id) {
-		this.key = key;
-		this.hasSkyLight = hasSkyLight;
-		this.id = id;
-	}
-	
-	public Key getKey() {
-		return key;
-	}
-	
-	public boolean hasSkyLight() {
-		return hasSkyLight;
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (hasSkyLight ? 1231 : 1237);
-		result = prime * result + ((key == null) ? 0 : key.hashCode());
-		return result;
-	}
+    public static final Set<Environment> REGISTERED_ENVIRONMENTS = new HashSet<>();
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		Environment other = (Environment) obj;
-		if (hasSkyLight != other.hasSkyLight) {
-			return false;
-		}
-		if (key == null) {
-            return other.key == null;
-		} else return key.equals(other.key);
+    public static Environment fromKey(Key key) {
+        if (key.equals(NORMAL.getKey())) {
+            return NORMAL;
+        } else if (key.equals(NETHER.getKey())) {
+            return NETHER;
+        } else if (key.equals(END.getKey())) {
+            return END;
+        }
+        return null;
     }
 
-	public int getId() {
-		return id;
-	}
+    @Deprecated
+    public static Environment createCustom(Key key, int id) {
+        return createCustom(key, true, id);
+    }
+
+    public static Environment createCustom(Key key, boolean hasSkyLight, int id) {
+        if (REGISTERED_ENVIRONMENTS.stream().anyMatch(each -> each.getKey().equals(key))) {
+            throw new IllegalArgumentException("An Environment is already created with this Key");
+        }
+        return new Environment(key, hasSkyLight, id);
+    }
+
+    public static Environment getCustom(Key key) {
+        return REGISTERED_ENVIRONMENTS.stream().filter(each -> each.getKey().equals(key)).findFirst().orElse(null);
+    }
+
+    //=========================
+
+    private final Key key;
+    private final boolean hasSkyLight;
+    private final int id;
+
+    private Environment(Key key, boolean hasSkyLight, int id) {
+        this.key = key;
+        this.hasSkyLight = hasSkyLight;
+        this.id = id;
+    }
+
+    public Key getKey() {
+        return key;
+    }
+
+    public boolean hasSkyLight() {
+        return hasSkyLight;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (hasSkyLight ? 1231 : 1237);
+        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Environment other = (Environment) obj;
+        if (hasSkyLight != other.hasSkyLight) {
+            return false;
+        }
+        if (key == null) {
+            return other.key == null;
+        } else return key.equals(other.key);
+    }
+
+    public int getId() {
+        return id;
+    }
 }

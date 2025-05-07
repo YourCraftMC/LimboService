@@ -53,27 +53,27 @@ import java.util.UUID;
 public class NbtComponentSerializer {
 
     private static final Set<String> BOOLEAN_TYPES = new HashSet<>(Arrays.asList(
-            "interpret",
-            "bold",
-            "italic",
-            "underlined",
-            "strikethrough",
-            "obfuscated"
+        "interpret",
+        "bold",
+        "italic",
+        "underlined",
+        "strikethrough",
+        "obfuscated"
     ));
     // Order is important
     private static final List<Pair<String, String>> COMPONENT_TYPES = Arrays.asList(
-            new Pair<>("text", "text"),
-            new Pair<>("translatable", "translate"),
-            new Pair<>("score", "score"),
-            new Pair<>("selector", "selector"),
-            new Pair<>("keybind", "keybind"),
-            new Pair<>("nbt", "nbt")
+        new Pair<>("text", "text"),
+        new Pair<>("translatable", "translate"),
+        new Pair<>("score", "score"),
+        new Pair<>("selector", "selector"),
+        new Pair<>("keybind", "keybind"),
+        new Pair<>("nbt", "nbt")
     );
 
     private NbtComponentSerializer() {
 
     }
-    
+
     public static JsonElement tagComponentToJson(Tag<?> tag) {
         return convertToJson(null, tag);
     }
@@ -82,7 +82,7 @@ public class NbtComponentSerializer {
     public static Tag<?> jsonComponentToTag(JsonElement component) {
         return convertToTag(component);
     }
-    
+
     private static Tag<?> convertToTag(JsonElement element) {
         if (element == null || element.isJsonNull()) {
             return null;
@@ -357,9 +357,9 @@ public class NbtComponentSerializer {
             return tag.valueToString();
         }
     }
-    
+
     private static class Pair<K, V> {
-        
+
         private final K key;
         private final V value;
 
@@ -375,6 +375,6 @@ public class NbtComponentSerializer {
         public V getValue() {
             return value;
         }
-        
+
     }
 }

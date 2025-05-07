@@ -58,8 +58,6 @@ public class ChunkUtil {
         dataOut.release();
 
         Map<HeightmapTypes, long[]> heightMaps  = new HashMap<>();
-//        NbtMap heightMaps = (NbtMap) convert(chunk.getHeightMaps());
-        System.out.println(chunk.getHeightMaps());
         ListTag<CompoundTag> tileEntities = chunk.getTileEntities();
         BlockEntityInfo[] blockEntities = new BlockEntityInfo[tileEntities.size()];
         int index = 0;

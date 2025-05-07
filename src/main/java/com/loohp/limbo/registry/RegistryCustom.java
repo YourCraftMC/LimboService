@@ -100,7 +100,6 @@ public class RegistryCustom {
             }
         }
         this.entries = entries;
-        System.out.println(entries);
     }
 
     public Key getIdentifier() {

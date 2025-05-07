@@ -32,8 +32,6 @@ import java.io.IOException;
 import java.util.*;
 
 public class ChunkUtil {
-    private static final Logger log = LoggerFactory.getLogger(ChunkUtil.class);
-
     public static ClientboundLevelChunkWithLightPacket create(int chunkX, int chunkZ, Chunk chunk, Environment environment, List<Byte[]> skylightArrays, List<Byte[]> blocklightArrays) {
 
         BitSet skyLightBitSet = new BitSet();
@@ -57,7 +55,10 @@ public class ChunkUtil {
         dataOut.readBytes(chunkData);
         dataOut.release();
 
-        Map<HeightmapTypes, long[]> heightMaps  = new HashMap<>();
+        Map<HeightmapTypes, long[]> heightMaps = new HashMap<>();
+        // 1
+        heightMaps.put(HeightmapTypes.MOTION_BLOCKING, chunk.getHeightMaps().getLongArray("MOTION_BLOCKING"));
+
         ListTag<CompoundTag> tileEntities = chunk.getTileEntities();
         BlockEntityInfo[] blockEntities = new BlockEntityInfo[tileEntities.size()];
         int index = 0;
@@ -66,7 +67,7 @@ public class ChunkUtil {
             int y = each.getInt("y");
             int z = each.getInt("z") % 16;
             Key blockId = Key.key(chunk.getBlockStateAt(x, y, z).getString("Name"));
-            Integer id = BuiltInRegistries.BLOCK_ENTITY_TYPE.getId(blockId);
+            int id = BuiltInRegistries.BLOCK_ENTITY_TYPE.getId(blockId);
             BlockEntityType blockEntityType = BlockEntityType.from(id);
             if (blockEntityType == null) {
                 Limbo.getInstance().getConsole().sendMessage("Unknown block entity type: " + blockId);
@@ -138,7 +139,6 @@ public class ChunkUtil {
 
                     long[] formattedLongs = bits.toLongArray();
 
-                    MinecraftTypes.writeVarInt(dataOut, longsNeeded);
                     for (int u = 0; u < longsNeeded; u++) {
                         if (u < formattedLongs.length) {
                             dataOut.writeLong(formattedLongs[u]);
@@ -176,7 +176,6 @@ public class ChunkUtil {
                             currentLong = currentLong << 16;
                             currentLong |= id;
                         }
-                        MinecraftTypes.writeVarInt(dataOut, longsNeeded);
                         for (int j = 0; j < longsNeeded; j++) {
                             if (j < globalLongs.size()) {
                                 dataOut.writeLong(globalLongs.get(j));
@@ -192,21 +191,19 @@ public class ChunkUtil {
                 dataOut.writeShort(0);
                 dataOut.writeByte(0);
                 MinecraftTypes.writeVarInt(dataOut, 0);
-                MinecraftTypes.writeVarInt(dataOut, 0);
             }
             int biome;
             if (environment.equals(Environment.END)) {
-                biome = 55; //the_end
+                biome = 56; //the_end
             } else if (environment.equals(Environment.NETHER)) {
                 biome = 34; //nether_waste
             } else if (environment.equals(Environment.NORMAL)) {
-                biome = 39; //plains
+                biome = 40; //plains
             } else {
-                biome = 39; //plains
+                biome = 40; //plains
             }
             dataOut.writeByte(0);
             MinecraftTypes.writeVarInt(dataOut, biome);
-            MinecraftTypes.writeVarInt(dataOut, 0);
         }
         return dataOut;
     }

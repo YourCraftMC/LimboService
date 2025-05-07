@@ -42,28 +42,29 @@ public class ClasspathResourcesUtils {
      * @param word the word to contains match
      * @return the resources in the order they are found
      */
-    public static Collection<String> getResources(String word) {
+    public static Collection<String> getResources(String word, boolean dir) {
         List<String> retval = new ArrayList<>();
         String classPath = System.getProperty("java.class.path", ".");
         String[] classPathElements = classPath.split(File.pathSeparator);
         for (String element : classPathElements) {
-            retval.addAll(getResources(element, word));
+            retval.addAll(getResources(element, word, dir));
         }
         return retval;
     }
 
-    private static Collection<String> getResources(String element, String word) {
+    private static Collection<String> getResources(String element, String word, boolean dir) {
         List<String> retval = new ArrayList<>();
         File file = new File(element);
         if (file.isDirectory()) {
-            retval.addAll(getResourcesFromDirectory(file, word));
+            if (dir)
+                retval.addAll(getResourcesFromDirectory(file, word));
         } else {
-            retval.addAll(getResourcesFromJarFile(file, word));
+            retval.addAll(getResourcesFromJarFile(file, word, dir));
         }
         return retval;
     }
 
-    private static Collection<String> getResourcesFromJarFile(final File file, final String word) {
+    private static Collection<String> getResourcesFromJarFile(final File file, final String word, boolean dir) {
         List<String> retval = new ArrayList<>();
         ZipFile zf;
         try {
@@ -75,6 +76,7 @@ public class ClasspathResourcesUtils {
         while (e.hasMoreElements()) {
             ZipEntry ze = e.nextElement();
             String fileName = ze.getName();
+            if (ze.isDirectory() && !dir) continue;
             boolean accept = fileName.replace("\\", "/").contains(word);
             if (accept) {
                 retval.add(fileName);

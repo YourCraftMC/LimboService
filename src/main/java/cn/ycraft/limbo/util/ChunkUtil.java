@@ -16,6 +16,7 @@ import net.querz.nbt.tag.ListTag;
 import org.cloudburstmc.nbt.NBTInputStream;
 import org.cloudburstmc.nbt.NbtMap;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
+import org.geysermc.mcprotocollib.protocol.data.game.level.HeightmapTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.level.LightUpdateData;
 import org.geysermc.mcprotocollib.protocol.data.game.level.block.BlockEntityInfo;
 import org.geysermc.mcprotocollib.protocol.data.game.level.block.BlockEntityType;
@@ -28,10 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class ChunkUtil {
     private static final Logger log = LoggerFactory.getLogger(ChunkUtil.class);
@@ -59,8 +57,9 @@ public class ChunkUtil {
         dataOut.readBytes(chunkData);
         dataOut.release();
 
-
-        NbtMap heightMaps = (NbtMap) convert(chunk.getHeightMaps());
+        Map<HeightmapTypes, long[]> heightMaps  = new HashMap<>();
+//        NbtMap heightMaps = (NbtMap) convert(chunk.getHeightMaps());
+        System.out.println(chunk.getHeightMaps());
         ListTag<CompoundTag> tileEntities = chunk.getTileEntities();
         BlockEntityInfo[] blockEntities = new BlockEntityInfo[tileEntities.size()];
         int index = 0;

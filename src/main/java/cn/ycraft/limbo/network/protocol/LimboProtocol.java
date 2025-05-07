@@ -16,7 +16,7 @@ public class LimboProtocol extends MinecraftProtocol {
     public void newServerSession(Server server, Session session) {
         resetStates();
         if (CODEC == null) {
-            CODEC = loadNetworkCodec();
+            CODEC = NbtMap.EMPTY;
         }
         session.addListener(new LimboServerListener(CODEC));
     }

@@ -150,7 +150,7 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
 
     public void setGamemode(GameMode gamemode) {
         if (!this.gamemode.equals(gamemode)) {
-            ClientboundGameEventPacket state = new ClientboundGameEventPacket(GameEvent.CHANGE_GAMEMODE, gamemode);
+            ClientboundGameEventPacket state = new ClientboundGameEventPacket(GameEvent.CHANGE_GAME_MODE, gamemode);
             clientConnection.sendPacket(state);
         }
         this.gamemode = gamemode;

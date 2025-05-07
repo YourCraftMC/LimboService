@@ -65,9 +65,9 @@ public class EntityUtil {
                     //	break;
                     case POSITION:
                         if (watch.isOptional()) {
-                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.OPTIONAL_POSITION, Optional.ofNullable(((Vector3i) watch.getValue()))));
+                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.OPTIONAL_BLOCK_POS, Optional.ofNullable(((Vector3i) watch.getValue()))));
                         } else {
-                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.POSITION, ((Vector3i) watch.getValue())));
+                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.BLOCK_POS, ((Vector3i) watch.getValue())));
                         }
                         break;
                     case BOOLEAN:
@@ -78,9 +78,9 @@ public class EntityUtil {
                         break;
                     case CHAT:
                         if (watch.isOptional()) {
-                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.OPTIONAL_CHAT, Optional.ofNullable(((Component) watch.getValue()))));
+                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.OPTIONAL_COMPONENT, Optional.ofNullable(((Component) watch.getValue()))));
                         } else {
-                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.CHAT, ((Component) watch.getValue())));
+                            list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.COMPONENT, ((Component) watch.getValue())));
                         }
                         break;
                     //case DIRECTION:
@@ -96,7 +96,7 @@ public class EntityUtil {
                         list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.POSE, (Pose) watch.getValue()));
                         break;
                     case ROTATION:
-                        list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.ROTATION, (Vector3f) watch.getValue()));
+                        list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.ROTATIONS, (Vector3f) watch.getValue()));
                         break;
                     //case SLOT:
                     //	break;
@@ -104,7 +104,7 @@ public class EntityUtil {
                         list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.STRING, ((String) watch.getValue())));
                         break;
                     case UUID:
-                        list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.OPTIONAL_UUID, Optional.ofNullable(((UUID) watch.getValue()))));
+                        list.add(new ObjectEntityMetadata<>(watch.getIndex(), MetadataTypes.OPTIONAL_LIVING_ENTITY_REFERENCE, Optional.ofNullable(((UUID) watch.getValue()))));
                         break;
                     case VARINT:
                         list.add(new IntEntityMetadata(watch.getIndex(), MetadataTypes.INT, (int) watch.getValue()));

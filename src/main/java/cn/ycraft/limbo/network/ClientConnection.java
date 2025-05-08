@@ -89,7 +89,7 @@ public class ClientConnection extends SessionAdapter {
     public void packetSent(Session session, Packet packet) {
         if (packet instanceof ClientboundLoginDisconnectPacket disconnectPacket) {
             if (!ServerConfig.LOGS.REDUCED_DEBUG_INFO.resolve()) {
-                String str = (ServerConfig.LOGS.DISPLAY_IP_ADDRESS.resolve() ? ((InetSocketAddress) inetAddress).getHostName() : "<ip address withheld>") + ":" + ((InetSocketAddress) session.getLocalAddress()).getPort();
+                String str = (ServerConfig.LOGS.DISPLAY_IP_ADDRESS.resolve() ? ((InetSocketAddress) inetAddress).getHostName() : "") + ":" + ((InetSocketAddress) session.getLocalAddress()).getPort();
                 Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Player disconnected with the reason " + PlainTextComponentSerializer.plainText().serialize(disconnectPacket.getReason()));
             }
         }

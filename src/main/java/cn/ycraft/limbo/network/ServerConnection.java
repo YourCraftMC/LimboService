@@ -101,7 +101,7 @@ public class ServerConnection {
 
                 if (ServerConfig.LOGS.HANDSHAKE_VERBOSE.resolve()) {
                     InetSocketAddress inetAddress = ((InetSocketAddress) event.getSession().getRemoteAddress());
-                    String str = (ServerConfig.LOGS.DISPLAY_IP_ADDRESS.resolve() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + inetAddress.getPort();
+                    String str = (ServerConfig.LOGS.DISPLAY_IP_ADDRESS.resolve() ? inetAddress.getHostName() : "") + ":" + inetAddress.getPort();
                     Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Legacy Status has pinged");
                 }
             }
@@ -119,7 +119,7 @@ public class ServerConnection {
                 Limbo.getInstance().getEventsManager().callEvent(new PlayerQuitEvent(player));
 
                 if (ServerConfig.LOGS.CONNECTION_VERBOSE.resolve()) {
-                    String str = (ServerConfig.LOGS.DISPLAY_IP_ADDRESS.resolve() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + inetAddress.getPort() + "|" + player.getName();
+                    String str = (ServerConfig.LOGS.DISPLAY_IP_ADDRESS.resolve() ? inetAddress.getHostName() : "") + ":" + inetAddress.getPort() + "|" + player.getName();
                     Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Player had disconnected!");
                 }
                 Limbo.getInstance().getUnsafe().b(player);

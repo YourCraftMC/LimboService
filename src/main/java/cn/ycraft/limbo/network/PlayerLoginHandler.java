@@ -127,7 +127,7 @@ public class PlayerLoginHandler implements ServerLoginHandler {
 
         if (ServerConfig.LOGS.CONNECTION_VERBOSE.resolve()) {
             InetSocketAddress inetAddress = (InetSocketAddress) clientConnection.getInetAddress();
-            String str = (ServerConfig.LOGS.DISPLAY_IP_ADDRESS.resolve() ? inetAddress.getHostName() : "<ip address withheld>") + ":" + inetAddress.getPort() + "|" + player.getName() + "(" + player.getUniqueId() + ")";
+            String str = (ServerConfig.LOGS.DISPLAY_IP_ADDRESS.resolve() ? inetAddress.getHostName() : "") + ":" + inetAddress.getPort() + "|" + player.getName() + "(" + player.getUniqueId() + ")";
             Limbo.getInstance().getConsole().sendMessage("[/" + str + "] <-> Player had connected to the Limbo server!");
         }
 

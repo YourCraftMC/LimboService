@@ -16,7 +16,7 @@ README LANGUAGES [ [**English**](README.md) | [中文](README_CN.md)  ]
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/YourCraftMC/LimboService/total?style=flat-square)
 ![Java version](https://img.shields.io/badge/Java-17-red?logo=openjdk&style=flat-square)
 
-🌆 A lightweight & standalone LIMBO service for Minecraft.
+🌆 A lightweight & standalone LIMBO service for Minecraft, based on [**MCProtocolLib**](https://github.com/GeyserMC/MCProtocolLib).
 
 > [!NOTE]
 > This project is forked from [LOOHP's Limbo](https://github.com/LOOHP/Limbo),

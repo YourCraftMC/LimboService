@@ -1,8 +1,8 @@
 ```text
-   __   _       __        ____             _        
-  / /  (_)_ _  / /  ___  / __/__ _____  __(_)______ 
+   __   _       __        ____             _
+  / /  (_)_ _  / /  ___  / __/__ _____  __(_)______
  / /__/ /  ' \/ _ \/ _ \_\ \/ -_) __/ |/ / / __/ -_)
-/____/_/_/_/_/_.__/\___/___/\__/_/  |___/_/\__/\__/ 
+/____/_/_/_/_/_.__/\___/___/\__/_/  |___/_/\__/\__/
 ```
 README LANGUAGES [ [**English**](README.md) | [中文](README_CN.md)  ]
 
@@ -10,7 +10,7 @@ README LANGUAGES [ [**English**](README.md) | [中文](README_CN.md)  ]
 
 <img src=".doc/images/map.png" width=200px align="right" alt="Map image">
 
-[![version](https://img.shields.io/github/v/release/YourCraftMC/LimboService?style=flat-square)](https://github.com/YourCraftMC/LimboService/releases)
+[![Version](https://img.shields.io/github/v/release/YourCraftMC/LimboService?style=flat-square)](https://github.com/YourCraftMC/LimboService/releases)
 [![License](https://img.shields.io/github/license/YourCraftMC/LimboService?style=flat-square)](https://www.gnu.org/licenses/lgpl-3.0.html)
 [![workflow](https://img.shields.io/github/actions/workflow/status/YourCraftMC/LimboService/maven.yml?style=flat-square)](https://github.com/YourCraftMC/LimboService/actions/workflows/maven.yml)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/YourCraftMC/LimboService/total?style=flat-square)
@@ -142,7 +142,7 @@ And... that's it! You can now use the LimboService API to develop your own plugi
 > You can find maven packages
 > at [GitHub Packages](https://github.com/orgs/YourCraftMC/packages?repo_name=LimboService)
 > and Javadocs [HERE](https://yourcraftmc.github.io/LimboService/).
-> 
+>
 > Remember to replace `VERSION` with the version you're using configs down below.
 
 <details>
@@ -211,7 +211,7 @@ dependencies {
 - [**LiteCommands**](https://github.com/Rollczi/LiteCommands): Used to implement command systems.
 - [**EasyPlugin-Color**](https://github.com/CarmJos/EasyPlugin): Used to parse generic color codes.
 
-For more dependencies, please see  [Dependencies](https://github.com/YourCraftMC/LimboService/network/dependencies) .
+For more dependencies, please see [Dependencies](https://github.com/YourCraftMC/LimboService/network/dependencies) .
 
 ## Acknowledgements & Supports
 

@@ -1,15 +1,15 @@
 ```text
-   __   _       __        ____             _        
-  / /  (_)_ _  / /  ___  / __/__ _____  __(_)______ 
+   __   _       __        ____             _
+  / /  (_)_ _  / /  ___  / __/__ _____  __(_)______
  / /__/ /  ' \/ _ \/ _ \_\ \/ -_) __/ |/ / / __/ -_)
-/____/_/_/_/_/_.__/\___/___/\__/_/  |___/_/\__/\__/ 
+/____/_/_/_/_/_.__/\___/___/\__/_/  |___/_/\__/\__/
 ```
 README LANGUAGES [ [English](README.md) | [**中文**](README_CN.md)  ]
 # LimboService
 
 <img src=".doc/images/map.png" width=200px align="right" alt="Map image">
 
-[![version](https://img.shields.io/github/v/release/YourCraftMC/LimboService?style=flat-square)](https://github.com/YourCraftMC/LimboService/releases)
+[![Version](https://img.shields.io/github/v/release/YourCraftMC/LimboService?style=flat-square)](https://github.com/YourCraftMC/LimboService/releases)
 [![License](https://img.shields.io/github/license/YourCraftMC/LimboService?style=flat-square)](https://www.gnu.org/licenses/lgpl-3.0.html)
 [![workflow](https://img.shields.io/github/actions/workflow/status/YourCraftMC/LimboService/maven.yml?style=flat-square)](https://github.com/YourCraftMC/LimboService/actions/workflows/maven.yml)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/YourCraftMC/LimboService/total?style=flat-square)
@@ -139,7 +139,7 @@ description: LimboService 基础插件模板
 > [!NOTE]
 > 您可从 [GitHub Packages](https://github.com/orgs/YourCraftMC/packages?repo_name=LimboService)
 > 查看、获取Maven的依赖包，还可以在 [这里](https://yourcraftmc.github.io/LimboService/) 找到本项目的 Javadoc。
-> 
+>
 > 使用时记得将下方配置中的 VERSION 替换为实际版本号。
 
 <details> <summary><b>Maven 依赖配置</b></summary>
@@ -202,7 +202,7 @@ dependencies {
 完整依赖列表请参见 [依赖关系图](https://github.com/YourCraftMC/LimboService/network/dependencies)。
 
 ## 致谢与支持
-特别感谢 [LoohpJames(@LOOHP)](https://github.com/LOOHP) 
+特别感谢 [LoohpJames(@LOOHP)](https://github.com/LOOHP)
 与 [其他贡献者](https://github.com/LOOHP/Limbo/graphs/contributors) 对原项目的卓越贡献。
 
 衷心感谢 JetBrains 为本项目及其他开源项目提供开发工具授权。

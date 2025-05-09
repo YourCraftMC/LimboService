@@ -20,10 +20,22 @@
 
 package com.loohp.limbo.utils;
 
+import cn.ycraft.limbo.util.ChunkUtil;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.json.JSONOptions;
 import net.querz.nbt.tag.CompoundTag;
+import net.querz.nbt.tag.ListTag;
+import net.querz.nbt.tag.StringTag;
+import net.querz.nbt.tag.Tag;
 
 public class SchematicConversionUtils {
+    private static final Gson gson = new Gson();
 
     public static CompoundTag toTileEntityTag(CompoundTag tag) {
         int[] pos = tag.getIntArray("Pos");
@@ -32,7 +44,75 @@ public class SchematicConversionUtils {
         tag.putInt("x", pos[0]);
         tag.putInt("y", pos[1]);
         tag.putInt("z", pos[2]);
+        for (String key : tag.keySet()) {
+            Tag<?> v = tag.get(key);
+            tag.put(key, fixComponentTag(v).result);
+        }
+        System.out.println(ChunkUtil.convert(tag));
         return tag;
+    }
+
+    public static FixedResult fixComponentTag(Tag<?> tag) {
+        if (tag instanceof StringTag) {
+            String value = ((StringTag) tag).getValue();
+            if (value.startsWith("\"") && value.endsWith("\"")) {
+                return FixedResult.normal(new StringTag(value.substring(1, value.length() - 1)));
+            } else if (value.startsWith("{") && value.endsWith("}")) {
+                return FixedResult.component(NbtComponentSerializer.jsonComponentToTag(gson.fromJson(value, JsonObject.class)));
+            }
+        } else if (tag instanceof CompoundTag) {
+            CompoundTag newed = new CompoundTag();
+            for (String key : ((CompoundTag) tag).keySet()) {
+                Tag<?> v = ((CompoundTag) tag).get(key);
+                newed.put(key, fixComponentTag(v).result);
+            }
+            return FixedResult.normal(newed);
+        } else if (tag instanceof ListTag<?>) {
+            ListTag<?> newed = ListTag.createUnchecked(((ListTag<?>) tag).getTypeClass());
+            boolean compound = false;
+            for (Tag<?> subTag : (ListTag<?>) tag) {
+                FixedResult fixedResult = fixComponentTag(subTag);
+                Tag<?> t = fixedResult.result;
+                boolean notMatch = t.getClass() != newed.getTypeClass();
+                if (notMatch && t.getClass() == CompoundTag.class && fixedResult.isComponent) {
+                    compound = true;
+                    newed = convertTextComponentCompoundList(newed);
+                } else if (notMatch && compound) {
+                    newed.addUnchecked(convertCompound(t));
+                } else {
+                    newed.addUnchecked(t);
+                }
+            }
+            if (compound && newed.size() < 4) {
+                while (newed.size() < 4) {
+                    newed.addUnchecked(convertCompound(new StringTag("")));
+                }
+            }
+            return FixedResult.normal(newed);
+        }
+        return FixedResult.normal(tag);
+    }
+
+    private static ListTag<?> convertTextComponentCompoundList(ListTag<?> old) {
+        ListTag<?> listTag = ListTag.createUnchecked(CompoundTag.class);
+        for (Tag<?> tag : old) {
+            listTag.addUnchecked(convertCompound(tag));
+        }
+        return listTag;
+    }
+
+    private static Tag<?> convertCompound(Tag<?> tag) {
+        if (tag instanceof StringTag) {
+            String value = ((StringTag) tag).getValue();
+            GsonComponentSerializer serializer = GsonComponentSerializer.builder().editOptions(edit -> edit.value(JSONOptions.EMIT_COMPACT_TEXT_COMPONENT, false)).build();
+            Component deserialize = serializer.deserializeFromTree(new JsonPrimitive(value));
+            JsonElement element = serializer.serializeToTree(deserialize);
+            return NbtComponentSerializer.jsonComponentToTag(element);
+        } else if (tag.getClass() == CompoundTag.class) {
+            return tag;
+        } else {
+            throw new IllegalArgumentException("Invalid tag type: " + tag.getClass());
+        }
     }
 
     public static CompoundTag toBlockTag(String input) {
@@ -59,4 +139,13 @@ public class SchematicConversionUtils {
         return tag;
     }
 
+    public record FixedResult(Tag<?> result, boolean isComponent) {
+        public static FixedResult normal(Tag<?> result) {
+            return new FixedResult(result, false);
+        }
+
+        public static FixedResult component(Tag<?> result) {
+            return new FixedResult(result, true);
+        }
+    }
 }

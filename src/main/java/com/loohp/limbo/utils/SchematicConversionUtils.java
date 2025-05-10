@@ -48,7 +48,6 @@ public class SchematicConversionUtils {
             Tag<?> v = tag.get(key);
             tag.put(key, fixComponentTag(v).result);
         }
-        System.out.println(ChunkUtil.convert(tag));
         return tag;
     }
 
@@ -77,15 +76,11 @@ public class SchematicConversionUtils {
                 if (notMatch && t.getClass() == CompoundTag.class && fixedResult.isComponent) {
                     compound = true;
                     newed = convertTextComponentCompoundList(newed);
+                    newed.addUnchecked(t);
                 } else if (notMatch && compound) {
                     newed.addUnchecked(convertCompound(t));
                 } else {
                     newed.addUnchecked(t);
-                }
-            }
-            if (compound && newed.size() < 4) {
-                while (newed.size() < 4) {
-                    newed.addUnchecked(convertCompound(new StringTag("")));
                 }
             }
             return FixedResult.normal(newed);

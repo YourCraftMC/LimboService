@@ -26,15 +26,15 @@ jobs:
           server-password: MAVEN_TOKEN
 
       - name: "Package"
-        run: mvn -B package --file pom.xml
+        run: mvn -B clean package --file pom.xml
         env:
           MAVEN_USERNAME: ${{ github.repository_owner }}
           MAVEN_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
-      - name: "Upload artifacts"
+      - name: "Upload build targets"
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts
+          name: target
           path: "**/target/"
           retention-days: 1
 

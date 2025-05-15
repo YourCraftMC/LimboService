@@ -26,7 +26,7 @@ public interface ServerConfig extends Configuration {
 
     interface SERVER extends Configuration {
 
-        @HeaderComments("Server bind host, localhost for local access only")
+        @HeaderComments("Server bind host, 'localhost' or '127.0.0.1' for local access only")
         ConfiguredValue<String> HOST = ConfiguredValue.of("0.0.0.0");
 
         @HeaderComments("Server port")
@@ -35,19 +35,19 @@ public interface ServerConfig extends Configuration {
         @HeaderComments("Ticks per second of the server, from 1 to 20, recommended 5.")
         ConfiguredValue<Integer> TPS = ConfiguredValue.of(5);
 
-        @HeaderComments("Server max players, -1 for no limit")
+        @HeaderComments("Server max players, -1 for no limit.")
         ConfiguredValue<Integer> MAX_PLAYERS = ConfiguredValue.of(-1);
 
-        @HeaderComments("Whether the server should be online mode")
+        @HeaderComments("Whether the server should be online mode.")
         ConfiguredValue<Boolean> ONLINE_MODE = ConfiguredValue.of(true);
 
-        @HeaderComments("Server list version as string")
+        @HeaderComments("Server list version as string.")
         ConfiguredValue<String> VERSION = ConfiguredValue.of("Limbo!");
 
-        @HeaderComments("Server list message in Json")
+        @HeaderComments("Server list message in JSON.")
         ConfiguredValue<String> MOTD = ConfiguredValue.of("{\"text\":\"\",\"extra\":[{\"text\":\"Limbo Server!\",\"color\":\"yellow\"}]}");
 
-        @HeaderComments("Server list favicon (May be left blank)")
+        @HeaderComments("Server list favicon (May be left blank).")
         ConfiguredValue<Favicon> FAVICON = ConfiguredValue.builderOf(Favicon.class).fromString()
             .parse(Favicon::load).serialize(Favicon::path)
             .defaults(Favicon.load("server-icon.png")).build();
@@ -93,18 +93,18 @@ public interface ServerConfig extends Configuration {
 
     interface LOGS extends Configuration {
 
-        @HeaderComments("Reduce debug info")
+        @HeaderComments("Reduce debug info.")
         ConfiguredValue<Boolean> REDUCED_DEBUG_INFO = ConfiguredValue.of(true);
 
-        @HeaderComments("Should a message be printed to the console when a handshake occurs")
+        @HeaderComments("Should a message be printed to the console when a handshake occurs.")
         ConfiguredValue<Boolean> HANDSHAKE_VERBOSE = ConfiguredValue.of(true);
 
         @HeaderComments("Should a message be printed to the console when a player connected to limbo.")
         ConfiguredValue<Boolean> CONNECTION_VERBOSE = ConfiguredValue.of(true);
 
         @HeaderComments({
-            "Whether the IP addresseses of players should be logged",
-            "If not enabled player IP addresses will be replaced by <ip address withheld> in logs"
+            "Whether the IP addresses of players should be logged,",
+            "If not enabled, players' IP addresses will be hidden in logs"
         })
         ConfiguredValue<Boolean> DISPLAY_IP_ADDRESS = ConfiguredValue.of(true);
 
@@ -114,23 +114,23 @@ public interface ServerConfig extends Configuration {
 
         @HeaderComments({
             "Whether this server is behind a bungeecord proxy with BungeeGuard installed (velocity can do this too for <1.13)",
-            "Mutually exclusive with bungeecord and velocity-modern"
+            "Mutually exclusive with bungeecord and velocity-modern."
         })
         ConfiguredValue<Boolean> BUNGEE_GUARD = ConfiguredValue.of(false);
 
         @HeaderComments({
-            "Whether this server is behind a bungeecord proxy",
-            "Mutually exclusive with velocity-modern and bungee-guard"
+            "Whether this server is behind a bungeecord proxy,",
+            "Mutually exclusive with velocity-modern and bungee-guard."
         })
         ConfiguredValue<Boolean> BUNGEECORD = ConfiguredValue.of(false);
 
         @HeaderComments({
-            "Whether this server is behind a velocity proxy with modern player forwarding",
-            "Mutually exclusive with BungeeCord and bungee-guard"
+            "Whether this server is behind a velocity proxy with modern player forwarding,",
+            "Mutually exclusive with BungeeCord and bungee-guard."
         })
         ConfiguredValue<Boolean> VELOCITY_MODERN = ConfiguredValue.of(false);
 
-        @HeaderComments("For Velocity Modern Forwarding or BungeeGuard a list of valid secrets")
+        @HeaderComments("For Velocity Modern Forwarding or BungeeGuard a list of valid secrets.")
         ConfiguredList<String> FORWARDING_SECRETS = ConfiguredList.builderOf(String.class)
             .fromString().defaults().build();
 
@@ -145,7 +145,7 @@ public interface ServerConfig extends Configuration {
         ConfiguredValue<Environment> DIMENSION = ConfiguredValue.builderOf(Environment.class).fromString()
             .parse(s -> Objects.requireNonNull(Environment.fromKey(Key.key(s.toLowerCase(Locale.ENGLISH)))))
             .serialize(env -> env.getKey().asString())
-            .defaults(Environment.NORMAL)
+            .defaults(Environment.END)
             .build();
 
         @HeaderComments("Spawn location")

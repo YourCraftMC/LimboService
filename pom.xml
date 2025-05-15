@@ -31,7 +31,7 @@
         <minecraft.version>1.21.5</minecraft.version>
 
         <deps.easyplugin.version>1.5.12</deps.easyplugin.version>
-        <deps.configured.version>4.0.11</deps.configured.version>
+        <deps.configured.version>4.1.5</deps.configured.version>
         <deps.litecommands.version>3.9.7</deps.litecommands.version>
     </properties>
 
@@ -235,14 +235,14 @@
 
         <dependency>
             <groupId>cc.carm.lib</groupId>
-            <artifactId>easyconfiguration-feature-text</artifactId>
+            <artifactId>configured-feature-text</artifactId>
             <version>${deps.configured.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>cc.carm.lib</groupId>
-            <artifactId>easyconfiguration-yaml</artifactId>
+            <artifactId>configured-yaml</artifactId>
             <version>${deps.configured.version}</version>
             <scope>compile</scope>
         </dependency>

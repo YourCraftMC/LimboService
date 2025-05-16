@@ -23,10 +23,7 @@ import ch.qos.logback.core.util.StringUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -49,6 +46,7 @@ public class ClasspathResourcesUtils {
         for (String element : classPathElements) {
             retval.addAll(getResources(element, word, dir));
         }
+        Collections.sort(retval);
         return retval;
     }
 

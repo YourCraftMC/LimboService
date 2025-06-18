@@ -8,11 +8,10 @@ import cc.carm.lib.configuration.value.standard.ConfiguredValue;
 import cn.ycraft.limbo.config.data.Favicon;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.world.Environment;
-import net.kyori.adventure.key.Key;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
-
 import java.util.Locale;
 import java.util.Objects;
+import net.kyori.adventure.key.Key;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 
 @ConfigPath(root = true)
 public interface ServerConfig extends Configuration {
@@ -87,6 +86,11 @@ public interface ServerConfig extends Configuration {
 
         @HeaderComments("The view distance of the server")
         ConfiguredValue<Integer> VIEW_DISTANCE = ConfiguredValue.of(6);
+        @HeaderComments({
+            "If the proxy is enabled, the skin will be overwritten.",
+            "If the proxy is turned off and this option is turned off, the skin will not be displayed"
+        })
+        ConfiguredValue<Boolean> OVERWRITE_SKIN = ConfiguredValue.of(true);
 
 
     }

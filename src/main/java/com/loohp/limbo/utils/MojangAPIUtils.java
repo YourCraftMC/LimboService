@@ -130,6 +130,7 @@ public class MojangAPIUtils {
                         ));
                     }
                 }
+                return list;
             } else {
                 System.err.println("Connection could not be opened (Response code " + connection.getResponseCode() + ", " + connection.getResponseMessage() + ")");
                 return null;

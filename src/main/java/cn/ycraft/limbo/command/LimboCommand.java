@@ -14,32 +14,33 @@ import dev.rollczi.litecommands.argument.suggester.input.SuggestionInput;
 import dev.rollczi.litecommands.command.CommandRoute;
 import dev.rollczi.litecommands.input.raw.RawCommand;
 import dev.rollczi.litecommands.invocation.Invocation;
-import dev.rollczi.litecommands.meta.Meta;
 import dev.rollczi.litecommands.permission.MissingPermissions;
+import dev.rollczi.litecommands.permission.PermissionService;
+import dev.rollczi.litecommands.permission.PermissionValidationResult;
 import dev.rollczi.litecommands.platform.PlatformInvocationListener;
 import dev.rollczi.litecommands.platform.PlatformSender;
 import dev.rollczi.litecommands.platform.PlatformSenderFactory;
 import dev.rollczi.litecommands.platform.PlatformSuggestionListener;
 import dev.rollczi.litecommands.suggestion.Suggestion;
 import dev.rollczi.litecommands.suggestion.SuggestionResult;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
+import org.jetbrains.annotations.NotNull;
 
 public class LimboCommand<SOURCE> {
 
     private final PlatformSenderFactory<SOURCE> senderFactory;
     private final LiteLimboSettings settings;
+    private final PermissionService permissionService;
     private final CommandRoute<SOURCE> baseRoute;
     private final PlatformInvocationListener<SOURCE> invocationHook;
     private final PlatformSuggestionListener<SOURCE> suggestionHook;
 
-    public LimboCommand(PlatformSenderFactory<SOURCE> senderFactory, LiteLimboSettings settings, CommandRoute<SOURCE> baseRoute, PlatformInvocationListener<SOURCE> invocationHook, PlatformSuggestionListener<SOURCE> suggestionHook) {
+    public LimboCommand(PlatformSenderFactory<SOURCE> senderFactory, LiteLimboSettings settings, final PermissionService permissionService, CommandRoute<SOURCE> baseRoute, PlatformInvocationListener<SOURCE> invocationHook, PlatformSuggestionListener<SOURCE> suggestionHook) {
         this.senderFactory = senderFactory;
         this.settings = settings;
+        this.permissionService = permissionService;
         this.baseRoute = baseRoute;
         this.invocationHook = invocationHook;
         this.suggestionHook = suggestionHook;
@@ -82,7 +83,7 @@ public class LimboCommand<SOURCE> {
         RawCommand rawCommand = RawCommand.from(context.getInput());
         ParseableInput<?> parseableInput = rawCommand.toParseableInput();
         PlatformSender platformSender = this.senderFactory.create(context.getSource());
-        Invocation<SOURCE> invocation = new Invocation<>(context.getSource(), platformSender, baseRoute.getName(), rawCommand.getLabel(), parseableInput);
+        Invocation<SOURCE> invocation = new Invocation<>(platformSender, baseRoute.getName(), rawCommand.getLabel(), parseableInput);
 
         invocationHook.execute(invocation, parseableInput);
         return Command.SINGLE_SUCCESS;
@@ -94,7 +95,7 @@ public class LimboCommand<SOURCE> {
             RawCommand rawCommand = RawCommand.from(input);
             SuggestionInput<?> suggestionInput = rawCommand.toSuggestionInput();
             PlatformSender platformSender = this.senderFactory.create(context.getSource());
-            Invocation<SOURCE> invocation = new Invocation<>(context.getSource(), platformSender, baseRoute.getName(), rawCommand.getLabel(), suggestionInput);
+            Invocation<SOURCE> invocation = new Invocation<>(platformSender, baseRoute.getName(), rawCommand.getLabel(), suggestionInput);
 
             SuggestionResult suggest = suggestionHook.suggest(invocation, suggestionInput);
 
@@ -111,10 +112,7 @@ public class LimboCommand<SOURCE> {
     }
 
     public Predicate<SOURCE> canUse() {
-        return (source) -> {
-            MissingPermissions check = MissingPermissions.check(senderFactory.create(source), baseRoute);
-            return check.isPermitted();
-        };
+        return (source) -> permissionService.isPermitted(senderFactory.create(source), baseRoute);
     }
 
     Message tooltip(String string) {

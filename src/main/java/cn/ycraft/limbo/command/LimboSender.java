@@ -29,7 +29,7 @@ public class LimboSender extends AbstractPlatformSender {
     }
 
     @Override
-    public boolean hasPermission(String permission) {
-        return sender.hasPermission(permission);
+    public Object getHandle() {
+        return sender;
     }
 }

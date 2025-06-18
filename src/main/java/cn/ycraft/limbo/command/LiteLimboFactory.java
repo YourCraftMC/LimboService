@@ -16,7 +16,7 @@ import com.loohp.limbo.player.Player;
 import com.loohp.limbo.plugins.LimboPlugin;
 import com.loohp.limbo.scheduler.LimboScheduler;
 import com.loohp.limbo.world.World;
-import dev.rollczi.litecommands.LiteCommandsBuilder;
+import dev.rollczi.litecommands.LiteCommandsBaseBuilder;
 import dev.rollczi.litecommands.LiteCommandsFactory;
 import dev.rollczi.litecommands.message.LiteMessages;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
@@ -25,9 +25,15 @@ public class LiteLimboFactory {
     private LiteLimboFactory() {
     }
 
-    @SuppressWarnings("unchecked")
-    public static <B extends LiteCommandsBuilder<CommandSender, LiteLimboSettings, B>> B create(LimboPlugin plugin) {
-        return (B) LiteCommandsFactory.builder(CommandSender.class, new LimboServicePlatform(new LiteLimboSettings()))
+    public static <B extends LiteCommandsBaseBuilder<CommandSender, LiteLimboSettings, B>> B create(LimboPlugin plugin) {
+        return create(plugin, new LiteLimboSettings());
+    }
+
+    public static <B extends LiteCommandsBaseBuilder<CommandSender, LiteLimboSettings, B>> B create(LimboPlugin plugin, LiteLimboSettings settings) {
+        return LiteCommandsFactory.<CommandSender, LiteLimboSettings, B>builder(
+                CommandSender.class, builder ->
+                    new LimboServicePlatform(settings, builder.getPermissionService())
+            )
             .self((builder, internal) -> {
                 builder.bind(Limbo.class, Limbo::getInstance);
                 builder.bind(LimboScheduler.class, () -> Limbo.getInstance().getScheduler());

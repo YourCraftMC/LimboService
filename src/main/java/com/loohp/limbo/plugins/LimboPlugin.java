@@ -29,6 +29,7 @@ import com.loohp.limbo.commands.CommandSender;
 import com.loohp.limbo.events.Event;
 import com.loohp.limbo.events.Listener;
 import com.loohp.limbo.file.FileConfiguration;
+import dev.rollczi.litecommands.LiteCommandsBaseBuilder;
 import dev.rollczi.litecommands.LiteCommandsBuilder;
 import org.jetbrains.annotations.NotNull;
 
@@ -73,7 +74,7 @@ public class LimboPlugin {
         Arrays.stream(listeners).forEach(listener -> getServer().getEventsManager().registerEvents(this, listener));
     }
 
-    public <B extends LiteCommandsBuilder<CommandSender, LiteLimboSettings, B>> B commandBuilder() {
+    public <B extends LiteCommandsBaseBuilder<CommandSender, LiteLimboSettings, B>> B commandBuilder() {
         return LiteLimboFactory.create(this);
     }
 

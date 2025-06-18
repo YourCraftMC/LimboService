@@ -20,15 +20,22 @@
 
 package com.loohp.limbo.utils;
 
-import javax.net.ssl.HttpsURLConnection;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.net.ssl.HttpsURLConnection;
+import org.geysermc.mcprotocollib.auth.GameProfile;
 
 public class MojangAPIUtils {
+    private static final Gson gson = new Gson();
 
     public static class SkinResponse {
 
@@ -86,19 +93,43 @@ public class MojangAPIUtils {
     }
 
     public static SkinResponse getSkinFromMojangServer(UUID uuid) {
+        final List<GameProfile.Property> properties = getPropertiesFromMojangServer(uuid);
+        if (properties == null || properties.isEmpty()) {
+            return null;
+        }
+        final GameProfile.Property textures = properties.stream().filter(property -> property.getName().equals("textures")).findFirst().orElse(null);
+        if (textures == null) {
+            return null;
+        }
+        return new SkinResponse(textures.getValue(), textures.getSignature());
+    }
+
+    public static List<GameProfile.Property> getPropertiesFromMojangServer(UUID uuid) {
         try {
             URL url = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid.toString() + "?unsigned=false");
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             connection.setUseCaches(false);
             connection.setDefaultUseCaches(false);
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
             connection.addRequestProperty("User-Agent", "Mozilla/5.0");
             connection.addRequestProperty("Cache-Control", "no-cache, no-store, must-revalidate");
             connection.addRequestProperty("Pragma", "no-cache");
             if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
                 String reply = String.join("", new BufferedReader(new InputStreamReader(connection.getInputStream())).lines().collect(Collectors.toList())).replace(" ", "");
-                String skin = reply.split("\"value\":\"")[1].split("\"")[0];
-                String signature = reply.split("\"signature\":\"")[1].split("\"")[0];
-                return new SkinResponse(skin, signature);
+                final ArrayList<GameProfile.Property> list = new ArrayList<>();
+                final JsonObject jsonObject = gson.fromJson(reply, JsonObject.class);
+                if (jsonObject.has("properties")) {
+                    final JsonArray properties = jsonObject.getAsJsonArray("properties");
+                    for (int i = 0; i < properties.size(); i++) {
+                        final JsonObject property = properties.get(i).getAsJsonObject();
+                        list.add(new GameProfile.Property(
+                            property.get("name").getAsString(),
+                            property.get("value").getAsString(),
+                            property.get("signature").getAsString()
+                        ));
+                    }
+                }
             } else {
                 System.err.println("Connection could not be opened (Response code " + connection.getResponseCode() + ", " + connection.getResponseMessage() + ")");
                 return null;

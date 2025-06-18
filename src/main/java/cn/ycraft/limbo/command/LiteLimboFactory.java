@@ -19,6 +19,7 @@ import com.loohp.limbo.world.World;
 import dev.rollczi.litecommands.LiteCommandsBaseBuilder;
 import dev.rollczi.litecommands.LiteCommandsFactory;
 import dev.rollczi.litecommands.message.LiteMessages;
+import dev.rollczi.litecommands.permission.PermissionResolver;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 
 public class LiteLimboFactory {
@@ -35,6 +36,7 @@ public class LiteLimboFactory {
                     new LimboServicePlatform(settings, builder.getPermissionService())
             )
             .self((builder, internal) -> {
+                builder.permissionResolver(PermissionResolver.createDefault(CommandSender.class, CommandSender::hasPermission));
                 builder.bind(Limbo.class, Limbo::getInstance);
                 builder.bind(LimboScheduler.class, () -> Limbo.getInstance().getScheduler());
                 builder.bind(SchedulerUtils.class, plugin::getScheduler);

@@ -90,8 +90,8 @@ public final class Limbo implements ForwardingAudience {
 
     //===========================
 
-    public static final String SERVER_IMPLEMENTATION_VERSION = "1.21.5";
-    public static final int SERVER_IMPLEMENTATION_PROTOCOL = 770;
+    public static final String SERVER_IMPLEMENTATION_VERSION = "1.21.6";
+    public static final int SERVER_IMPLEMENTATION_PROTOCOL = 771;
     public static String LIMBO_IMPLEMENTATION_VERSION;
 
     private final AtomicBoolean isRunning;

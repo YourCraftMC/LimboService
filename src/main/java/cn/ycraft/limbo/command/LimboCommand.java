@@ -46,8 +46,8 @@ public class LimboCommand<SOURCE> {
         this.suggestionHook = suggestionHook;
     }
 
-    public LiteralArgumentBuilder<SOURCE> toLiteral() {
-        LiteralArgumentBuilder<SOURCE> baseArgument = LiteralArgumentBuilder.<SOURCE>literal(baseRoute.getName())
+    public LiteralArgumentBuilder<SOURCE> toLiteral(String name) {
+        LiteralArgumentBuilder<SOURCE> baseArgument = LiteralArgumentBuilder.<SOURCE>literal(name)
             .executes(this::execute)
             .requires(canUse());
 

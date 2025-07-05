@@ -32,7 +32,7 @@
 
         <deps.easyplugin.version>1.5.13</deps.easyplugin.version>
         <deps.configured.version>4.1.5</deps.configured.version>
-        <deps.litecommands.version>3.10.0</deps.litecommands.version>
+        <deps.litecommands.version>3.10.2</deps.litecommands.version>
     </properties>
 
     <groupId>cn.ycraft</groupId>

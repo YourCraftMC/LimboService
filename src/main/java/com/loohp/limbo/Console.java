@@ -22,10 +22,22 @@ package com.loohp.limbo;
 
 import cc.carm.lib.easyplugin.utils.ColorParser;
 import com.loohp.limbo.commands.CommandSender;
-import com.loohp.limbo.utils.CustomStringUtils;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.identity.Identity;
@@ -39,17 +51,16 @@ import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.TitlePart;
-import org.jline.reader.*;
+import org.jline.reader.Candidate;
+import org.jline.reader.Completer;
+import org.jline.reader.EndOfFileException;
+import org.jline.reader.LineReader;
 import org.jline.reader.LineReader.SuggestionType;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.ParsedLine;
+import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
-
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 public class Console implements CommandSender {
 
@@ -227,11 +238,11 @@ public class Console implements CommandSender {
             try {
                 String command = tabReader.readLine(PROMPT).trim();
                 if (!command.isEmpty()) {
-                    new Thread(() -> Limbo.getInstance().dispatchCommand(this, command)).start();
+                    Limbo.getInstance().getScheduler().runTask(Limbo.getInstance().getPluginManager().getPlugin("LimboService"), () -> {
+                        Limbo.getInstance().dispatchCommand(this, command);
+                    });
                 }
-            } catch (UserInterruptException e) {
-                System.exit(0);
-            } catch (EndOfFileException e) {
+            } catch (UserInterruptException | EndOfFileException e) {
                 break;
             }
         }

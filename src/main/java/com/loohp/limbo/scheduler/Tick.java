@@ -24,11 +24,10 @@ import cn.ycraft.limbo.config.ServerConfig;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.scheduler.LimboScheduler.CurrentSchedulerTask;
 import com.loohp.limbo.scheduler.LimboScheduler.LimboSchedulerTask;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -37,7 +36,7 @@ public class Tick {
     private int tickingInterval;
     private final AtomicLong tick = new AtomicLong(0);
 
-    private final List<Thread> threads = new ArrayList<>();
+    private final ExecutorService ASYNC_EXECUTOR = Executors.newFixedThreadPool(4);
     private final Queue<LimboSchedulerTask> asyncTasksQueue = new ConcurrentLinkedQueue<>();
 
     public Tick(Limbo instance) {
@@ -45,7 +44,7 @@ public class Tick {
             tickingInterval = (int) Math.round(1000.0 / ServerConfig.SERVER.TPS.resolve());
 
             for (int i = 0; i < 4; i++) {
-                Thread thread = new Thread(() -> {
+                ASYNC_EXECUTOR.submit(() -> {
                     while (instance.isRunning()) {
                         LimboSchedulerTask task = asyncTasksQueue.poll();
                         if (task == null) {
@@ -65,8 +64,6 @@ public class Tick {
                         }
                     }
                 });
-                thread.start();
-                threads.add(thread);
             }
 
             while (instance.isRunning()) {
@@ -122,17 +119,10 @@ public class Tick {
     }
 
     public void waitAndKillThreads(long waitTime) {
-        long end = System.currentTimeMillis() + waitTime;
-        for (Thread thread : threads) {
-            try {
-                thread.join(Math.max(end - System.currentTimeMillis(), 1));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (thread.isAlive()) {
-                //noinspection removal
-                thread.stop();
-            }
+        try {
+            ASYNC_EXECUTOR.awaitTermination(waitTime, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 

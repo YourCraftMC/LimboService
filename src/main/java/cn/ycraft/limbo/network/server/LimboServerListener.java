@@ -5,6 +5,17 @@ import cn.ycraft.limbo.network.NetworkConstants;
 import cn.ycraft.limbo.network.protocol.LimboProtocol;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.utils.ForwardingUtils;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.security.PrivateKey;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.UUID;
+import javax.crypto.SecretKey;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -26,18 +37,6 @@ import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundK
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-
-import javax.crypto.SecretKey;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.security.PrivateKey;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.UUID;
 
 public class LimboServerListener extends ServerListener {
     private final byte[] _challenge = new byte[4];
@@ -63,7 +62,9 @@ public class LimboServerListener extends ServerListener {
                 if (session.getFlag(MinecraftConstants.ENCRYPT_CONNECTION, true)) {
                     session.send(new ClientboundHelloPacket($getServerId(), $getKeyPair().getPublic(), _challenge, session.getFlag(MinecraftConstants.SHOULD_AUTHENTICATE, true)));
                 } else {
-                    new Thread(() -> $auth(session, false, null)).start();
+                    session.getChannel().eventLoop().execute(() -> {
+                        $auth(session, false, null);
+                    });
                 }
                 return;
             } else if (packet instanceof ServerboundKeyPacket keyPacket) {
@@ -74,7 +75,7 @@ public class LimboServerListener extends ServerListener {
 
                 SecretKey key = keyPacket.getSecretKey(privateKey);
                 session.setEncryption(protocol.createEncryption(key));
-                (new Thread(() -> $auth(session, session.getFlag(MinecraftConstants.SHOULD_AUTHENTICATE, true), key))).start();
+                session.getChannel().eventLoop().execute(() -> $auth(session, session.getFlag(MinecraftConstants.SHOULD_AUTHENTICATE, true), key));
                 return;
             }
         }

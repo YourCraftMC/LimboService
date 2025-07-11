@@ -21,7 +21,6 @@
 package com.loohp.limbo.utils;
 
 import cn.ycraft.limbo.config.ServerConfig;
-import com.loohp.limbo.Limbo;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.kyori.adventure.key.Key;

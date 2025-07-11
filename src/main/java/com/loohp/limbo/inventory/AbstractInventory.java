@@ -20,9 +20,9 @@
 
 package com.loohp.limbo.inventory;
 
+import cn.ycraft.limbo.util.ItemUtil;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.player.Player;
-import cn.ycraft.limbo.util.ItemUtil;
 import net.kyori.adventure.key.Key;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetSlotPacket;

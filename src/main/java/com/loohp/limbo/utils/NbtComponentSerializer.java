@@ -24,28 +24,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.LazilyParsedNumber;
-import net.querz.nbt.tag.ByteArrayTag;
-import net.querz.nbt.tag.ByteTag;
-import net.querz.nbt.tag.CompoundTag;
-import net.querz.nbt.tag.DoubleTag;
-import net.querz.nbt.tag.EndTag;
-import net.querz.nbt.tag.FloatTag;
-import net.querz.nbt.tag.IntArrayTag;
-import net.querz.nbt.tag.IntTag;
-import net.querz.nbt.tag.ListTag;
-import net.querz.nbt.tag.LongArrayTag;
-import net.querz.nbt.tag.LongTag;
-import net.querz.nbt.tag.NumberTag;
-import net.querz.nbt.tag.ShortTag;
-import net.querz.nbt.tag.StringTag;
-import net.querz.nbt.tag.Tag;
+import net.querz.nbt.tag.*;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Taken from <a href="https://github.com/GeyserMC/MCProtocolLib/blob/master/src/main/java/com/github/steveice10/mc/protocol/codec/NbtComponentSerializer.java">MCProtocolLib's NbtComponentSerializer</a>

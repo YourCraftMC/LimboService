@@ -20,7 +20,6 @@
 
 package com.loohp.limbo.inventory;
 
-import com.loohp.limbo.location.Location;
 import net.kyori.adventure.text.Component;
 
 public class CustomInventory extends AbstractInventory implements TitledInventory {

@@ -21,19 +21,18 @@
 package com.loohp.limbo.player;
 
 import cn.ycraft.limbo.config.ServerConfig;
-import com.loohp.limbo.Limbo;
-import com.loohp.limbo.entity.Entity;
-import com.loohp.limbo.location.Location;
 import cn.ycraft.limbo.util.ChunkUtil;
 import cn.ycraft.limbo.util.EntityUtil;
+import com.loohp.limbo.entity.Entity;
+import com.loohp.limbo.location.Location;
 import com.loohp.limbo.world.ChunkPosition;
 import com.loohp.limbo.world.World;
 import net.querz.mca.Chunk;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundAddEntityPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundRemoveEntitiesPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundAddEntityPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundChunkBatchFinishedPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundChunkBatchStartPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundForgetLevelChunkPacket;

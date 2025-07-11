@@ -25,19 +25,6 @@ import com.loohp.limbo.commands.CommandSender;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.identity.Identity;
@@ -51,16 +38,20 @@ import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.TitlePart;
-import org.jline.reader.Candidate;
-import org.jline.reader.Completer;
-import org.jline.reader.EndOfFileException;
-import org.jline.reader.LineReader;
+import org.jline.reader.*;
 import org.jline.reader.LineReader.SuggestionType;
-import org.jline.reader.LineReaderBuilder;
-import org.jline.reader.ParsedLine;
-import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class Console implements CommandSender {
 
@@ -215,8 +206,8 @@ public class Console implements CommandSender {
     public void sendMessage(String message) {
         stashLine();
         String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-        logs.println(ColorParser.clear("[" + date + " Info] " + message));
-        reader.getTerminal().writer().append("[" + date + " Info] " + translateToConsole(message) + "\n");
+        logs.println(ColorParser.clear("[" + date + " INFO] " + message));
+        reader.getTerminal().writer().append("[" + date + " INFO] " + translateToConsole(message) + "\n");
         reader.getTerminal().flush();
         unstashLine();
     }
@@ -224,8 +215,8 @@ public class Console implements CommandSender {
     public void sendComponent(Component message) {
         stashLine();
         String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-        logs.println(ColorParser.clear("[" + date + " Info] " + PlainTextComponentSerializer.plainText().serialize(message)));
-        reader.getTerminal().writer().append("[" + date + " Info] " + translateToConsole(message) + "\n");
+        logs.println(ColorParser.clear("[" + date + " INFO] " + PlainTextComponentSerializer.plainText().serialize(message)));
+        reader.getTerminal().writer().append("[" + date + " INFO] " + translateToConsole(message) + "\n");
         reader.getTerminal().flush();
         unstashLine();
     }
@@ -288,8 +279,8 @@ public class Console implements CommandSender {
         public PrintStream printf(Locale l, String format, Object... args) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.printf(l, ColorParser.clear("[" + date + " Info]" + format), args);
-            PrintStream stream = super.printf(l, Console.translateToConsole("[" + date + " Info]" + format), args);
+            logs.printf(l, ColorParser.clear("[" + date + " INFO]" + format), args);
+            PrintStream stream = super.printf(l, Console.translateToConsole("[" + date + " INFO]" + format), args);
             console.unstashLine();
             return stream;
         }
@@ -298,8 +289,8 @@ public class Console implements CommandSender {
         public PrintStream printf(String format, Object... args) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.printf(ColorParser.clear("[" + date + " Info]" + format), args);
-            PrintStream stream = super.printf(ColorParser.clear("[" + date + " Info]" + format), args);
+            logs.printf(ColorParser.clear("[" + date + " INFO]" + format), args);
+            PrintStream stream = super.printf(ColorParser.clear("[" + date + " INFO]" + format), args);
             console.unstashLine();
             return stream;
         }
@@ -308,8 +299,8 @@ public class Console implements CommandSender {
         public void println() {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Info]"));
-            super.println(ColorParser.clear("[" + date + " Info]"));
+            logs.println(ColorParser.clear("[" + date + " INFO]"));
+            super.println(ColorParser.clear("[" + date + " INFO]"));
             console.unstashLine();
         }
 
@@ -317,8 +308,8 @@ public class Console implements CommandSender {
         public void println(boolean x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Info]" + x));
-            super.println(ColorParser.clear("[" + date + " Info]" + x));
+            logs.println(ColorParser.clear("[" + date + " INFO]" + x));
+            super.println(ColorParser.clear("[" + date + " INFO]" + x));
             console.unstashLine();
         }
 
@@ -326,8 +317,8 @@ public class Console implements CommandSender {
         public void println(char x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Info]" + x));
-            super.println(ColorParser.clear("[" + date + " Info]" + x));
+            logs.println(ColorParser.clear("[" + date + " INFO]" + x));
+            super.println(ColorParser.clear("[" + date + " INFO]" + x));
             console.unstashLine();
         }
 
@@ -335,8 +326,8 @@ public class Console implements CommandSender {
         public void println(char[] x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Info]" + String.valueOf(x)));
-            super.println(ColorParser.clear("[" + date + " Info]" + String.valueOf(x)));
+            logs.println(ColorParser.clear("[" + date + " INFO]" + String.valueOf(x)));
+            super.println(ColorParser.clear("[" + date + " INFO]" + String.valueOf(x)));
             console.unstashLine();
         }
 
@@ -344,8 +335,8 @@ public class Console implements CommandSender {
         public void println(double x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Info]" + x));
-            super.println(ColorParser.clear("[" + date + " Info]" + x));
+            logs.println(ColorParser.clear("[" + date + " INFO]" + x));
+            super.println(ColorParser.clear("[" + date + " INFO]" + x));
             console.unstashLine();
         }
 
@@ -353,8 +344,8 @@ public class Console implements CommandSender {
         public void println(float x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Info]" + x));
-            super.println(ColorParser.clear("[" + date + " Info]" + x));
+            logs.println(ColorParser.clear("[" + date + " INFO]" + x));
+            super.println(ColorParser.clear("[" + date + " INFO]" + x));
             console.unstashLine();
         }
 
@@ -362,8 +353,8 @@ public class Console implements CommandSender {
         public void println(int x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Info]" + x));
-            super.println(ColorParser.clear("[" + date + " Info]" + x));
+            logs.println(ColorParser.clear("[" + date + " INFO]" + x));
+            super.println(ColorParser.clear("[" + date + " INFO]" + x));
             console.unstashLine();
         }
 
@@ -371,8 +362,8 @@ public class Console implements CommandSender {
         public void println(long x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Info]" + x));
-            super.println(ColorParser.clear("[" + date + " Info]" + x));
+            logs.println(ColorParser.clear("[" + date + " INFO]" + x));
+            super.println(ColorParser.clear("[" + date + " INFO]" + x));
             console.unstashLine();
         }
 
@@ -380,8 +371,8 @@ public class Console implements CommandSender {
         public void println(Object x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Info]" + x));
-            super.println(ColorParser.clear("[" + date + " Info]" + x));
+            logs.println(ColorParser.clear("[" + date + " INFO]" + x));
+            super.println(ColorParser.clear("[" + date + " INFO]" + x));
             console.unstashLine();
         }
 
@@ -389,8 +380,8 @@ public class Console implements CommandSender {
         public void println(String string) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Info] " + string));
-            super.println(ColorParser.clear("[" + date + " Info] " + string));
+            logs.println(ColorParser.clear("[" + date + " INFO] " + string));
+            super.println(ColorParser.clear("[" + date + " INFO] " + string));
             console.unstashLine();
         }
     }
@@ -410,8 +401,8 @@ public class Console implements CommandSender {
         public PrintStream printf(Locale l, String format, Object... args) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.printf(l, ColorParser.clear("[" + date + " Error]" + format), args);
-            PrintStream stream = super.printf(l, ERROR_RED + ColorParser.clear("[" + date + " Error]" + format + RESET_COLOR), args);
+            logs.printf(l, ColorParser.clear("[" + date + " ERROR]" + format), args);
+            PrintStream stream = super.printf(l, ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + format + RESET_COLOR), args);
             console.unstashLine();
             return stream;
         }
@@ -420,8 +411,8 @@ public class Console implements CommandSender {
         public PrintStream printf(String format, Object... args) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.printf(ColorParser.clear("[" + date + " Error]" + format), args);
-            PrintStream stream = super.printf(ERROR_RED + ColorParser.clear("[" + date + " Error]" + format + RESET_COLOR), args);
+            logs.printf(ColorParser.clear("[" + date + " ERROR]" + format), args);
+            PrintStream stream = super.printf(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + format + RESET_COLOR), args);
             console.unstashLine();
             return stream;
         }
@@ -430,8 +421,8 @@ public class Console implements CommandSender {
         public void println() {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Error]"));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " Error]") + RESET_COLOR);
+            logs.println(ColorParser.clear("[" + date + " ERROR]"));
+            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]") + RESET_COLOR);
             console.unstashLine();
         }
 
@@ -439,8 +430,8 @@ public class Console implements CommandSender {
         public void println(boolean x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Error]" + x));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " Error]" + x) + RESET_COLOR);
+            logs.println(ColorParser.clear("[" + date + " ERROR]" + x));
+            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + x) + RESET_COLOR);
             console.unstashLine();
         }
 
@@ -448,8 +439,8 @@ public class Console implements CommandSender {
         public void println(char x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Error]" + x));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " Error]" + x) + RESET_COLOR);
+            logs.println(ColorParser.clear("[" + date + " ERROR]" + x));
+            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + x) + RESET_COLOR);
             console.unstashLine();
         }
 
@@ -457,8 +448,8 @@ public class Console implements CommandSender {
         public void println(char[] x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Error]" + String.valueOf(x)));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " Error]" + String.valueOf(x)) + RESET_COLOR);
+            logs.println(ColorParser.clear("[" + date + " ERROR]" + String.valueOf(x)));
+            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + String.valueOf(x)) + RESET_COLOR);
             console.unstashLine();
         }
 
@@ -466,8 +457,8 @@ public class Console implements CommandSender {
         public void println(double x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Error]" + x));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " Error]" + x) + RESET_COLOR);
+            logs.println(ColorParser.clear("[" + date + " ERROR]" + x));
+            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + x) + RESET_COLOR);
             console.unstashLine();
         }
 
@@ -475,8 +466,8 @@ public class Console implements CommandSender {
         public void println(float x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Error]" + x));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " Error]" + x) + RESET_COLOR);
+            logs.println(ColorParser.clear("[" + date + " ERROR]" + x));
+            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + x) + RESET_COLOR);
             console.unstashLine();
         }
 
@@ -484,8 +475,8 @@ public class Console implements CommandSender {
         public void println(int x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Error]" + x));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " Error]" + x) + RESET_COLOR);
+            logs.println(ColorParser.clear("[" + date + " ERROR]" + x));
+            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + x) + RESET_COLOR);
             console.unstashLine();
         }
 
@@ -493,8 +484,8 @@ public class Console implements CommandSender {
         public void println(long x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Error]" + x));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " Error]" + x) + RESET_COLOR);
+            logs.println(ColorParser.clear("[" + date + " ERROR]" + x));
+            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + x) + RESET_COLOR);
             console.unstashLine();
         }
 
@@ -502,8 +493,8 @@ public class Console implements CommandSender {
         public void println(Object x) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Error]" + x));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " Error]" + x) + RESET_COLOR);
+            logs.println(ColorParser.clear("[" + date + " ERROR]" + x));
+            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + x) + RESET_COLOR);
             console.unstashLine();
         }
 
@@ -511,8 +502,8 @@ public class Console implements CommandSender {
         public void println(String string) {
             console.stashLine();
             String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " Error] " + string));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " Error] " + string) + RESET_COLOR);
+            logs.println(ColorParser.clear("[" + date + " ERROR] " + string));
+            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR] " + string) + RESET_COLOR);
             console.unstashLine();
         }
     }

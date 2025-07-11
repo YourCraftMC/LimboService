@@ -21,11 +21,7 @@
 package com.loohp.limbo.events.inventory;
 
 import com.loohp.limbo.events.Cancellable;
-import com.loohp.limbo.inventory.ClickType;
-import com.loohp.limbo.inventory.InventoryAction;
-import com.loohp.limbo.inventory.InventoryType;
-import com.loohp.limbo.inventory.InventoryView;
-import com.loohp.limbo.inventory.ItemStack;
+import com.loohp.limbo.inventory.*;
 
 public class InventoryClickEvent extends InventoryEvent implements Cancellable {
 

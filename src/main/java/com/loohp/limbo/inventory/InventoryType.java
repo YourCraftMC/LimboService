@@ -20,7 +20,6 @@
 
 package com.loohp.limbo.inventory;
 
-import net.kyori.adventure.key.Key;
 import org.geysermc.mcprotocollib.protocol.data.game.inventory.ContainerType;
 
 public enum InventoryType {

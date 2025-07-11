@@ -20,8 +20,8 @@
 
 package com.loohp.limbo.events.status;
 
-import com.loohp.limbo.events.Event;
 import cn.ycraft.limbo.network.ClientConnection;
+import com.loohp.limbo.events.Event;
 import net.kyori.adventure.text.Component;
 
 public class StatusPingEvent extends Event {

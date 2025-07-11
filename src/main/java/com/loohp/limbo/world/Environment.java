@@ -20,7 +20,6 @@
 
 package com.loohp.limbo.world;
 
-import com.loohp.limbo.registry.RegistryCustom;
 import net.kyori.adventure.key.Key;
 
 import java.util.HashSet;

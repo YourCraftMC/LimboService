@@ -20,10 +20,8 @@ import com.loohp.limbo.player.Player;
 import com.loohp.limbo.player.PlayerInventory;
 import com.loohp.limbo.registry.BuiltInRegistries;
 import com.loohp.limbo.registry.RegistryCustom;
-import com.loohp.limbo.utils.CustomStringUtils;
 import com.loohp.limbo.utils.InventoryClickUtils;
 import com.loohp.limbo.world.BlockState;
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -57,7 +55,6 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.Serverbound
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.inventory.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
 
-import java.beans.FeatureDescriptor;
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.ArrayList;

@@ -20,8 +20,8 @@
 
 package com.loohp.limbo.bossbar;
 
-import com.loohp.limbo.player.Player;
 import cn.ycraft.limbo.util.BossBarUtil;
+import com.loohp.limbo.player.Player;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;

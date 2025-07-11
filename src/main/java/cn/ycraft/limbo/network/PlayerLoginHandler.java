@@ -19,12 +19,6 @@ import com.loohp.limbo.utils.MojangAPIUtils;
 import com.loohp.limbo.world.World;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -48,6 +42,13 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.play
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundSetDefaultSpawnPositionPacket;
+
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class PlayerLoginHandler implements ServerLoginHandler {
     private static Cache<UUID, List<GameProfile.Property>> propertiesCache = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.SECONDS).build();

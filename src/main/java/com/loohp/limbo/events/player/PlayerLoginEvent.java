@@ -20,9 +20,9 @@
 
 package com.loohp.limbo.events.player;
 
+import cn.ycraft.limbo.network.ClientConnection;
 import com.loohp.limbo.events.Cancellable;
 import com.loohp.limbo.events.Event;
-import cn.ycraft.limbo.network.ClientConnection;
 import net.kyori.adventure.text.Component;
 
 public class PlayerLoginEvent extends Event implements Cancellable {

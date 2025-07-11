@@ -20,7 +20,6 @@
 
 package com.loohp.limbo.utils;
 
-import cn.ycraft.limbo.util.ChunkUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

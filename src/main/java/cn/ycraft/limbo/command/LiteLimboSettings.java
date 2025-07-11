@@ -1,7 +1,6 @@
 package cn.ycraft.limbo.command;
 
 import dev.rollczi.litecommands.platform.PlatformSettings;
-import org.jetbrains.annotations.ApiStatus;
 
 public class LiteLimboSettings implements PlatformSettings {
 

@@ -19,8 +19,8 @@
 
 package com.loohp.limbo.events.connection;
 
-import com.loohp.limbo.events.Event;
 import cn.ycraft.limbo.network.ClientConnection;
+import com.loohp.limbo.events.Event;
 
 public class ConnectionEstablishedEvent extends Event {
 

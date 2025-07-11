@@ -83,7 +83,7 @@ public class ServerConnection {
             @Override
             public void serverBound(ServerBoundEvent event) {
                 if (!silent) {
-                    Limbo.getInstance().getConsole().sendMessage("Limbo server listening on /" + ((InetSocketAddress) event.getServer().getBindAddress()).getHostName() + ":" + ((InetSocketAddress) event.getServer().getBindAddress()).getPort());
+                    Limbo.getInstance().getConsole().sendMessage("LimboService start listening on /" + ((InetSocketAddress) event.getServer().getBindAddress()).getHostName() + ":" + ((InetSocketAddress) event.getServer().getBindAddress()).getPort());
                 }
             }
 

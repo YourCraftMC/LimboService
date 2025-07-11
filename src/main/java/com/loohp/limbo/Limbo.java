@@ -23,6 +23,7 @@ package com.loohp.limbo;
 import cc.carm.lib.configuration.source.ConfigurationHolder;
 import cc.carm.lib.configuration.source.option.StandardOptions;
 import cc.carm.lib.configuration.source.yaml.YAMLConfigFactory;
+import cc.carm.lib.easyplugin.utils.ColorParser;
 import cn.ycraft.limbo.config.AllowlistConfig;
 import cn.ycraft.limbo.config.ServerConfig;
 import cn.ycraft.limbo.config.ServerMessages;
@@ -132,6 +133,9 @@ public final class Limbo implements ForwardingAudience {
         this.unsafe = new Unsafe(this);
         this.console = new Console(System.in, System.out, System.err);
 
+        LIMBO_IMPLEMENTATION_VERSION = getLimboVersion();
+        console.sendMessage(ColorParser.parse("Booting LimboService &8(v" + LIMBO_IMPLEMENTATION_VERSION + ")&r on Minecraft " + SERVER_IMPLEMENTATION_VERSION + " ..."));
+
         // Initialize the configuration.
         this.configHolder = YAMLConfigFactory.from("config.yml")
             .option(StandardOptions.PRELOAD, true).build();
@@ -149,14 +153,10 @@ public final class Limbo implements ForwardingAudience {
 
         isRunning = new AtomicBoolean(true);
 
-        LIMBO_IMPLEMENTATION_VERSION = getLimboVersion();
-        console.sendMessage("Loading Limbo Version " + LIMBO_IMPLEMENTATION_VERSION + " on Minecraft " + SERVER_IMPLEMENTATION_VERSION);
-        reloadConfig();
-
         if (!ServerConfig.PROXY.usingProxy()) {
-            console.sendMessage("If you are using BungeeCord/Velocity, consider turning that on in the settings!");
+            console.sendMessage(ColorParser.parse("&9If you are using BungeeCord/Velocity, consider turning that on in the settings!"));
         } else {
-            console.sendMessage("Starting Limbo server in proxied mode!");
+            console.sendMessage(ColorParser.parse("&rStarting LimboService in &9proxied mode&r!"));
         }
 
         worlds.add(loadDefaultWorld());

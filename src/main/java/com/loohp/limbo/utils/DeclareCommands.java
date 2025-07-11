@@ -34,16 +34,17 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import java.util.List;
-import java.util.OptionalInt;
-import java.util.Queue;
-import java.util.function.BiPredicate;
 import net.kyori.adventure.key.Key;
 import org.geysermc.mcprotocollib.protocol.data.game.command.CommandNode;
 import org.geysermc.mcprotocollib.protocol.data.game.command.CommandParser;
 import org.geysermc.mcprotocollib.protocol.data.game.command.CommandType;
 import org.geysermc.mcprotocollib.protocol.data.game.command.properties.StringProperties;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundCommandsPacket;
+
+import java.util.List;
+import java.util.OptionalInt;
+import java.util.Queue;
+import java.util.function.BiPredicate;
 
 public class DeclareCommands {
     public static ClientboundCommandsPacket getDeclareCommandsPacket(CommandSender sender) {

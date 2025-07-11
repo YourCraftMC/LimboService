@@ -2,6 +2,7 @@ package cn.ycraft.limbo;
 
 import cn.ycraft.limbo.command.LiteLimboFactory;
 import cn.ycraft.limbo.command.defaults.*;
+import com.loohp.limbo.Limbo;
 import com.loohp.limbo.file.FileConfiguration;
 import com.loohp.limbo.plugins.LimboPlugin;
 
@@ -15,7 +16,7 @@ public class InternalPlugin extends LimboPlugin {
             FileConfiguration config = new FileConfiguration(new File("internal-plugin.yml"));
             config.set("name", "LimboService");
             config.set("author", "YourCraftMC");
-            config.set("version", "1.0.0");
+            config.set("version", Limbo.LIMBO_IMPLEMENTATION_VERSION);
             config.set("main", getClass().getName());
             setInfo(config, null);
         } catch (IOException ignored) {

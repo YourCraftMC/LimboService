@@ -162,7 +162,7 @@ public final class Limbo implements ForwardingAudience {
 
         serverHost = ServerConfig.SERVER.HOST.resolve();
         serverPort = ServerConfig.SERVER.PORT.resolve();
-        onlineMode = ServerConfig.SERVER.ONLINE_MODE.resolve();
+        onlineMode = ServerConfig.SERVER.ONLINE_MODE.resolve() && !ServerConfig.PROXY.BUNGEECORD.resolve();
 
         isRunning = new AtomicBoolean(true);
 

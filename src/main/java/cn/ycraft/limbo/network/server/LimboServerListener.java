@@ -109,7 +109,7 @@ public class LimboServerListener extends ServerListener {
                         String bungeeForwarding = intentionPacket.getHostname();
                         if (isBungeeCord || isBungeeGuard) {
                             try {
-                                String[] data = bungeeForwarding.split("\\x00");
+                                String[] data = bungeeForwarding.split("\00");
                                 String host = "";
                                 String floodgate = "";
                                 String clientIp = "";

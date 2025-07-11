@@ -20,15 +20,12 @@
 
 package com.loohp.limbo.world;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.loohp.limbo.Limbo;
-import net.kyori.adventure.key.Key;
 import net.querz.nbt.io.SNBTUtil;
 import net.querz.nbt.tag.CompoundTag;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,10 +33,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import net.kyori.adventure.key.Key;
 
 public class GeneratedBlockDataMappings {
 
-    private static JSONObject globalPalette = new JSONObject();
+    private static JsonObject globalPalette = new JsonObject();
+    private static final Gson gson = new Gson();
 
     static {
         String block = "reports/blocks.json";
@@ -48,23 +47,24 @@ public class GeneratedBlockDataMappings {
             throw new RuntimeException("Failed to load " + block + " from jar!");
         }
         try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-            globalPalette = (JSONObject) new JSONParser().parse(reader);
-        } catch (IOException | ParseException e) {
+            globalPalette = gson.fromJson(reader, JsonObject.class);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public static int getGlobalPaletteIDFromKey(Key key) {
         String blockId = key.asString();
-        JSONObject data = (JSONObject) globalPalette.get(blockId);
+        JsonObject data = globalPalette.get(blockId).getAsJsonObject();
         Object obj = data.get("properties");
         if (obj == null) {
-            return ((Number) ((JSONObject) ((JSONArray) data.get("states")).get(0)).get("id")).intValue();
+            return data.get("states").getAsJsonArray().get(0).getAsJsonObject().get("id").getAsInt();
         }
 
-        for (Object entry : (JSONArray) data.get("states")) {
-            if (((JSONObject) entry).containsKey("default") && ((boolean) ((JSONObject) entry).get("default"))) {
-                return ((Number) ((JSONObject) entry).get("id")).intValue();
+        for (JsonElement entry : data.get("states").getAsJsonArray()) {
+            final JsonObject element = entry.getAsJsonObject();
+            if (element.has("default") && element.get("default").getAsBoolean()) {
+                return element.get("id").getAsInt();
             }
         }
 
@@ -77,10 +77,10 @@ public class GeneratedBlockDataMappings {
         try {
             String blockname = tag.getString("Name");
 
-            JSONObject data = (JSONObject) globalPalette.get(blockname);
+            JsonObject data = globalPalette.get(blockname).getAsJsonObject();
             Object obj = data.get("properties");
             if (obj == null) {
-                return ((Number) ((JSONObject) ((JSONArray) data.get("states")).get(0)).get("id")).intValue();
+                return data.get("states").getAsJsonArray().get(0).getAsJsonObject().get("id").getAsInt();
             }
 
             if (tag.containsKey("Properties")) {
@@ -90,17 +90,18 @@ public class GeneratedBlockDataMappings {
                     blockstate.put(key, blockProp.getString(key));
                 }
 
-                for (Object entry : (JSONArray) data.get("states")) {
-                    JSONObject jsonobj = (JSONObject) entry;
-                    if (((JSONObject) jsonobj.get("properties")).keySet().stream().allMatch(key -> Objects.equals(blockstate.get(key), ((JSONObject) jsonobj.get("properties")).get(key)))) {
-                        return ((Number) jsonobj.get("id")).intValue();
+                for (JsonElement entry : data.get("states").getAsJsonArray()) {
+                    JsonObject jsonobj = entry.getAsJsonObject();
+                    if (jsonobj.get("properties").getAsJsonObject().keySet().stream().allMatch(key -> Objects.equals(blockstate.get(key), jsonobj.get("properties").getAsJsonObject().get(key).getAsString()))) {
+                        return jsonobj.get("id").getAsInt();
                     }
                 }
             }
 
-            for (Object entry : (JSONArray) data.get("states")) {
-                if (((JSONObject) entry).containsKey("default") && ((boolean) ((JSONObject) entry).get("default"))) {
-                    return ((Number) ((JSONObject) entry).get("id")).intValue();
+            for (JsonElement entry : data.get("states").getAsJsonArray()) {
+                final JsonObject element = entry.getAsJsonObject();
+                if (element.has("default") && element.get("default").getAsBoolean()) {
+                    return element.get("id").getAsInt();
                 }
             }
 

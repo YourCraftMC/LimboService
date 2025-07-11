@@ -8,10 +8,11 @@ import cc.carm.lib.configuration.value.standard.ConfiguredValue;
 import cn.ycraft.limbo.config.data.Favicon;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.world.Environment;
-import java.util.Locale;
-import java.util.Objects;
 import net.kyori.adventure.key.Key;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
+
+import java.util.Locale;
+import java.util.Objects;
 
 @ConfigPath(root = true)
 public interface ServerConfig extends Configuration {
@@ -137,6 +138,11 @@ public interface ServerConfig extends Configuration {
         @HeaderComments("For Velocity Modern Forwarding or BungeeGuard a list of valid secrets.")
         ConfiguredList<String> FORWARDING_SECRETS = ConfiguredList.builderOf(String.class)
             .fromString().defaults().build();
+
+
+        static boolean usingProxy() {
+            return BUNGEE_GUARD.resolve() || BUNGEECORD.resolve() || VELOCITY_MODERN.resolve();
+        }
 
     }
 

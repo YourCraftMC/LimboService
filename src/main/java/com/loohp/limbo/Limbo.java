@@ -32,11 +32,7 @@ import com.google.gson.GsonBuilder;
 import com.loohp.limbo.bossbar.KeyedBossBar;
 import com.loohp.limbo.commands.CommandSender;
 import com.loohp.limbo.events.EventsManager;
-import com.loohp.limbo.inventory.AnvilInventory;
-import com.loohp.limbo.inventory.CustomInventory;
-import com.loohp.limbo.inventory.Inventory;
-import com.loohp.limbo.inventory.InventoryHolder;
-import com.loohp.limbo.inventory.InventoryType;
+import com.loohp.limbo.inventory.*;
 import com.loohp.limbo.location.Location;
 import com.loohp.limbo.metrics.Metrics;
 import com.loohp.limbo.permissions.PermissionsManager;
@@ -49,35 +45,6 @@ import com.loohp.limbo.utils.ImageUtils;
 import com.loohp.limbo.utils.NetworkUtils;
 import com.loohp.limbo.world.Schematic;
 import com.loohp.limbo.world.World;
-import net.querz.nbt.io.NBTUtil;
-import net.querz.nbt.tag.CompoundTag;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.bossbar.BossBar;
@@ -85,12 +52,28 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.querz.nbt.io.NBTUtil;
+import net.querz.nbt.tag.CompoundTag;
 import org.geysermc.mcprotocollib.protocol.data.game.BossBarAction;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundBossEventPacket;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public final class Limbo implements ForwardingAudience {
 
@@ -170,10 +153,10 @@ public final class Limbo implements ForwardingAudience {
         console.sendMessage("Loading Limbo Version " + LIMBO_IMPLEMENTATION_VERSION + " on Minecraft " + SERVER_IMPLEMENTATION_VERSION);
         reloadConfig();
 
-        if (!ServerConfig.PROXY.BUNGEECORD.resolve()) {
-            console.sendMessage("If you are using BungeeCord, consider turning that on in the settings!");
+        if (!ServerConfig.PROXY.usingProxy()) {
+            console.sendMessage("If you are using BungeeCord/Velocity, consider turning that on in the settings!");
         } else {
-            console.sendMessage("Starting Limbo server in BungeeCord mode!");
+            console.sendMessage("Starting Limbo server in proxied mode!");
         }
 
         worlds.add(loadDefaultWorld());

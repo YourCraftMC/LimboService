@@ -51,13 +51,16 @@ import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.querz.nbt.io.NBTUtil;
 import net.querz.nbt.tag.CompoundTag;
 import org.geysermc.mcprotocollib.protocol.data.game.BossBarAction;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundBossEventPacket;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -91,8 +94,8 @@ public final class Limbo implements ForwardingAudience {
 
     //===========================
 
-    public static final String SERVER_IMPLEMENTATION_VERSION = "1.21.7";
-    public static final int SERVER_IMPLEMENTATION_PROTOCOL = 772;
+    public static String SERVER_IMPLEMENTATION_VERSION;
+    public static int SERVER_IMPLEMENTATION_PROTOCOL;
     public static String LIMBO_IMPLEMENTATION_VERSION;
 
     private final AtomicBoolean isRunning;
@@ -131,10 +134,13 @@ public final class Limbo implements ForwardingAudience {
     public Limbo() throws IOException, ParseException, NumberFormatException, ClassNotFoundException, InterruptedException {
         Limbo.instance = this;
         this.unsafe = new Unsafe(this);
-        this.console = new Console(System.in, System.out, System.err);
+        this.console = new Console();
+        System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
 
         LIMBO_IMPLEMENTATION_VERSION = getLimboVersion();
-        console.sendMessage(ColorParser.parse("Booting LimboService &8(v" + LIMBO_IMPLEMENTATION_VERSION + ")&r on Minecraft " + SERVER_IMPLEMENTATION_VERSION + " ..."));
+        SERVER_IMPLEMENTATION_VERSION = getMineCraftVersion();
+        SERVER_IMPLEMENTATION_PROTOCOL = getMineCraftProtocol();
+        console.sendMessage("Booting LimboService &8(v" + LIMBO_IMPLEMENTATION_VERSION + ")&r on Minecraft " + SERVER_IMPLEMENTATION_VERSION + " ...");
 
         // Initialize the configuration.
         this.configHolder = YAMLConfigFactory.from("config.yml")
@@ -154,9 +160,9 @@ public final class Limbo implements ForwardingAudience {
         isRunning = new AtomicBoolean(true);
 
         if (!ServerConfig.PROXY.usingProxy()) {
-            console.sendMessage(ColorParser.parse("&9If you are using BungeeCord/Velocity, consider turning that on in the settings!"));
+            console.sendMessage("&9If you are using BungeeCord/Velocity, consider turning that on in the settings!");
         } else {
-            console.sendMessage(ColorParser.parse("&rStarting LimboService in &9proxied mode&r!"));
+            console.sendMessage("&rStarting LimboService in &9proxied mode&r!");
         }
 
         worlds.add(loadDefaultWorld());
@@ -228,7 +234,7 @@ public final class Limbo implements ForwardingAudience {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> Limbo.getInstance().terminate()));
 
-        this.console.run();
+        this.console.start();
     }
 
     public void reloadConfig() {
@@ -452,7 +458,7 @@ public final class Limbo implements ForwardingAudience {
         tick.waitAndKillThreads(5000);
 
         for (Player player : getPlayers()) {
-            player.disconnect("Server closed");
+            player.disconnect("Server closed.");
         }
 
         server.shutdown();
@@ -464,8 +470,7 @@ public final class Limbo implements ForwardingAudience {
             }
         }
 
-        console.sendMessage("Server closed");
-        console.logs.close();
+        System.out.println("Server shutdown. bye.");
     }
 
     public void stopServer() {
@@ -488,18 +493,31 @@ public final class Limbo implements ForwardingAudience {
         Limbo.getInstance().getPluginManager().dispatchCommand(sender, input);
     }
 
-    private String getLimboVersion() throws IOException {
+    @Contract("_, !null -> !null")
+    private String getMetaInf(@NotNull String key, @Nullable String defaults) throws IOException {
         Enumeration<URL> manifests = getClass().getClassLoader().getResources("META-INF/MANIFEST.MF");
         while (manifests.hasMoreElements()) {
             URL url = manifests.nextElement();
             try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
-                Optional<String> line = br.lines().filter(each -> each.startsWith("Limbo-Version:")).findFirst();
+                Optional<String> line = br.lines().filter(each -> each.startsWith(key + ":")).findFirst();
                 if (line.isPresent()) {
-                    return line.get().substring(14).trim();
+                    return line.get().substring(key.length() + 1).trim();
                 }
             }
         }
-        return "Unknown";
+        return defaults;
+    }
+
+    private String getMineCraftVersion() throws IOException {
+        return getMetaInf("MineCraft-Version", "UNKNOWN");
+    }
+
+    private int getMineCraftProtocol() throws IOException {
+        return Integer.parseInt(getMetaInf("MineCraft-Protocol", "0"));
+    }
+
+    private String getLimboVersion() throws IOException {
+        return getMetaInf("Limbo-Version", "UNKNOWN");
     }
 
     public Inventory createInventory(Component title, int slots, InventoryHolder holder) {
@@ -514,12 +532,10 @@ public final class Limbo implements ForwardingAudience {
         if (!type.isCreatable()) {
             throw new UnsupportedOperationException("This InventoryType cannot be created.");
         }
-        switch (type) {
-            case ANVIL:
-                return new AnvilInventory(title, holder);
-            default:
-                throw new UnsupportedOperationException("This InventoryType has not been implemented yet.");
+        if (type == InventoryType.ANVIL) {
+            return new AnvilInventory(title, holder);
         }
+        throw new UnsupportedOperationException("This InventoryType has not been implemented yet.");
     }
 
 

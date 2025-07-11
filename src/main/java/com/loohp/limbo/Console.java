@@ -22,6 +22,7 @@ package com.loohp.limbo;
 
 import cc.carm.lib.easyplugin.utils.ColorParser;
 import com.loohp.limbo.commands.CommandSender;
+import com.loohp.limbo.plugins.LimboPlugin;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -36,94 +37,33 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.TitlePart;
-import org.jline.reader.*;
-import org.jline.reader.LineReader.SuggestionType;
-import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
+import net.minecrell.terminalconsole.SimpleTerminalConsole;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.io.IoBuilder;
+import org.jetbrains.annotations.NotNull;
+import org.jline.reader.Candidate;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-public class Console implements CommandSender {
+public class Console extends SimpleTerminalConsole implements CommandSender {
 
-    private final static String CONSOLE = "CONSOLE";
-    private final static String PROMPT = "> ";
-    protected final static String ERROR_RED = "\u001B[31;1m";
-    protected final static String RESET_COLOR = "\u001B[0m";
+    protected final static String CONSOLE_NAME = "CONSOLE";
+    protected static final Logger logger = LogManager.getLogger(Console.class);
 
-    private final Terminal terminal;
-    private final LineReader tabReader;
-    private final LineReader reader;
-
-    private final InputStream in;
-    @SuppressWarnings("unused")
-    private final PrintStream out;
-    @SuppressWarnings("unused")
-    private final PrintStream err;
-    protected final PrintStream logs;
-
-    public Console(InputStream in, PrintStream out, PrintStream err) throws IOException {
-        String fileName = new SimpleDateFormat("yyyy'-'MM'-'dd'_'HH'-'mm'-'ss'_'zzz'.log'").format(new Date());
-        File dir = new File("logs");
-        dir.mkdirs();
-        File logs = new File(dir, fileName);
-        this.logs = new PrintStream(Files.newOutputStream(logs.toPath()), true, StandardCharsets.UTF_8);
-
-        if (in != null) {
-            System.setIn(in);
-            this.in = System.in;
-        } else {
-            this.in = null;
-        }
-        System.setOut(new ConsoleOutputStream(this, out == null ? new PrintStream(new OutputStream() {
-            @Override
-            public void write(int b) {
-                //DO NOTHING
-            }
-        }) : out, this.logs));
-        this.out = System.out;
-
-        System.setErr(new ConsoleErrorStream(this, err == null ? new PrintStream(new OutputStream() {
-            @Override
-            public void write(int b) {
-                //DO NOTHING
-            }
-        }) : err, this.logs));
-        this.err = System.err;
-
-
-        terminal = TerminalBuilder.builder().streams(in, out).jansi(true).dumb(false).build();
-        reader = LineReaderBuilder.builder().terminal(terminal).build();
-        tabReader = LineReaderBuilder.builder().terminal(terminal).completer(new Completer() {
-            @Override
-            public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
-                com.mojang.brigadier.StringReader input = new StringReader(line.line());
-                Suggestions suggestions = null;
-                try {
-                    suggestions = Limbo.getInstance().getPluginManager().suggest(Limbo.getInstance().getConsole(), input).get();
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
-                for (Suggestion each : suggestions.getList()) {
-                    candidates.add(new Candidate(each.getText()));
-                }
-            }
-        }).build();
-        tabReader.setAutosuggestion(SuggestionType.NONE);
+    public Console() {
+        System.setOut(IoBuilder.forLogger(logger).setLevel(Level.INFO).buildPrintStream());
+        System.setErr(IoBuilder.forLogger(logger).setLevel(Level.ERROR).buildPrintStream());
     }
 
     @Override
     public String getName() {
-        return CONSOLE;
+        return CONSOLE_NAME;
     }
 
     @Override
@@ -131,6 +71,43 @@ public class Console implements CommandSender {
         return Limbo.getInstance().getPermissionsManager().hasPermission(this, permission);
     }
 
+    @Override
+    protected LineReader buildReader(LineReaderBuilder builder) {
+        return super.buildReader(builder.appName("LimboService")
+            .completer((reader, line, candidates) -> {
+                StringReader input = new StringReader(line.line());
+                Suggestions suggestions;
+                try {
+                    suggestions = Limbo.getInstance().getPluginManager().suggest(this, input).get();
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.error("Error occurred while getting tab completion", e);
+                    return;
+                }
+                for (Suggestion each : suggestions.getList()) {
+                    candidates.add(new Candidate(each.getText()));
+                }
+            })
+        );
+    }
+
+    @Override
+    protected boolean isRunning() {
+        return Limbo.getInstance().isRunning();
+    }
+
+    @Override
+    protected void runCommand(String command) {
+        if (command.isEmpty()) return;
+        LimboPlugin internal = Limbo.getInstance().getPluginManager().getPlugin("LimboService");
+        Limbo.getInstance().getScheduler().runTaskAsync(
+            internal, () -> Limbo.getInstance().dispatchCommand(Limbo.getInstance().getConsole(), command)
+        );
+    }
+
+    @Override
+    protected void shutdown() {
+        Limbo.getInstance().stopServer();
+    }
 
     @Override
     public void sendMessage(String message, UUID uuid) {
@@ -138,47 +115,54 @@ public class Console implements CommandSender {
     }
 
     @Override
-    public void sendMessage(Identity source, Component message, MessageType type) {
-        sendComponent(message);
+    public void sendMessage(String message) {
+        TextComponent component = LegacyComponentSerializer.legacySection().deserialize(ColorParser.parse(message));
+        logger.info(ANSIComponentSerializer.ansi().serialize(component));
     }
 
     @Override
-    public void openBook(Book book) {
+    @SuppressWarnings({"UnstableApiUsage", "deprecation"})
+    public void sendMessage(@NotNull Identity source, @NotNull Component message, @NotNull MessageType type) {
+        logger.info(ANSIComponentSerializer.ansi().serialize(message));
+    }
+
+    @Override
+    public void openBook(@NotNull Book book) {
         //ignore
     }
 
     @Override
-    public void stopSound(SoundStop stop) {
+    public void stopSound(@NotNull SoundStop stop) {
         //ignore
     }
 
     @Override
-    public void playSound(Sound sound, Emitter emitter) {
+    public void playSound(@NotNull Sound sound, @NotNull Emitter emitter) {
         //ignore
     }
 
     @Override
-    public void playSound(Sound sound, double x, double y, double z) {
+    public void playSound(@NotNull Sound sound, double x, double y, double z) {
         //ignore
     }
 
     @Override
-    public void playSound(Sound sound) {
+    public void playSound(@NotNull Sound sound) {
         //ignore
     }
 
     @Override
-    public void sendActionBar(Component message) {
+    public void sendActionBar(@NotNull Component message) {
         //ignore
     }
 
     @Override
-    public void sendPlayerListHeaderAndFooter(Component header, Component footer) {
+    public void sendPlayerListHeaderAndFooter(@NotNull Component header, @NotNull Component footer) {
         //ignore
     }
 
     @Override
-    public <T> void sendTitlePart(TitlePart<T> part, T value) {
+    public <T> void sendTitlePart(@NotNull TitlePart<T> part, @NotNull T value) {
         //ignore
     }
 
@@ -193,319 +177,13 @@ public class Console implements CommandSender {
     }
 
     @Override
-    public void showBossBar(BossBar bar) {
+    public void showBossBar(@NotNull BossBar bar) {
         //ignore
     }
 
     @Override
-    public void hideBossBar(BossBar bar) {
+    public void hideBossBar(@NotNull BossBar bar) {
         //ignore
-    }
-
-    @Override
-    public void sendMessage(String message) {
-        stashLine();
-        String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-        logs.println(ColorParser.clear("[" + date + " INFO] " + message));
-        reader.getTerminal().writer().append("[" + date + " INFO] " + translateToConsole(message) + "\n");
-        reader.getTerminal().flush();
-        unstashLine();
-    }
-
-    public void sendComponent(Component message) {
-        stashLine();
-        String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-        logs.println(ColorParser.clear("[" + date + " INFO] " + PlainTextComponentSerializer.plainText().serialize(message)));
-        reader.getTerminal().writer().append("[" + date + " INFO] " + translateToConsole(message) + "\n");
-        reader.getTerminal().flush();
-        unstashLine();
-    }
-
-    protected void run() {
-        if (in == null) {
-            return;
-        }
-        while (true) {
-            try {
-                String command = tabReader.readLine(PROMPT).trim();
-                if (!command.isEmpty()) {
-                    Limbo.getInstance().getScheduler().runTask(Limbo.getInstance().getPluginManager().getPlugin("LimboService"), () -> {
-                        Limbo.getInstance().dispatchCommand(this, command);
-                    });
-                }
-            } catch (UserInterruptException | EndOfFileException e) {
-                break;
-            }
-        }
-    }
-
-    protected void stashLine() {
-        try {
-            tabReader.callWidget(LineReader.CLEAR);
-        } catch (Exception ignore) {
-        }
-    }
-
-    protected void unstashLine() {
-        try {
-            tabReader.callWidget(LineReader.REDRAW_LINE);
-            tabReader.callWidget(LineReader.REDISPLAY);
-            tabReader.getTerminal().writer().flush();
-        } catch (Exception ignore) {
-        }
-    }
-
-    protected static String translateToConsole(String str) {
-        TextComponent component = LegacyComponentSerializer.legacySection().deserialize(str);
-        return ANSIComponentSerializer.ansi().serialize(component);
-    }
-
-    protected static String translateToConsole(Component component) {
-        return ANSIComponentSerializer.ansi().serialize(component);
-    }
-
-    public static class ConsoleOutputStream extends PrintStream {
-
-        private final PrintStream logs;
-        private final Console console;
-
-        public ConsoleOutputStream(Console console, OutputStream out, PrintStream logs) {
-            super(out);
-            this.logs = logs;
-            this.console = console;
-        }
-
-        @Override
-        public PrintStream printf(Locale l, String format, Object... args) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.printf(l, ColorParser.clear("[" + date + " INFO]" + format), args);
-            PrintStream stream = super.printf(l, Console.translateToConsole("[" + date + " INFO]" + format), args);
-            console.unstashLine();
-            return stream;
-        }
-
-        @Override
-        public PrintStream printf(String format, Object... args) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.printf(ColorParser.clear("[" + date + " INFO]" + format), args);
-            PrintStream stream = super.printf(ColorParser.clear("[" + date + " INFO]" + format), args);
-            console.unstashLine();
-            return stream;
-        }
-
-        @Override
-        public void println() {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " INFO]"));
-            super.println(ColorParser.clear("[" + date + " INFO]"));
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(boolean x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " INFO]" + x));
-            super.println(ColorParser.clear("[" + date + " INFO]" + x));
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(char x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " INFO]" + x));
-            super.println(ColorParser.clear("[" + date + " INFO]" + x));
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(char[] x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " INFO]" + String.valueOf(x)));
-            super.println(ColorParser.clear("[" + date + " INFO]" + String.valueOf(x)));
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(double x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " INFO]" + x));
-            super.println(ColorParser.clear("[" + date + " INFO]" + x));
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(float x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " INFO]" + x));
-            super.println(ColorParser.clear("[" + date + " INFO]" + x));
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(int x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " INFO]" + x));
-            super.println(ColorParser.clear("[" + date + " INFO]" + x));
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(long x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " INFO]" + x));
-            super.println(ColorParser.clear("[" + date + " INFO]" + x));
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(Object x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " INFO]" + x));
-            super.println(ColorParser.clear("[" + date + " INFO]" + x));
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(String string) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " INFO] " + string));
-            super.println(ColorParser.clear("[" + date + " INFO] " + string));
-            console.unstashLine();
-        }
-    }
-
-    public static class ConsoleErrorStream extends PrintStream {
-
-        private final PrintStream logs;
-        private final Console console;
-
-        public ConsoleErrorStream(Console console, OutputStream out, PrintStream logs) {
-            super(out);
-            this.logs = logs;
-            this.console = console;
-        }
-
-        @Override
-        public PrintStream printf(Locale l, String format, Object... args) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.printf(l, ColorParser.clear("[" + date + " ERROR]" + format), args);
-            PrintStream stream = super.printf(l, ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + format + RESET_COLOR), args);
-            console.unstashLine();
-            return stream;
-        }
-
-        @Override
-        public PrintStream printf(String format, Object... args) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.printf(ColorParser.clear("[" + date + " ERROR]" + format), args);
-            PrintStream stream = super.printf(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + format + RESET_COLOR), args);
-            console.unstashLine();
-            return stream;
-        }
-
-        @Override
-        public void println() {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " ERROR]"));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]") + RESET_COLOR);
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(boolean x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " ERROR]" + x));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + x) + RESET_COLOR);
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(char x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " ERROR]" + x));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + x) + RESET_COLOR);
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(char[] x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " ERROR]" + String.valueOf(x)));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + String.valueOf(x)) + RESET_COLOR);
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(double x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " ERROR]" + x));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + x) + RESET_COLOR);
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(float x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " ERROR]" + x));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + x) + RESET_COLOR);
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(int x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " ERROR]" + x));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + x) + RESET_COLOR);
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(long x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " ERROR]" + x));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + x) + RESET_COLOR);
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(Object x) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " ERROR]" + x));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR]" + x) + RESET_COLOR);
-            console.unstashLine();
-        }
-
-        @Override
-        public void println(String string) {
-            console.stashLine();
-            String date = new SimpleDateFormat("HH':'mm':'ss").format(new Date());
-            logs.println(ColorParser.clear("[" + date + " ERROR] " + string));
-            super.println(ERROR_RED + ColorParser.clear("[" + date + " ERROR] " + string) + RESET_COLOR);
-            console.unstashLine();
-        }
     }
 
 }

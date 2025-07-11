@@ -1,23 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN" shutdownHook="disable">
+<Configuration status="WARN">
+
+    <Properties>
+        <Property name="log_level">%highlight{%level}{
+            FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=cyan, TRACE=blue}
+        </Property>
+        <Property name="log_prefix">[%d{HH:mm:ss} ${log_level}]</Property>
+    </Properties>
+
     <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
+        <TerminalConsole name="Console">
             <PatternLayout>
-                <Pattern>%d{HH:mm:ss} %highlight{[%level]}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=cyan}
-                    [%logger]: %msg%n%xEx
-                </Pattern>
+                <LoggerNamePatternSelector
+                    defaultPattern="${log_prefix} [%logger] %minecraftFormatting{%msg}%n%xEx">
+                    <PatternMatch key="com.loohp.limbo."
+                                  pattern="${log_prefix} %minecraftFormatting{%msg}%n%xEx"/>
+                    <PatternMatch key="cn.ycraft.limbo."
+                                  pattern="${log_prefix} %minecraftFormatting{%msg}%n%xEx"/>
+                </LoggerNamePatternSelector>
             </PatternLayout>
-        </Console>
+        </TerminalConsole>
 
         <RollingRandomAccessFile name="File" fileName="logs/latest.log"
                                  filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz"
-                                 immediateFlush="true">
-            <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] [%logger]: %msg%n"/>
+                                 immediateFlush="false">
+            <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] [%logger]: %stripAnsi{%msg}%n"/>
             <Policies>
-                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <TimeBasedTriggeringPolicy/>
                 <OnStartupTriggeringPolicy minSize="0"/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
             </Policies>
-            <DefaultRolloverStrategy max="10"/>
+            <DefaultRolloverStrategy max="25"/>
         </RollingRandomAccessFile>
     </Appenders>
 

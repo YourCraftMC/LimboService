@@ -42,7 +42,7 @@ if you have any LimboService plugins, you can put them in the `plugins/` directo
 Or if you want to develop your own plugins, please see the [Development](#development) section.
 
 > [!CAUTION]
-> LimboService is **not implemented** any Bukkit/Spigot/BungeeCord/Velocity API,
+> LimboService is **not implementing** any Bukkit/Spigot/BungeeCord/Velocity API,
 > and it's **completely not compatible** and will **never compatible** with any plugins of them!
 >
 > You need to use the provided API to develop your own plugins!

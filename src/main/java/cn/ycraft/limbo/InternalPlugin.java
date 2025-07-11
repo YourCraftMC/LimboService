@@ -33,7 +33,8 @@ public class InternalPlugin extends LimboPlugin {
                 new SayCommand(),
                 new SpawnCommand(),
                 new StopCommand(),
-                new VersionCommand()
+                new VersionCommand(),
+                new DumpCommand()
             )
             .build();
     }

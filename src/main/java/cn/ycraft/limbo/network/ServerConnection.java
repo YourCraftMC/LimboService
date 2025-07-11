@@ -20,6 +20,7 @@
 
 package cn.ycraft.limbo.network;
 
+import cc.carm.lib.easyplugin.utils.ColorParser;
 import cn.ycraft.limbo.config.ServerConfig;
 import cn.ycraft.limbo.network.protocol.LimboProtocol;
 import cn.ycraft.limbo.network.server.ForwardData;
@@ -83,7 +84,14 @@ public class ServerConnection {
             @Override
             public void serverBound(ServerBoundEvent event) {
                 if (!silent) {
-                    Limbo.getInstance().getConsole().sendMessage("LimboService start listening on /" + ((InetSocketAddress) event.getServer().getBindAddress()).getHostName() + ":" + ((InetSocketAddress) event.getServer().getBindAddress()).getPort());
+                    if (port == 0) {
+                        Limbo.getInstance().getConsole().sendMessage(ColorParser.parse("&aWaiting for external connection service bootup..."));
+                    } else {
+                        Limbo.getInstance().getConsole().sendMessage(ColorParser.parse(
+                            "&2LimboService start listening on /" + ((InetSocketAddress) event.getServer().getBindAddress()).getHostName() + ":" + ((InetSocketAddress) event.getServer().getBindAddress()).getPort()
+                            )
+                        );
+                    }
                 }
             }
 

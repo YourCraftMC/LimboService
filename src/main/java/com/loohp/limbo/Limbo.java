@@ -438,7 +438,7 @@ public final class Limbo implements ForwardingAudience {
 
     private void terminate() {
         isRunning.set(false);
-        console.sendMessage("Stopping Server...");
+        console.sendMessage(ColorParser.parse("&cStopping Server..."));
 
         for (LimboPlugin plugin : Limbo.getInstance().getPluginManager().getPlugins()) {
             try {

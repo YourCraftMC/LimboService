@@ -151,7 +151,7 @@ public class LimboServerListener extends ServerListener {
                                             break;
                                     }
                                 }
-                                if (state != 6) {
+                                if (state != 6 && state != 4) {
                                     throw new IllegalStateException("Illegal bungee state: " + state);
                                 }
 
@@ -192,6 +192,8 @@ public class LimboServerListener extends ServerListener {
                                     PrintWriter pw = new PrintWriter(sw);
                                     e.printStackTrace(pw);
                                     Limbo.getInstance().getConsole().sendMessage(sw.toString());
+                                    Limbo.getInstance().getConsole().sendMessage(bungeeForwarding);
+                                    Limbo.getInstance().getConsole().sendMessage(Arrays.toString(bungeeForwarding.split("\00")));
                                 }
                                 Limbo.getInstance().getConsole().sendMessage("If you wish to use bungeecord's IP forwarding, please enable that in your bungeecord config.yml as well!");
                                 session.disconnect(Component.text("Please connect from the proxy!").color(NamedTextColor.RED));
@@ -207,7 +209,7 @@ public class LimboServerListener extends ServerListener {
                         throw new UnsupportedOperationException("Invalid client intent: " + intentionPacket.getIntent());
                 }
                 return;
-            }
+            } else throw new IllegalStateException("Invalid Packet+" + packet.getClass().getName());
         }
         super.packetReceived(session, packet);
     }

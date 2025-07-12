@@ -72,7 +72,7 @@ public class PlayerLoginHandler implements ServerLoginHandler {
         if (forwardedData.velocityDataFrom != null) {
             profile.setProperties(forwardedData.velocityDataFrom.properties);
         }
-        if (ServerConfig.PLAYER.OVERWRITE_SKIN.resolve()) {
+        if (ServerConfig.PLAYER.OVERWRITE_SKIN.resolve() && Limbo.getInstance().isOnlineMode()) {
             List<GameProfile.Property> properties = propertiesCache.getIfPresent(profile.getId());
             if (properties == null) {
                 properties = MojangAPIUtils.getPropertiesFromMojangServer(profile.getId());

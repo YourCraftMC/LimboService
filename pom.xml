@@ -28,7 +28,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 
-        <minecraft.version>1.21.7</minecraft.version>
+        <minecraft.version>1.21.8</minecraft.version>
         <minecraft.protocol>772</minecraft.protocol>
 
         <deps.easyplugin.version>1.5.13</deps.easyplugin.version>
@@ -40,7 +40,7 @@
 
     <groupId>cn.ycraft</groupId>
     <artifactId>limboservice</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.7</version>
 
     <name>LimboService</name>
     <description>A lightweight and standalone LIMBO service for Minecraft.</description>

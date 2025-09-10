@@ -62,23 +62,32 @@ public class PluginManager {
             if (file.isFile() && file.getName().endsWith(".jar")) {
                 boolean found = false;
                 try (ZipInputStream zip = new ZipInputStream(new FileInputStream(file))) {
+                    ZipEntry limboYmlEntry = null;
+                    ZipEntry pluginYmlEntry = null;
+                    // 首先遍历，优先查找 limbo.yml 和 plugin.yml 的入口
                     while (true) {
                         ZipEntry entry = zip.getNextEntry();
                         if (entry == null) {
                             break;
                         }
                         String name = entry.getName();
-                        if (name.endsWith("plugin.yml") || name.endsWith("limbo.yml")) {
-                            found = true;
-
-                            FileConfiguration pluginYaml = new FileConfiguration(zip);
-                            String main = pluginYaml.get("main", String.class);
-                            String pluginName = pluginYaml.get("name", String.class);
-
-                            if (plugins.containsKey(pluginName)) {
-                                System.err.println("Ambiguous plugin name in " + file.getName() + " with the plugin \"" + plugins.get(pluginName).getClass().getName() + "\"");
-                                break;
-                            }
+                        if (name.endsWith("limbo.yml")) {
+                            limboYmlEntry = entry;
+                            break; // 找到 limbo.yml 立即跳出
+                        } else if (name.endsWith("plugin.yml")) {
+                            pluginYmlEntry = entry;
+                            // 不跳出，继续查找 limbo.yml
+                        }
+                    }
+                    // 优先加载 limbo.yml
+                    if (limboYmlEntry != null) {
+                        found = true;
+                        FileConfiguration pluginYaml = new FileConfiguration(zip);
+                        String main = pluginYaml.get("main", String.class);
+                        String pluginName = pluginYaml.get("name", String.class);
+                        if (plugins.containsKey(pluginName)) {
+                            System.err.println("Ambiguous plugin name in " + file.getName() + " with the plugin \"" + plugins.get(pluginName).getClass().getName() + "\"");
+                        } else {
                             URLClassLoader child = new URLClassLoader(new URL[]{file.toURI().toURL()}, Limbo.getInstance().getClass().getClassLoader());
                             Class<?> clazz = Class.forName(main, true, child);
                             LimboPlugin plugin = (LimboPlugin) clazz.getDeclaredConstructor().newInstance();
@@ -86,7 +95,22 @@ public class PluginManager {
                             plugins.put(plugin.getName(), plugin);
                             plugin.onLoad();
                             Limbo.getInstance().getConsole().sendMessage("Loading plugin " + file.getName() + " " + plugin.getInfo().getVersion() + " by " + plugin.getInfo().getAuthor());
-                            break;
+                        }
+                    } else if (pluginYmlEntry != null) {
+                        found = true;
+                        FileConfiguration pluginYaml = new FileConfiguration(zip);
+                        String main = pluginYaml.get("main", String.class);
+                        String pluginName = pluginYaml.get("name", String.class);
+                        if (plugins.containsKey(pluginName)) {
+                            System.err.println("Ambiguous plugin name in " + file.getName() + " with the plugin \"" + plugins.get(pluginName).getClass().getName() + "\"");
+                        } else {
+                            URLClassLoader child = new URLClassLoader(new URL[]{file.toURI().toURL()}, Limbo.getInstance().getClass().getClassLoader());
+                            Class<?> clazz = Class.forName(main, true, child);
+                            LimboPlugin plugin = (LimboPlugin) clazz.getDeclaredConstructor().newInstance();
+                            plugin.setInfo(pluginYaml, file);
+                            plugins.put(plugin.getName(), plugin);
+                            plugin.onLoad();
+                            Limbo.getInstance().getConsole().sendMessage("Loading plugin " + file.getName() + " " + plugin.getInfo().getVersion() + " by " + plugin.getInfo().getAuthor());
                         }
                     }
                 } catch (Exception e) {
@@ -94,7 +118,7 @@ public class PluginManager {
                     e.printStackTrace();
                 }
                 if (!found) {
-                    System.err.println("Jar file " + file.getName() + " has no plugin.yml!");
+                    System.err.println("Jar file " + file.getName() + " has no plugin.yml or limbo.yml!");
                 }
             }
         }

@@ -100,7 +100,7 @@ public class Console extends SimpleTerminalConsole implements CommandSender {
         if (command.isEmpty()) return;
         LimboPlugin internal = Limbo.getInstance().getPluginManager().getPlugin("LimboService");
         Limbo.getInstance().getScheduler().runTaskAsync(
-            internal, () -> Limbo.getInstance().dispatchCommand(Limbo.getInstance().getConsole(), command)
+            internal, () -> Limbo.getInstance().dispatchCommand(this, command)
         );
     }
 

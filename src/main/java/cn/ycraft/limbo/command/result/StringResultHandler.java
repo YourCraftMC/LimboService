@@ -1,4 +1,4 @@
-package cn.ycraft.limbo.command;
+package cn.ycraft.limbo.command.result;
 
 import com.loohp.limbo.commands.CommandSender;
 import dev.rollczi.litecommands.handler.result.ResultHandler;

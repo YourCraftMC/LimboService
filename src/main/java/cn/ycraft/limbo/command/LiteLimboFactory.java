@@ -1,10 +1,15 @@
 package cn.ycraft.limbo.command;
 
+import cc.carm.lib.configuration.value.text.PreparedText;
 import cn.ycraft.limbo.command.argument.GameModeArgument;
 import cn.ycraft.limbo.command.argument.PlayerArgument;
 import cn.ycraft.limbo.command.context.LocationContext;
 import cn.ycraft.limbo.command.context.SenderOnlyContextProvider;
 import cn.ycraft.limbo.command.context.WorldContext;
+import cn.ycraft.limbo.command.result.ComponentResultHandler;
+import cn.ycraft.limbo.command.result.ConfiguredMessageResultHandler;
+import cn.ycraft.limbo.command.result.PreparedTextResultHandler;
+import cn.ycraft.limbo.command.result.StringResultHandler;
 import cn.ycraft.limbo.config.ServerMessages;
 import cn.ycraft.limbo.config.value.ConfiguredMessage;
 import cn.ycraft.limbo.util.SchedulerUtils;
@@ -20,6 +25,7 @@ import dev.rollczi.litecommands.LiteCommandsBaseBuilder;
 import dev.rollczi.litecommands.LiteCommandsFactory;
 import dev.rollczi.litecommands.message.LiteMessages;
 import dev.rollczi.litecommands.permission.PermissionResolver;
+import net.kyori.adventure.text.Component;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 
 public class LiteLimboFactory {
@@ -50,7 +56,9 @@ public class LiteLimboFactory {
                 builder.argument(GameMode.class, new GameModeArgument());
 
                 builder.result(String.class, new StringResultHandler());
+                builder.result(Component.class, new ComponentResultHandler());
                 builder.result(ConfiguredMessage.class, new ConfiguredMessageResultHandler());
+                builder.result(PreparedText.class, new PreparedTextResultHandler());
 
                 builder.message(LiteMessages.MISSING_PERMISSIONS, ServerMessages.NO_PERMISSION);
             });

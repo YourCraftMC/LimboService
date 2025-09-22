@@ -35,7 +35,7 @@
         <deps.configured.version>4.1.7</deps.configured.version>
         <deps.litecommands.version>3.10.5</deps.litecommands.version>
 
-        <dependency.log4j.version>2.25.1</dependency.log4j.version>
+        <dependency.log4j.version>2.25.2</dependency.log4j.version>
     </properties>
 
     <groupId>cn.ycraft</groupId>

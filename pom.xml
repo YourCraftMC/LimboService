@@ -33,7 +33,7 @@
 
         <deps.easyplugin.version>1.5.13</deps.easyplugin.version>
         <deps.configured.version>4.2.0</deps.configured.version>
-        <deps.litecommands.version>3.10.5</deps.litecommands.version>
+        <deps.litecommands.version>3.10.6</deps.litecommands.version>
 
         <dependency.log4j.version>2.25.2</dependency.log4j.version>
     </properties>

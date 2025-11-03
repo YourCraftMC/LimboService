@@ -549,6 +549,20 @@
             </distributionManagement>
         </profile>
 
+        <profile>
+            <id>local</id>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>localRepository</id>
+                    <url>file:${user.home}/local-deploy/</url>
+                </snapshotRepository>
+                <repository>
+                    <id>localRepository</id>
+                    <url>file:${user.home}/local-deploy/</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+
     </profiles>
 
 </project>

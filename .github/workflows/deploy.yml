@@ -15,7 +15,7 @@ jobs:
     name: "Publish Project (GitHub Packages)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: "Set up JDK"
         uses: actions/setup-java@v5
         with:
@@ -46,7 +46,7 @@ jobs:
     name: "Publish Project (GitHub Branch)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: "Set up JDK"
         uses: actions/setup-java@v5
         with:

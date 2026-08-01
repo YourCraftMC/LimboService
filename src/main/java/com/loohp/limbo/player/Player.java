@@ -37,9 +37,7 @@ import com.loohp.limbo.events.player.PlayerChatEvent;
 import com.loohp.limbo.events.player.PlayerTeleportEvent;
 import com.loohp.limbo.inventory.*;
 import com.loohp.limbo.location.Location;
-import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -273,7 +271,7 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
     }
 
     public void sendMessage(String message, UUID uuid) {
-        sendMessage(Identity.identity(uuid), LegacyComponentSerializer.legacySection().deserialize(message));
+        sendMessage(LegacyComponentSerializer.legacySection().deserialize(message));
     }
 
     public void sendMessage(String message) {
@@ -281,17 +279,8 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
     }
 
     @Override
-    @SuppressWarnings({"UnstableApiUsage", "deprecation"})
-    public void sendMessage(final @NotNull Identity source, final @NotNull Component message, final @NotNull MessageType type) {
-        Packet packet;
-        switch (type) {
-            case CHAT:
-            case SYSTEM:
-            default:
-                packet = new ClientboundSystemChatPacket(message, false);
-                break;
-        }
-        clientConnection.sendPacket(packet);
+    public void sendMessage(final @NotNull Component message) {
+        clientConnection.sendPacket(new ClientboundSystemChatPacket(message, false));
     }
 
 
@@ -334,7 +323,7 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
         Limbo.getInstance().getConsole().sendMessage(chat);
 
         for (Player each : Limbo.getInstance().getPlayers()) {
-            each.sendMessage(Identity.identity(uuid), Component.translatable("chat.type.text").arguments(Component.text(this.getName()), Component.text(event.getMessage())), MessageType.CHAT);
+            each.sendMessage(Component.translatable("chat.type.text").arguments(Component.text(this.getName()), Component.text(event.getMessage())));
         }
 
     }

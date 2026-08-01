@@ -11,6 +11,7 @@ import java.security.Key;
 
 public class LimboProtocol extends MinecraftProtocol {
     private static NbtMap CODEC;
+    private static NbtMap NETWORK_TAGS;
 
     @Override
     public void newServerSession(Server server, Session session) {
@@ -18,7 +19,10 @@ public class LimboProtocol extends MinecraftProtocol {
         if (CODEC == null) {
             CODEC = NbtMap.EMPTY;
         }
-        session.addListener(new LimboServerListener(CODEC));
+        if (NETWORK_TAGS == null) {
+            NETWORK_TAGS = NbtMap.EMPTY;
+        }
+        session.addListener(new LimboServerListener(CODEC, NETWORK_TAGS));
     }
 
     @Override

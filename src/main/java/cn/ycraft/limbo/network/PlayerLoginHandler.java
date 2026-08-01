@@ -31,6 +31,7 @@ import org.geysermc.mcprotocollib.protocol.ServerLoginHandler;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntryAction;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.GlobalPos;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerSpawnInfo;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.GameEvent;
@@ -105,7 +106,7 @@ public class PlayerLoginHandler implements ServerLoginHandler {
         PlayerSpawnEvent spawnEvent = Limbo.getInstance().getEventsManager().callEvent(new PlayerSpawnEvent(player, worldSpawn));
         worldSpawn = spawnEvent.getSpawnLocation();
         World world = worldSpawn.getWorld();
-        session.send(new ClientboundLoginPacket(0, false, new Key[]{Key.key("minecraft:" + world.getName())}, ServerConfig.SERVER.MAX_PLAYERS.resolve(), 8, 8, !ServerConfig.LOGS.REDUCED_DEBUG_INFO.resolve(), true, false, new PlayerSpawnInfo(world.getEnvironment().getId(), Key.key("minecraft:" + world.getName()), 0, ServerConfig.PLAYER.DEFAULT_GAMEMODE.resolve(), ServerConfig.PLAYER.DEFAULT_GAMEMODE.resolve(), false, true, null, 0, 0), false));
+        session.send(new ClientboundLoginPacket(0, false, new Key[]{Key.key("minecraft:" + world.getName())}, ServerConfig.SERVER.MAX_PLAYERS.resolve(), 8, 8, !ServerConfig.LOGS.REDUCED_DEBUG_INFO.resolve(), true, false, new PlayerSpawnInfo(world.getEnvironment().getId(), Key.key("minecraft:" + world.getName()), 0, ServerConfig.PLAYER.DEFAULT_GAMEMODE.resolve(), ServerConfig.PLAYER.DEFAULT_GAMEMODE.resolve(), false, true, null, 0, 0), Limbo.getInstance().isOnlineMode(), false));
         Limbo.getInstance().getUnsafe().a(player, ServerConfig.PLAYER.DEFAULT_GAMEMODE.resolve());
 
         ByteBuf buffer = Unpooled.buffer();
@@ -134,7 +135,7 @@ public class PlayerLoginHandler implements ServerLoginHandler {
         ClientboundCommandsPacket commandsPacket = DeclareCommands.getDeclareCommandsPacket(player);
         player.clientConnection.sendPacket(commandsPacket);
 
-        ClientboundSetDefaultSpawnPositionPacket spawnPositionPacket = new ClientboundSetDefaultSpawnPositionPacket(Vector3i.ZERO, worldSpawn.getPitch());
+        ClientboundSetDefaultSpawnPositionPacket spawnPositionPacket = new ClientboundSetDefaultSpawnPositionPacket(new GlobalPos(Key.key("minecraft:" + world.getName()), Vector3i.ZERO), worldSpawn.getYaw(), worldSpawn.getPitch());
         player.clientConnection.sendPacket(spawnPositionPacket);
 
         Vector3d spawn = Vector3d.from(worldSpawn.getX(), worldSpawn.getY(), worldSpawn.getZ());

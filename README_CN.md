@@ -13,7 +13,7 @@ README LANGUAGES [ [English](README.md) | [**中文**](README_CN.md)  ]
 [![License](https://img.shields.io/github/license/YourCraftMC/LimboService?style=flat-square)](https://www.gnu.org/licenses/lgpl-3.0.html)
 [![workflow](https://img.shields.io/github/actions/workflow/status/YourCraftMC/LimboService/maven.yml?style=flat-square)](https://github.com/YourCraftMC/LimboService/actions/workflows/maven.yml)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/YourCraftMC/LimboService/total?style=flat-square)
-![Java version](https://img.shields.io/badge/Java-17-red?logo=openjdk&style=flat-square)
+![Java version](https://img.shields.io/badge/Java-21-red?logo=openjdk&style=flat-square)
 
 🌆 专为 Minecraft 打造的轻量级独立 LIMBO 服务，基于 [**MCProtocolLib**](https://github.com/GeyserMC/MCProtocolLib)。
 

@@ -22,14 +22,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <properties>
-        <project.jdk.version>17</project.jdk.version>
+        <project.jdk.version>21</project.jdk.version>
         <maven.compiler.source>${project.jdk.version}</maven.compiler.source>
         <maven.compiler.target>${project.jdk.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 
-        <minecraft.version>1.21.8</minecraft.version>
-        <minecraft.protocol>772</minecraft.protocol>
+        <minecraft.version>26.2</minecraft.version>
+        <minecraft.protocol>776</minecraft.protocol>
 
         <deps.easyplugin.version>1.5.13</deps.easyplugin.version>
         <deps.configured.version>4.2.0</deps.configured.version>
@@ -40,7 +40,7 @@
 
     <groupId>cn.ycraft</groupId>
     <artifactId>limboservice</artifactId>
-    <version>1.0.8</version>
+    <version>1.1.0</version>
 
     <name>LimboService</name>
     <description>A lightweight and standalone LIMBO service for Minecraft.</description>
@@ -145,7 +145,7 @@
         <dependency>
             <groupId>org.geysermc.mcprotocollib</groupId>
             <artifactId>protocol</artifactId>
-            <version>26.1-1</version>
+            <version>26.2-SNAPSHOT</version>
         </dependency>
 
         <dependency>

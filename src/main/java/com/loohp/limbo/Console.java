@@ -26,9 +26,7 @@ import com.loohp.limbo.plugins.LimboPlugin;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
-import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.Sound.Emitter;
@@ -121,8 +119,7 @@ public class Console extends SimpleTerminalConsole implements CommandSender {
     }
 
     @Override
-    @SuppressWarnings({"UnstableApiUsage", "deprecation"})
-    public void sendMessage(@NotNull Identity source, @NotNull Component message, @NotNull MessageType type) {
+    public void sendMessage(@NotNull Component message) {
         logger.info(ANSIComponentSerializer.ansi().serialize(message));
     }
 

@@ -42,8 +42,8 @@ import java.util.UUID;
 public class LimboServerListener extends ServerListener {
     private final byte[] _challenge = new byte[4];
 
-    public LimboServerListener(NbtMap networkCodec) {
-        super(networkCodec);
+    public LimboServerListener(NbtMap networkCodec, NbtMap networkTags) {
+        super(networkCodec, networkTags);
         new Random().nextBytes(_challenge);
     }
 

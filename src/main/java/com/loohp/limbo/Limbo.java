@@ -446,6 +446,23 @@ public final class Limbo implements ForwardingAudience {
         isRunning.set(false);
         console.sendMessage(ColorParser.parse("&cStopping Server..."));
 
+        // If the server fails to shut down within the configured timeout (e.g. a plugin hangs in onDisable),
+        // force kill the current process so the JVM always exits.
+        int shutdownTimeout = ServerConfig.SERVER.SHUTDOWN_TIMEOUT.resolve();
+        if (shutdownTimeout > 0) {
+            Thread forceKillTimer = new Thread(() -> {
+                try {
+                    TimeUnit.SECONDS.sleep(shutdownTimeout);
+                    System.err.println("Server failed to shut down within " + shutdownTimeout + " seconds. Force killing the process!");
+                    Runtime.getRuntime().halt(1);
+                } catch (InterruptedException e) {
+                    // Shutdown completed before the timeout expired, nothing to do.
+                }
+            }, "Limbo-ShutdownForceKill");
+            forceKillTimer.setDaemon(true);
+            forceKillTimer.start();
+        }
+
         for (LimboPlugin plugin : Limbo.getInstance().getPluginManager().getPlugins()) {
             try {
                 console.sendMessage("Disabling plugin " + plugin.getName() + " " + plugin.getInfo().getVersion());

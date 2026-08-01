@@ -52,6 +52,12 @@ public interface ServerConfig extends Configuration {
             .parse(Favicon::load).serialize(Favicon::path)
             .defaults(Favicon.load("server-icon.png")).build();
 
+        @HeaderComments({
+            "Maximum time (in seconds) to wait for the server to shut down gracefully before force killing the process.",
+            "Some plugins may hang during shutdown and prevent the server from stopping; set to 0 to disable this force kill timer."
+        })
+        ConfiguredValue<Integer> SHUTDOWN_TIMEOUT = ConfiguredValue.of(120);
+
         interface TAB_LIST extends Configuration {
             @HeaderComments("Tab-List Footer (May be left blank)")
             ConfiguredValue<String> HEADER = ConfiguredValue.of("");

@@ -34,16 +34,17 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipFile;
 
 public class PluginManager {
 
@@ -61,15 +62,13 @@ public class PluginManager {
         for (File file : pluginFolder.listFiles()) {
             if (file.isFile() && file.getName().endsWith(".jar")) {
                 boolean found = false;
-                try (ZipInputStream zip = new ZipInputStream(new FileInputStream(file))) {
+                try (ZipFile zip = new ZipFile(file)) {
                     ZipEntry limboYmlEntry = null;
                     ZipEntry pluginYmlEntry = null;
                     // 首先遍历，优先查找 limbo.yml 和 plugin.yml 的入口
-                    while (true) {
-                        ZipEntry entry = zip.getNextEntry();
-                        if (entry == null) {
-                            break;
-                        }
+                    Enumeration<? extends ZipEntry> entries = zip.entries();
+                    while (entries.hasMoreElements()) {
+                        ZipEntry entry = entries.nextElement();
                         String name = entry.getName();
                         if (name.endsWith("limbo.yml")) {
                             limboYmlEntry = entry;
@@ -80,37 +79,26 @@ public class PluginManager {
                         }
                     }
                     // 优先加载 limbo.yml
-                    if (limboYmlEntry != null) {
+                    ZipEntry ymlEntry = limboYmlEntry != null ? limboYmlEntry : pluginYmlEntry;
+                    if (ymlEntry != null) {
                         found = true;
-                        FileConfiguration pluginYaml = new FileConfiguration(zip);
-                        String main = pluginYaml.get("main", String.class);
-                        String pluginName = pluginYaml.get("name", String.class);
-                        if (plugins.containsKey(pluginName)) {
-                            System.err.println("Ambiguous plugin name in " + file.getName() + " with the plugin \"" + plugins.get(pluginName).getClass().getName() + "\"");
-                        } else {
-                            URLClassLoader child = new URLClassLoader(new URL[]{file.toURI().toURL()}, Limbo.getInstance().getClass().getClassLoader());
-                            Class<?> clazz = Class.forName(main, true, child);
-                            LimboPlugin plugin = (LimboPlugin) clazz.getDeclaredConstructor().newInstance();
-                            plugin.setInfo(pluginYaml, file);
-                            plugins.put(plugin.getName(), plugin);
-                            plugin.onLoad();
-                            Limbo.getInstance().getConsole().sendMessage("Loading plugin " + file.getName() + " " + plugin.getInfo().getVersion() + " by " + plugin.getInfo().getAuthor());
-                        }
-                    } else if (pluginYmlEntry != null) {
-                        found = true;
-                        FileConfiguration pluginYaml = new FileConfiguration(zip);
-                        String main = pluginYaml.get("main", String.class);
-                        String pluginName = pluginYaml.get("name", String.class);
-                        if (plugins.containsKey(pluginName)) {
-                            System.err.println("Ambiguous plugin name in " + file.getName() + " with the plugin \"" + plugins.get(pluginName).getClass().getName() + "\"");
-                        } else {
-                            URLClassLoader child = new URLClassLoader(new URL[]{file.toURI().toURL()}, Limbo.getInstance().getClass().getClassLoader());
-                            Class<?> clazz = Class.forName(main, true, child);
-                            LimboPlugin plugin = (LimboPlugin) clazz.getDeclaredConstructor().newInstance();
-                            plugin.setInfo(pluginYaml, file);
-                            plugins.put(plugin.getName(), plugin);
-                            plugin.onLoad();
-                            Limbo.getInstance().getConsole().sendMessage("Loading plugin " + file.getName() + " " + plugin.getInfo().getVersion() + " by " + plugin.getInfo().getAuthor());
+                        try (InputStream input = zip.getInputStream(ymlEntry)) {
+                            FileConfiguration pluginYaml = new FileConfiguration(input);
+                            String main = pluginYaml.get("main", String.class);
+                            String pluginName = pluginYaml.get("name", String.class);
+                            if (main == null || pluginName == null) {
+                                System.err.println("Invalid plugin.yml/limbo.yml in " + file.getName() + ": missing \"main\" or \"name\" key!");
+                            } else if (plugins.containsKey(pluginName)) {
+                                System.err.println("Ambiguous plugin name in " + file.getName() + " with the plugin \"" + plugins.get(pluginName).getClass().getName() + "\"");
+                            } else {
+                                URLClassLoader child = new URLClassLoader(new URL[]{file.toURI().toURL()}, Limbo.getInstance().getClass().getClassLoader());
+                                Class<?> clazz = Class.forName(main, true, child);
+                                LimboPlugin plugin = (LimboPlugin) clazz.getDeclaredConstructor().newInstance();
+                                plugin.setInfo(pluginYaml, file);
+                                plugins.put(plugin.getName(), plugin);
+                                plugin.onLoad();
+                                Limbo.getInstance().getConsole().sendMessage("Loading plugin " + file.getName() + " " + plugin.getInfo().getVersion() + " by " + plugin.getInfo().getAuthor());
+                            }
                         }
                     }
                 } catch (Exception e) {

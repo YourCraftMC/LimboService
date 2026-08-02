@@ -94,13 +94,13 @@ public class Player extends LivingEntity implements CommandSender, InventoryHold
     protected final InventoryView inventoryView;
     private final AtomicInteger containerIdCounter;
 
-    @WatchableField(MetadataIndex = 15, WatchableObjectType = WatchableObjectType.FLOAT)
+    @WatchableField(MetadataIndex = 17, WatchableObjectType = WatchableObjectType.FLOAT)
     protected float additionalHearts = 0.0F;
-    @WatchableField(MetadataIndex = 16, WatchableObjectType = WatchableObjectType.VARINT)
+    @WatchableField(MetadataIndex = 18, WatchableObjectType = WatchableObjectType.VARINT)
     protected int score = 0;
-    @WatchableField(MetadataIndex = 17, WatchableObjectType = WatchableObjectType.BYTE)
+    @WatchableField(MetadataIndex = 16, WatchableObjectType = WatchableObjectType.BYTE)
     protected byte skinLayers = 0;
-    @WatchableField(MetadataIndex = 18, WatchableObjectType = WatchableObjectType.BYTE)
+    @WatchableField(MetadataIndex = 15, WatchableObjectType = WatchableObjectType.BYTE)
     protected byte mainHand = 1;
     //@WatchableField(MetadataIndex = 19, WatchableObjectType = WatchableObjectType.NBT)
     //protected Entity leftShoulder = null;

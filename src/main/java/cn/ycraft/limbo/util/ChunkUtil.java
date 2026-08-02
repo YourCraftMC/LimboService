@@ -2,7 +2,6 @@ package cn.ycraft.limbo.util;
 
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.registry.BuiltInRegistries;
-import com.loohp.limbo.utils.BitsUtils;
 import com.loohp.limbo.world.Environment;
 import com.loohp.limbo.world.GeneratedBlockDataMappings;
 import io.netty.buffer.ByteBuf;
@@ -102,8 +101,11 @@ public class ChunkUtil {
 
     public static @NotNull ByteBuf createSectionData(Chunk chunk, Environment environment) {
         ByteBuf dataOut = Unpooled.buffer();
-        for (int i = 0; i < 16; i++) {
-            Section section = chunk.getSection(i);
+        // Minecraft 26.x chunk sections include a fluid count after the block count.
+        // Section count must match the dimension height sent to the client (height / 16).
+        int sectionCount = environment.equals(Environment.NORMAL) ? 24 : 16;
+        for (int i = 0; i < sectionCount; i++) {
+            Section section = i < 16 ? chunk.getSection(i) : null;
             if (section != null) {
                 short counter = 0;
                 for (int x = 0; x < 16; x++) {
@@ -117,6 +119,7 @@ public class ChunkUtil {
                     }
                 }
                 dataOut.writeShort(counter);
+                dataOut.writeShort(0); // Fluid count
 
                 int newBits = 32 - Integer.numberOfLeadingZeros(section.getPalette().size() - 1);
                 newBits = Math.max(newBits, 4);
@@ -128,18 +131,14 @@ public class ChunkUtil {
                         MinecraftTypes.writeVarInt(dataOut, GeneratedBlockDataMappings.getGlobalPaletteIDFromState(tag));
                     }
 
-                    BitSet bits = BitSet.valueOf(section.getBlockStates());
-                    int shift = 64 % newBits;
+                    // Querz's block states are already encoded in the compact 1.18+ format
+                    // (values packed consecutively without cross-long offsets), which is exactly
+                    // what the client/ViaVersion expect. Do not apply any bit shifting here.
+                    long[] blockStates = section.getBlockStates();
                     int longsNeeded = (int) Math.ceil(4096 / (double) (64 / newBits));
-                    for (int u = 64; u <= bits.length(); u += 64) {
-                        BitsUtils.shiftAfter(bits, u - shift, shift);
-                    }
-
-                    long[] formattedLongs = bits.toLongArray();
-
                     for (int u = 0; u < longsNeeded; u++) {
-                        if (u < formattedLongs.length) {
-                            dataOut.writeLong(formattedLongs[u]);
+                        if (u < blockStates.length) {
+                            dataOut.writeLong(blockStates[u]);
                         } else {
                             dataOut.writeLong(0);
                         }
@@ -186,9 +185,10 @@ public class ChunkUtil {
                     }
                 }
             } else {
-                dataOut.writeShort(0);
-                dataOut.writeByte(0);
-                MinecraftTypes.writeVarInt(dataOut, 0);
+                dataOut.writeShort(0); // Block count
+                dataOut.writeShort(0); // Fluid count
+                dataOut.writeByte(0); // Block palette: single value
+                MinecraftTypes.writeVarInt(dataOut, 0); // air
             }
             int biome;
             if (environment.equals(Environment.END)) {

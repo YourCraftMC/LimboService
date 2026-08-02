@@ -58,6 +58,7 @@ import net.querz.nbt.io.NBTUtil;
 import net.querz.nbt.tag.CompoundTag;
 import org.geysermc.mcprotocollib.protocol.data.game.BossBarAction;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundBossEventPacket;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -85,6 +86,9 @@ public final class Limbo implements ForwardingAudience {
     private static Limbo instance;
 
     public static void main(String[] args) throws IOException, ParseException, NumberFormatException, ClassNotFoundException, InterruptedException {
+        // Prevent Log4j from registering its own JVM shutdown hook, which races with our shutdown hook
+        // and can leave logging broken (falling back to SimpleLogger) during shutdown.
+        System.setProperty("log4j.shutdownHookEnabled", "false");
         new Limbo();
     }
 
@@ -454,6 +458,10 @@ public final class Limbo implements ForwardingAudience {
                 try {
                     TimeUnit.SECONDS.sleep(shutdownTimeout);
                     System.err.println("Server failed to shut down within " + shutdownTimeout + " seconds. Force killing the process!");
+                    try {
+                        LogManager.shutdown();
+                    } catch (Throwable ignored) {
+                    }
                     Runtime.getRuntime().halt(1);
                 } catch (InterruptedException e) {
                     // Shutdown completed before the timeout expired, nothing to do.
@@ -488,6 +496,9 @@ public final class Limbo implements ForwardingAudience {
         }
 
         System.out.println("Server shutdown. bye.");
+
+        // Flush and stop Log4j explicitly, since its automatic shutdown hook has been disabled.
+        LogManager.shutdown();
     }
 
     public void stopServer() {
